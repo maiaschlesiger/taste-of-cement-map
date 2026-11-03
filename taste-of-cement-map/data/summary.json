@@ -1,0 +1,27 @@
+{
+ "duration": 5098.57,
+ "points": 5098,
+ "fam_seconds": {
+  "silence": 703,
+  "machine": 1504,
+  "ambient": 776,
+  "air": 368,
+  "war": 200,
+  "music": 561,
+  "voice": 875,
+  "water": 110,
+  "media": 1
+ },
+ "impacts": 75,
+ "impact_readings": {
+  "unclear": 27,
+  "machine": 21,
+  "war": 22,
+  "both": 5
+ },
+ "cuts": 92,
+ "silent_seconds": 382,
+ "rhyme_count": 635,
+ "war_seconds": 82,
+ "machine_seconds": 635
+}

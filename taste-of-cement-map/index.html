@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sound Map of Taste of Cement</title>
+<meta name="description" content="An interactive acoustic map of Ziad Kalthoum's Taste of Cement (2017): where the sounds of building in Beirut and the sounds of destruction in Syria meet.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="top">
+  <div class="title">
+    <h1>Sound Map of <em>Taste of Cement</em></h1>
+    <p class="sub">Ziad Kalthoum, 2017 · 85 min · every second of the soundtrack as one point</p>
+  </div>
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-tab="space" class="on">Sound space</button>
+    <button role="tab" data-tab="strata">Timeline</button>
+    <button role="tab" data-tab="impacts">Impacts</button>
+    <button role="tab" data-tab="about">About the map</button>
+  </nav>
+</header>
+
+<section class="player">
+  <div class="media">
+    <video id="media" playsinline preload="metadata"></video>
+    <label class="load">
+      <input type="file" id="file" accept="video/*,audio/*,.opus,.ogg,.m4a">
+      <span>Load your copy of the film or its audio</span>
+    </label>
+    <p class="hint" id="mediaHint">Nothing is uploaded: the file stays on your computer. Without it, clicking still moves the playhead.</p>
+  </div>
+  <div class="transport">
+    <button id="play" disabled aria-label="Play or pause">▶</button>
+    <span class="clock" id="clock">0:00</span>
+    <input type="range" id="scrub" min="0" max="5098" step="1" value="0" aria-label="Film time">
+    <span class="clock" id="dur">84:58</span>
+  </div>
+  <div class="now" id="now"></div>
+</section>
+
+<main>
+  <!-- SOUND SPACE -->
+  <section class="pane on" id="pane-space">
+    <aside class="controls">
+      <h2>Views</h2>
+      <div class="presets" id="presets"></div>
+      <h2>Axes</h2>
+      <label>X <select id="ax-x"></select></label>
+      <label>Y <select id="ax-y"></select></label>
+      <label>Z <select id="ax-z"></select></label>
+      <label>Colour <select id="ax-c"></select></label>
+      <h2>Layers</h2>
+      <label class="chk"><input type="checkbox" id="showPath"> Path through film time</label>
+      <label class="chk"><input type="checkbox" id="showRhymes" checked> Rhyme lines (machine ↔ war)</label>
+      <label class="rng">Rhymes shown <input type="range" id="rhymeN" min="10" max="300" value="60"><output id="rhymeNo">60</output></label>
+      <h2>Film time</h2>
+      <div class="range2">
+        <label>from <input type="number" id="t0" min="0" max="85" value="0" step="1"> min</label>
+        <label>to <input type="number" id="t1" min="0" max="85" value="85" step="1"> min</label>
+      </div>
+      <p class="axdesc" id="axdesc"></p>
+    </aside>
+    <div class="plotwrap">
+      <div id="plot3d" class="plot"></div>
+      <div class="compare" id="compare">
+        <div class="slots">
+          <div class="slot" id="slotA"><b>A</b> <span>click a point</span></div>
+          <div class="slot" id="slotB"><b>B</b> <span>shift-click a point</span></div>
+        </div>
+        <div class="cmpbtns">
+          <button id="playA" disabled>Hear A</button>
+          <button id="playB" disabled>Hear B</button>
+          <button id="playAB" disabled>A then B</button>
+        </div>
+        <div id="cmpbars" class="cmpbars"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TIMELINE -->
+  <section class="pane" id="pane-strata">
+    <div class="strata-head">
+      <p>The film from start to finish. The top band shows which sound-world dominates each stretch. Below it are loudness, the <b>echo index</b> (does this second sound more like the building site or more like the war?), detected impacts, and hard cuts in the sound edit. Click anywhere to jump there.</p>
+      <div class="legend" id="legend"></div>
+    </div>
+    <div id="plotStrata" class="plot tall"></div>
+    <div class="places">
+      <h2>Places <small>(your annotations: the soundtrack alone can't say where a shot is)</small></h2>
+      <div class="placebar">
+        <select id="placeKind">
+          <option>Beirut: construction site</option>
+          <option>Beirut: barracks / underground</option>
+          <option>Beirut: city / sea</option>
+          <option>Syria: war footage</option>
+          <option>Black screen / title</option>
+          <option>Other</option>
+        </select>
+        <button id="markIn">Mark start</button>
+        <button id="markOut">Mark end</button>
+        <button id="exportPlaces">Export places.json</button>
+        <label class="btnlike">Import <input type="file" id="importPlaces" accept=".json"></label>
+      </div>
+      <ul id="placeList"></ul>
+    </div>
+  </section>
+
+  <!-- IMPACTS -->
+  <section class="pane" id="pane-impacts">
+    <aside class="controls">
+      <h2>Impacts</h2>
+      <p>Every sudden low-frequency hit in the film with no speech over it (a hammer, a slab, a shell, a boom). Each one is placed by three measurements:</p>
+      <ul class="defs">
+        <li><b>Decay</b>: how long the sound takes to fade by 12 dB. A short dry knock means the source is near; a long tail means space, distance and echo.</li>
+        <li><b>Weight</b>: the share of energy below 250 Hz, which you feel in your chest.</li>
+        <li><b>Brightness</b>: the spectral centre of gravity.</li>
+      </ul>
+      <p>Colour shows what a machine listener (Google's YAMNet AudioSet classifier) thought the hit was.</p>
+      <div id="impStats" class="stats"></div>
+    </aside>
+    <div class="plotwrap"><div id="plotImp" class="plot"></div></div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="pane prose" id="pane-about">
+    <div class="cols">
+      <div>
+        <h2>What this is</h2>
+        <p><em>Taste of Cement</em> follows Syrian men building a high-rise in Beirut while their own houses in Syria are being bombed. Lebanese curfews confine them to the building's foundations after dark. They are forbidden to speak about their conditions, and the film barely lets them speak at all. The soundtrack does the talking: the grinding of the cement mixer, hammering, a tank's tracks, shelling, the sea, long silences.</p>
+        <p>This map treats that soundtrack as a territory. Each of the film's 5,098 seconds is a point. Its position is set by measurements of how it sounds, not by where it was filmed. The question the map asks is the one the film asks without words: <b>how far apart do building and destroying actually sound?</b></p>
+        <h2>How to read it</h2>
+        <p><b>Sound space</b> puts every second in 3D. Choose any three measurements as axes, or start from a preset. <b>Rhyme lines</b> join a machine-dominated second to the war-dominated second it sounds most like, judged by the classifier's 1,024-dimensional "hearing" of each moment. Click a point to set A, shift-click to set B, and listen to them one after the other.</p>
+        <p><b>Timeline</b> lays the same data out in film order. <b>Impacts</b> isolates the single hits: hammer against shell.</p>
+      </div>
+      <div>
+        <h2>Method</h2>
+        <p>Audio: the film's soundtrack (AAC, 44.1 kHz). The source copy is effectively mono, so stereo position is not measured. Signal measurements come from <code>librosa</code> on 23 ms frames, averaged to one value per second. Sound-type probabilities come from YAMNet, a MobileNet classifier trained by Google on 2 million YouTube clips across 521 AudioSet classes. YAMNet's classes are grouped into families: <i>war</i> (Explosion, Boom, Gunshot, Artillery, Thunder…), <i>machine</i> (Hammer, Jackhammer, Drill, Engine, Vehicle, Rumble…), <i>voice</i>, <i>music</i>, <i>water</i>, <i>silence</i>, <i>air</i>. All scripts are in <code>/analysis</code>.</p>
+        <h2>Limits, honestly</h2>
+        <ul>
+          <li>The classifier hears sound types, not places. A "war" label means <i>sounds like a detonation</i>, not <i>filmed in Syria</i>. Use the Places annotations to add where each shot actually is.</li>
+          <li>YAMNet has no "tank" or "cement mixer" class. Heavy machinery and armoured vehicles both land on Vehicle / Truck / Rumble. That blind spot is part of the finding.</li>
+          <li>The audio is a lossy web copy, so content above about 16 kHz is missing and is not used.</li>
+          <li>Thresholds (what counts as an impact or a cut) are choices. They are listed in the code.</li>
+        </ul>
+        <p class="small"><em>Taste of Cement</em> is directed by Ziad Kalthoum; all rights to the film belong to its makers. This site contains no audio or images from the film, only numerical measurements derived from it.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script src="js/vendor/plotly.min.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

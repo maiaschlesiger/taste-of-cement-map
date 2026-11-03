@@ -1,0 +1,20 @@
+# never commit the film or its audio
+*.mp4
+*.mov
+*.mkv
+*.webm
+*.m4a
+*.m4v
+*.opus
+*.ogg
+*.wav
+*.mp3
+*.aac
+*.flac
+
+# analysis intermediates
+*.npy
+*.npz
+*.h5
+__pycache__/
+.DS_Store

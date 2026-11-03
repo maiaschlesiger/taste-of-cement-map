@@ -1,0 +1,6 @@
+numpy
+scipy
+librosa>=0.10
+soundfile
+h5py
+tensorflow-cpu>=2.15
