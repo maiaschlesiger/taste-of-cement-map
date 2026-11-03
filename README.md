@@ -8,7 +8,7 @@ Made for a creative mapping assignment on film and migration.
 
 | Tab | What it shows |
 |---|---|
-| **Sound space** | Every second in 3D. Choose any three of 17 measurements as axes (loudness, low-frequency weight, brightness, percussiveness, hits per second, classifier probabilities, echo index…), or start from one of four preset views. *Rhyme lines* join each machine-dominated second to the war-dominated second it sounds most like. Click a point to set A and shift-click to set B, then listen to them one after the other. |
+| **Sound space** | Every second in 3D, built to compare **building sounds** (tools, metal, engines) with **bomb sounds** (explosions, gunfire, thunder). Includes an 8-step guided tour, four question views, plain-language axes, a semi-transparent hover card explaining each dot, notes on key moments, and echo lines joining each building sound to the bomb sound it most resembles. Click a dot to set A and shift-click to set B, then listen to them back to back. |
 | **Timeline** | The same data in film order: the dominant sound-world, loudness, the echo index (machine ↔ war), impacts and hard sound cuts. Includes a **Places** tool for marking where each shot actually is (Beirut site, barracks, Syria footage…), because the soundtrack alone can't tell you that. |
 | **Impacts** | The 75 isolated hits in the film (hammer, slab, shell, boom), measured by decay, low-frequency weight and brightness, and coloured by what the classifier thinks they are. |
 | **About the map** | Method and limitations. |

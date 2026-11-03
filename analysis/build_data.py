@@ -232,3 +232,33 @@ json.dump(d, open(f"{out}/data.json", "w"), separators=(",", ":"))
 print(len(regions), "regions")
 for r in regions:
     print(f'{r["a"]//60:3d}:{r["a"]%60:02d}-{r["b"]//60:3d}:{r["b"]%60:02d} {r["fam"]:8s} {r["loud"]}')
+
+# ---------------- building vs bombing categories (for the 3D comparison) ----------------
+GROUPS = {
+    "tool": ["Tools", "Power tool", "Drill", "Jackhammer", "Hammer", "Sawing", "Filing (rasp)", "Sanding",
+             "Mechanisms", "Ratchet, pawl", "Clang", "Clatter", "Chink, clink", "Glass"],
+    "engine": ["Engine", "Heavy engine (low frequency)", "Idling", "Truck", "Air brake", "Medium engine (mid frequency)",
+               "Vehicle", "Motor vehicle (road)", "Rail transport", "Train", "Railroad car, train wagon", "Bus", "Car",
+               "Mechanical fan", "Rumble", "Steam", "Hiss"],
+    "bomb": FAM["war"],
+}
+GI = {k: [names.index(n) for n in L] for k, L in GROUPS.items()}
+d = json.load(open(f"{out}/data.json"))
+cats = {}
+for p in d["points"]:
+    s = p["t"]
+    m = (ypatch_t >= s) & (ypatch_t < s + 1)
+    y = S[m].max(0) if m.any() else S[np.argmin(np.abs(ypatch_t - s - 0.5))]
+    g = {k: float(y[i].max()) for k, i in GI.items()}
+    bt = {k: names[i[int(np.argmax(y[i]))]] for k, i in GI.items()}
+    p["p_tool"], p["p_engine"], p["p_bomb"] = round(g["tool"], 3), round(g["engine"], 3), round(g["bomb"], 3)
+    p["p_build"] = round(max(g["tool"], g["engine"]), 3)
+    build = g["tool"] > 0.2 or g["engine"] > 0.3
+    bomb = g["bomb"] > 0.25
+    p["cat"] = "both" if (bomb and (g["tool"] > 0.15 or g["engine"] > 0.2)) else "bomb" if bomb else "tool" if g["tool"] > 0.2 else "engine" if g["engine"] > 0.3 else "other"
+    p["lab"] = {"tool": bt["tool"], "engine": bt["engine"], "bomb": bt["bomb"]}
+    cats[p["cat"]] = cats.get(p["cat"], 0) + 1
+json.dump(d, open(f"{out}/data.json", "w"), separators=(",", ":"))
+summ = json.load(open(f"{out}/summary.json")); summ["cats"] = cats
+json.dump(summ, open(f"{out}/summary.json", "w"), indent=1)
+print("cats", cats)

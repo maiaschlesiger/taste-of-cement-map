@@ -46,26 +46,47 @@
   <!-- SOUND SPACE -->
   <section class="pane on" id="pane-space">
     <aside class="controls">
-      <h2>Views</h2>
+      <h2>What am I looking at?</h2>
+      <p class="intro">Syrian workers build a tower in Beirut while their homes in Syria are bombed. The film barely lets them speak, so its <b>sound</b> tells the story. Here <b>every dot is one second of that soundtrack</b>. A dot's position shows what the sound is <i>like</i>, not where it was filmed. Hover over any dot for an explanation.</p>
+      <h2>Sounds <small>(click to hide or show)</small></h2>
+      <div class="catlegend" id="catlegend"></div>
+      <h2>Ask the map</h2>
       <div class="presets" id="presets"></div>
-      <h2>Axes</h2>
-      <label>X <select id="ax-x"></select></label>
-      <label>Y <select id="ax-y"></select></label>
-      <label>Z <select id="ax-z"></select></label>
-      <label>Colour <select id="ax-c"></select></label>
       <h2>Layers</h2>
+      <label class="chk"><input type="checkbox" id="showNotes" checked> Notes on key moments</label>
+      <label class="chk"><input type="checkbox" id="showRhymes"> Echo lines: each building sound → the bomb it most resembles</label>
       <label class="chk"><input type="checkbox" id="showPath"> Path through film time</label>
-      <label class="chk"><input type="checkbox" id="showRhymes" checked> Rhyme lines (machine ↔ war)</label>
-      <label class="rng">Rhymes shown <input type="range" id="rhymeN" min="10" max="300" value="60"><output id="rhymeNo">60</output></label>
-      <h2>Film time</h2>
-      <div class="range2">
-        <label>from <input type="number" id="t0" min="0" max="85" value="0" step="1"> min</label>
-        <label>to <input type="number" id="t1" min="0" max="85" value="85" step="1"> min</label>
-      </div>
-      <p class="axdesc" id="axdesc"></p>
+      <details class="own">
+        <summary>Build your own comparison</summary>
+        <label>Left–right <select id="ax-x"></select></label>
+        <label>Front–back <select id="ax-y"></select></label>
+        <label>Up–down <select id="ax-z"></select></label>
+        <label>Colour <select id="ax-c"></select></label>
+        <label class="rng">Echo lines <input type="range" id="rhymeN" min="10" max="300" value="40"><output id="rhymeNo">40</output></label>
+        <div class="range2">
+          <label>from <input type="number" id="t0" min="0" max="85" value="0" step="1"> min</label>
+          <label>to <input type="number" id="t1" min="0" max="85" value="85" step="1"> min</label>
+        </div>
+      </details>
+      <h2>The three directions</h2>
+      <div class="axdesc" id="axdesc"></div>
     </aside>
     <div class="plotwrap">
-      <div id="plot3d" class="plot"></div>
+      <div class="story" id="story">
+        <div class="story-text">
+          <span class="story-step" id="storyStep"></span>
+          <h3 id="storyTitle"></h3>
+          <p id="storyBody"></p>
+        </div>
+        <div class="story-nav">
+          <button id="storyPrev" aria-label="Previous step">←</button>
+          <button id="storyNext" class="primary">Start the tour →</button>
+        </div>
+      </div>
+      <div class="plotbox">
+        <div id="plot3d" class="plot"></div>
+        <div id="hovercard" class="hovercard" role="status" aria-live="polite"></div>
+      </div>
       <div class="compare" id="compare">
         <div class="slots">
           <div class="slot" id="slotA"><b>A</b> <span>click a point</span></div>
@@ -132,7 +153,7 @@
         <p><em>Taste of Cement</em> follows Syrian men building a high-rise in Beirut while their own houses in Syria are being bombed. Lebanese curfews confine them to the building's foundations after dark. They are forbidden to speak about their conditions, and the film barely lets them speak at all. The soundtrack does the talking: the grinding of the cement mixer, hammering, a tank's tracks, shelling, the sea, long silences.</p>
         <p>This map treats that soundtrack as a territory. Each of the film's 5,098 seconds is a point. Its position is set by measurements of how it sounds, not by where it was filmed. The question the map asks is the one the film asks without words: <b>how far apart do building and destroying actually sound?</b></p>
         <h2>How to read it</h2>
-        <p><b>Sound space</b> puts every second in 3D. Choose any three measurements as axes, or start from a preset. <b>Rhyme lines</b> join a machine-dominated second to the war-dominated second it sounds most like, judged by the classifier's 1,024-dimensional "hearing" of each moment. Click a point to set A, shift-click to set B, and listen to them one after the other.</p>
+        <p><b>Sound space</b> puts every second in 3D. Choose any three measurements as axes, or start from a preset. <b>Echo lines</b> join a building-sound second to the war-dominated second it sounds most like, judged by the classifier's 1,024-dimensional "hearing" of each moment. Click a point to set A, shift-click to set B, and listen to them one after the other.</p>
         <p><b>Timeline</b> lays the same data out in film order. <b>Impacts</b> isolates the single hits: hammer against shell.</p>
       </div>
       <div>

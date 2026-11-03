@@ -3,61 +3,120 @@
 (() => {
   "use strict";
 
+  // ---------------- palette ----------------
+  const C = { blue: "#1f63ad", lblue: "#8fb8e3", orange: "#ff6a1f", pink: "#ff85b8", yellow: "#fbbf00", maroon: "#932a10",
+              green: "#3a7d3e", olive: "#9b9a00", cream: "#e6d6c4", grey: "#c4bcb2", ink: "#1d1b19", mute: "#7a736b" };
+
+  // building-vs-bombing categories used by the 3D comparison
+  const CAT = {
+    tool:   { c: C.blue,   label: "Tools & metal", long: "hammers, jackhammers, drills, clanging metal", op: 0.9 },
+    engine: { c: C.lblue,  label: "Engines & heavy machines", long: "cement mixers, trucks, cranes, rumbling motors (and, the computer can't tell, tanks)", op: 0.75 },
+    bomb:   { c: C.orange, label: "Bombs, gunfire, thunder", long: "explosions, booms, gunshots, artillery, thunder", op: 1 },
+    both:   { c: C.pink,   label: "Heard as both at once", long: "seconds where the computer hears building work and a blast together", op: 1 },
+    other:  { c: C.cream,  label: "Everything else", long: "voices, music, wind, the sea, silence", op: 0.35 },
+  };
+  // sound-world families used by the timeline
   const FAM = {
-    machine: { c: "#c9b79c", label: "Machine / tools / engines" },
-    war:     { c: "#ff5a36", label: "Detonation / gunfire / thunder" },
-    voice:   { c: "#7fb7ff", label: "Voice" },
-    music:   { c: "#b58cff", label: "Music / score" },
-    water:   { c: "#3fd0c9", label: "Water / sea" },
-    silence: { c: "#565c66", label: "Silence" },
-    air:     { c: "#8f9aa6", label: "Wind / rustle / noise" },
-    ambient: { c: "#6c727b", label: "Unclassified ambience" },
-    media:   { c: "#ffd23f", label: "TV / radio" },
+    machine: { c: C.blue,   label: "Machines / tools / engines" },
+    war:     { c: C.orange, label: "Bombs / gunfire / thunder" },
+    voice:   { c: C.pink,   label: "Voice" },
+    music:   { c: C.yellow, label: "Music / score" },
+    water:   { c: C.lblue,  label: "Water / sea" },
+    silence: { c: C.cream,  label: "Silence" },
+    air:     { c: C.olive,  label: "Wind / rustle / noise" },
+    ambient: { c: C.grey,   label: "Unclassified ambience" },
+    media:   { c: C.green,  label: "TV / radio" },
   };
   const READ = {
-    war:     { c: "#ff5a36", label: "Classifier hears: detonation" },
-    machine: { c: "#c9b79c", label: "Classifier hears: machine" },
-    both:    { c: "#ffd23f", label: "Classifier hears: both at once" },
-    unclear: { c: "#6c727b", label: "Classifier: neither" },
+    war:     { c: C.orange, label: "Computer hears: bomb" },
+    machine: { c: C.blue,   label: "Computer hears: machine/tool" },
+    both:    { c: C.pink,   label: "Computer hears: both at once" },
+    unclear: { c: C.grey,   label: "Computer: neither" },
   };
 
+  // ---------------- measurements (axes), in plain language ----------------
+  const pct = v => Math.round(v * 100) + "%";
   const AX = {
-    t:         { l: "Film time (min)", f: p => p.t / 60, d: "Where in the film this second falls." },
-    loud:      { l: "Loudness (dB)", f: p => Math.max(-90, p.loud), d: "Average level of the second (RMS, dB full scale). 0 is the maximum; −60 is near silence." },
-    weight:    { l: "Low-frequency weight", f: p => p.weight, d: "Share of the energy below 250 Hz: the part of a sound you feel in your body. Engines, explosions and the cement mixer sit high; voices and birds sit low." },
-    sub:       { l: "Sub-bass share (<80 Hz)", f: p => p.sub, d: "Share of the energy below 80 Hz: the rumble you feel more than hear." },
-    bright:    { l: "Brightness (Hz)", f: p => p.bright, d: "Spectral centroid: the 'centre of gravity' of the frequencies. Metal-on-metal and hiss are bright; distant booms and drones are dark." },
-    noisy:     { l: "Noisiness", f: p => p.noisy, d: "Spectral flatness: 0 = tonal (a note, a hum), 1 = pure noise (wind, debris, static)." },
-    perc:      { l: "Percussiveness", f: p => p.perc, d: "Share of energy in short transients rather than sustained tones (harmonic/percussive separation)." },
-    dens:      { l: "Event density (hits/s)", f: p => p.dens, d: "How many distinct sound onsets per second: the rhythm of labour or of fire." },
-    thud:      { l: "Thud strength (dB)", f: p => p.thud, d: "Largest sudden jump in low-frequency energy within the second: a slam, a drop, a shell." },
-    crest:     { l: "Impulsiveness (dB)", f: p => p.crest, d: "Peak-to-average ratio. High = sharp spikes over quiet; low = a continuous wall of sound." },
-    p_war:     { l: "Classifier: detonation", f: p => p.p_war, d: "YAMNet's probability that this second contains Explosion, Boom, Gunshot, Artillery, Thunder or similar." },
-    p_machine: { l: "Classifier: machine", f: p => p.p_machine, d: "YAMNet's probability of Hammer, Jackhammer, Drill, Engine, Vehicle, Truck, Rumble and similar." },
-    p_voice:   { l: "Classifier: voice", f: p => p.p_voice, d: "Probability of speech, narration, crowd or shouting." },
-    p_music:   { l: "Classifier: music", f: p => p.p_music, d: "Probability of music or score." },
-    p_water:   { l: "Classifier: water", f: p => p.p_water, d: "Probability of water, waves or sea." },
-    p_silence: { l: "Classifier: silence", f: p => p.p_silence, d: "Probability of silence." },
-    echo:      { l: "Echo index (machine ← → war)", f: p => p.echo, d: "Compares the classifier's internal 'hearing' (a 1,024-number embedding) of this second with the average war second and the average machine second. −1 sounds like the building site; +1 sounds like the bombardment; around 0 it could be either." },
+    weight:   { l: "Heaviness", t: "Heaviness: light → heavy", f: p => p.weight, lo: "light", hi: "heavy, felt in the chest", v: p => pct(p.weight) + " of its energy is deep bass",
+                d: "How much of the sound is deep bass (below 250 Hz), the part you feel in your chest as much as hear. Explosions, engines and the cement mixer are heavy; hammer taps and voices are light." },
+    bright:   { l: "Sharpness", t: "Sharpness: muffled → sharp (Hz)", f: p => p.bright, lo: "muffled, dull", hi: "sharp, metallic", v: p => Math.round(p.bright) + " Hz",
+                d: "Where the sound's energy sits in pitch. Metal striking metal is sharp; a blast heard from far away loses its high tones and becomes muffled. Measured as the spectral centroid." },
+    loud:     { l: "Loudness", t: "Loudness: quiet → loud (dB)", f: p => Math.max(-90, p.loud), lo: "quiet", hi: "loud", v: p => p.loud <= -120 ? "total silence" : p.loud + " dB",
+                d: "How loud the second is (decibels, 0 = the loudest the recording allows, −60 = near silence)." },
+    thud:     { l: "Jolt", t: "Jolt: soft → jolting (dB)", f: p => p.thud, lo: "soft onset", hi: "jolting", v: p => p.thud + " dB jump",
+                d: "The biggest sudden jump in bass within the second: a slab dropped, a door slammed, a shell landing." },
+    dens:     { l: "Pace", t: "Pace: sparse → rapid (hits per second)", f: p => p.dens, lo: "sparse", hi: "rapid", v: p => p.dens + " hits/s",
+                d: "How many separate hits or onsets happen in the second: the rhythm of hammering, or of gunfire." },
+    perc:     { l: "Hits vs. hum", t: "Hits vs. hum: steady → percussive", f: p => p.perc, lo: "steady hum", hi: "sharp hits", v: p => pct(p.perc) + " in hits",
+                d: "Is the sound made of short hits (hammering, gunfire) or a continuous hum (engines, wind, music)?" },
+    noisy:    { l: "Noisiness", t: "Noisiness: tonal → noisy", f: p => p.noisy, lo: "tonal (a note, a hum)", hi: "noise-like (debris, wind)", v: p => p.noisy.toFixed(3),
+                d: "0 = a clear tone or hum; 1 = pure noise like wind, static or falling debris." },
+    t:        { l: "Film time", t: "Film time: start → end (min)", f: p => p.t / 60, lo: "early in the film", hi: "late in the film", v: p => fmt(p.t),
+                d: "When in the film this second happens." },
+    p_build:  { l: "Sounds like building", t: "Sounds like building work (computer's confidence)", f: p => p.p_build, lo: "not like building", hi: "clearly building work", v: p => pct(p.p_build),
+                d: "How sure a sound-recognition program (Google's YAMNet, trained on 2 million clips) is that this second contains tools, metal or engines." },
+    p_bomb:   { l: "Sounds like bombs", t: "Sounds like bombs (computer's confidence)", f: p => p.p_bomb, lo: "not like a blast", hi: "clearly a blast", v: p => pct(p.p_bomb),
+                d: "How sure the same program is that this second contains an explosion, boom, gunshot, artillery or thunder." },
+    p_tool:   { l: "Sounds like tools", t: "Sounds like tools & metal (confidence)", f: p => p.p_tool, lo: "no tools", hi: "clearly tools", v: p => pct(p.p_tool),
+                d: "Confidence that this second contains hammers, drills, jackhammers or clanging metal." },
+    p_engine: { l: "Sounds like engines", t: "Sounds like engines (confidence)", f: p => p.p_engine, lo: "no engines", hi: "clearly engines", v: p => pct(p.p_engine),
+                d: "Confidence that this second contains engines, trucks, heavy machinery or rumble." },
+    echo:     { l: "Building ↔ bombing", t: "Resembles: building ← → bombing", f: p => p.echo, lo: "resembles building work", hi: "resembles bombing", v: p => (p.echo > 0 ? "+" : "") + p.echo.toFixed(2),
+                d: "Compares the program's whole 'impression' of this second (1,024 numbers) with its impression of a typical bomb second and a typical building second. Negative: closer to building. Positive: closer to bombing. Near zero: it could be either." },
   };
-  const COLOR_OPTS = { fam: "Sound family", t: "Film time", echo: "Echo index", loud: "Loudness", place: "Places (your annotations)" };
+  const COLOR_OPTS = { cat: "Building vs. bombing", t: "Film time", echo: "Building ↔ bombing resemblance", loud: "Loudness", place: "Places (your annotations)" };
 
+  // ---------------- key moments (verified from the data; places to confirm against the picture) ----------------
+  const NOTES = [
+    { t: 110, short: "1:50 · hammer → 'gunfire'", text: "In the middle of a run of hammering (1:48–1:52), the computer hears one second as <b>gunfire (81%)</b>. The film's first minutes already blur work and war." },
+    { t: 776, short: "12:56 · engine rumble", text: "An engine rumble on the building site. Its closest match among all the bomb sounds is <b>thunder at 70:23, 57 minutes later</b>." },
+    { t: 1806, short: "30:06 · after total silence", text: "Right after the film's <b>only moment of total digital silence</b> (30:05, two seconds), a blast heard as explosion <i>and</i> breaking glass." },
+    { t: 3292, short: "54:52 · loudest stretch", text: "Inside the film's <b>loudest stretch</b> (48:49–55:40): engine noise on a steady 2-second beat that the computer keeps hearing as <b>'Boom'</b>." },
+    { t: 4223, short: "70:23 · 'thunder'", text: "The thunder that the engine rumble at 12:56 most resembles. A sound from the Beirut site returns almost an hour later as war." },
+  ];
+
+  // ---------------- guided questions (presets) ----------------
   const PRESETS = [
-    { name: "Two cities, one space", note: "Machine vs detonation probability, rising through film time. Where do the two worlds overlap?", x: "p_machine", y: "p_war", z: "t", c: "fam", path: false, rh: true },
-    { name: "The body of sound", note: "Weight × brightness × loudness: how each sound would land on a body.", x: "weight", y: "bright", z: "loud", c: "fam", path: false, rh: true },
-    { name: "Rhythms: labour and fire", note: "Hits per second × percussiveness × thud: the rhythm of hammering next to the rhythm of shelling.", x: "dens", y: "perc", z: "thud", c: "fam", path: false, rh: false },
-    { name: "The film as a journey", note: "Time × echo index × loudness, joined as a path: the film's route between the two sound-worlds.", x: "t", y: "echo", z: "loud", c: "echo", path: true, rh: false },
+    { id: "overlap", name: "Where do building and bombing overlap?", x: "p_build", y: "p_bomb", z: "t", c: "cat", path: false, rh: false,
+      body: s => `Left to right: how sure the computer is that a second is <b>building work</b>. Front to back: how sure it is that it's a <b>bomb</b>. Up: film time. Most seconds are one or the other, but <b>${s.n.both} seconds (pink)</b> are heard as both at once, and they cluster around <b>${s.bothMin}</b>.` },
+    { id: "body", name: "Do they hit the body the same way?", x: "weight", y: "bright", z: "loud", c: "cat", path: false, rh: false,
+      body: s => `Bombs and engines are <b>equally heavy</b> (typically ${pct(s.med.bomb.weight)} vs ${pct(s.med.engine.weight)} of their energy is deep bass) and about as loud (${s.med.bomb.loud} vs ${s.med.engine.loud} dB). What sets bombs apart is that they are <b>muffled</b>: ${s.med.bomb.bright} Hz against ${s.med.tool.bright} Hz for tools. A blast reaches the camera from far away; a hammer is right there.` },
+    { id: "rhythm", name: "Does the rhythm of work echo the rhythm of war?", x: "dens", y: "perc", z: "thud", c: "cat", path: false, rh: false,
+      body: s => `Tools are fast and percussive (typically ${s.med.tool.dens} hits per second). Bombs are sparse (${s.med.bomb.dens}/s) but <b>jolt</b> a little harder (${s.med.bomb.thud} dB jumps vs ${s.med.tool.thud} for tools). Still, the blue and orange clouds overlap: by these measures, a lot of the work sounds like the war.` },
+    { id: "echo", name: "Which building sounds echo which bombs?", x: "t", y: "echo", z: "weight", c: "cat", path: false, rh: true,
+      body: s => `Each line joins a building sound to the bomb sound it <b>most resembles</b> anywhere in the film. Many partners are seconds apart, where the edit layers them. Others are <b>far apart</b>: the engine rumble at 12:56 matches thunder at 70:23. Sounds from Beirut return as Syria, the way memory works.` },
+  ];
+
+  // ---------------- tour ----------------
+  const TOUR = [
+    { title: "Every dot is one second of the film", preset: "overlap", only: null,
+      body: () => `<i>Taste of Cement</i> follows Syrian men building a high-rise in Beirut while their own homes in Syria are being bombed. They barely speak on screen, so the film tells their story through <b>sound</b>. This map lays out all 5,098 seconds of its soundtrack. Dots are placed by what each second <i>sounds like</i>, not by where it was filmed.` },
+    { title: "Blue: the sound of building", preset: "overlap", only: ["tool", "engine"],
+      body: s => `Dark blue is <b>tools and metal</b> (${s.n.tool} seconds); light blue is <b>engines and heavy machines</b> (${s.n.engine} seconds). This is the work the men do in exile, and it fills about a quarter of the film.` },
+    { title: "Orange: the sound of bombs", preset: "overlap", only: ["bomb"],
+      body: s => `Explosions, booms, gunfire and thunder take up just <b>${s.n.bomb} seconds</b>, about ${Math.round(100 * s.n.bomb / s.N)}% of the film. Yet the war is felt throughout, because the film keeps letting us hear it <i>inside</i> the building sounds.` },
+    { title: "Pink: heard as both at once", preset: "overlap", only: ["both"], focus: 3292,
+      body: s => `In <b>${s.n.both} seconds</b> the computer hears building work and a blast together. About half of them fall in the film's loudest stretch (48:49–55:40), where engine noise beats every 2 seconds and is heard again and again as 'Boom'.` },
+    { title: "A hammer mistaken for gunfire", preset: "overlap", only: ["tool", "bomb"], focus: 110,
+      body: () => `At 1:48–1:52 the computer hears hammer, hammer, <b>gunfire (81%)</b>, jackhammer, jackhammer. A program trained on millions of clips cannot reliably separate the sound of building from the sound of shooting. The film works in exactly that gap.` },
+    { title: "Same weight in the body", preset: "body", only: ["tool", "engine", "bomb", "both"],
+      body: s => PRESETS[1].body(s) },
+    { title: "Echoes across the film", preset: "echo", only: ["tool", "engine", "bomb", "both"], focus: 776,
+      body: s => PRESETS[3].body(s) },
+    { title: "Why this matters", preset: "overlap", only: null,
+      body: () => `Maps of migration usually draw a line from home to destination. This one shows what that line leaves out: the men have arrived, but the war has come with them, in the noise of their own labour. Building one city and the destruction of another <b>sound alike</b>. The film turns that into an experience; the map makes it measurable. <b>Now explore:</b> hover over any dot, and load the film above to hear it.` },
   ];
 
   const $ = s => document.querySelector(s);
+  const wrap = (txt, n) => { const out = []; let line = ""; for (const w of txt.split(" ")) { if ((line + " " + w).trim().length > n) { out.push(line.trim()); line = w; } else line += " " + w; } out.push(line.trim()); return out.join("<br>"); };
   const fmt = s => { s = Math.max(0, Math.round(s)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`; };
-  const DARK = { paper_bgcolor: "#121315", plot_bgcolor: "#121315", font: { color: "#e6e2da", family: "IBM Plex Sans, sans-serif", size: 12 } };
-  const sceneAxis = title => ({ title: { text: title, font: { size: 12 } }, gridcolor: "#2b2e33", zerolinecolor: "#3a3e44", backgroundcolor: "#16181b", showbackground: true, color: "#9a968e" });
+  const LIGHT = { paper_bgcolor: "#ffffff", plot_bgcolor: "#ffffff", font: { color: C.ink, family: "IBM Plex Sans, sans-serif", size: 12 } };
+  const sceneAxis = title => ({ title: { text: title, font: { size: 12 } }, gridcolor: "#ece3d8", zerolinecolor: "#d9cdbf", backgroundcolor: "#fbf7f2", showbackground: true, color: C.mute, showspikes: false });
 
-  let P = [], RH = [], REG = [], IMP = [], CUTS = [], PLACES = [];
-  let state = { x: "p_machine", y: "p_war", z: "t", c: "fam", path: false, rh: true, rhN: 60, t0: 0, t1: 85 };
-  let playheadIdx = { space: -1, imp: -1 };
-  let cur = 0, A = null, B = null, stopAt = null;
+  let P = [], RH = [], REG = [], IMP = [], CUTS = [], PLACES = [], STATS = null;
+  let state = { x: "p_build", y: "p_bomb", z: "t", c: "cat", path: false, rh: false, notes: true, rhN: 40, t0: 0, t1: 85, hidden: new Set(), only: null, focus: null };
+  let traceInfo = { playhead: -1, ab: -1 }, impPlayhead = -1;
+  let cur = 0, A = null, B = null, stopAt = null, tourStep = -1;
   const media = $("#media");
   let hasMedia = false;
 
@@ -68,7 +127,7 @@
       PLACES = loadPlaces(places);
       init();
     })
-    .catch(e => { document.body.insertAdjacentHTML("afterbegin", `<p style="padding:20px;color:#ff5a36">Could not load data (${e}). If you opened index.html straight from disk, run a local server instead (see README).</p>`); });
+    .catch(e => { document.body.insertAdjacentHTML("afterbegin", `<p style="padding:20px;color:#e0301e">Could not load data (${e}). If you opened index.html straight from disk, run a local server instead (see README).</p>`); });
 
   function loadPlaces(fromFile) {
     try { const s = localStorage.getItem("toc-places"); if (s) return JSON.parse(s); } catch (e) { /* storage unavailable */ }
@@ -76,42 +135,85 @@
   }
   function savePlaces() { try { localStorage.setItem("toc-places", JSON.stringify(PLACES)); } catch (e) { /* ignore */ } }
 
-  function init() {
-    // selects
-    for (const id of ["#ax-x", "#ax-y", "#ax-z"]) {
-      const s = $(id);
-      for (const k in AX) s.add(new Option(AX[k].l, k));
+  // ---------------- statistics used in captions (computed live from the data) ----------------
+  function computeStats() {
+    const med = arr => { const s = [...arr].sort((a, b) => a - b); return s.length ? s[Math.floor(s.length / 2)] : 0; };
+    const n = {}, m = {};
+    for (const k in CAT) {
+      const g = P.filter(p => p.cat === k); n[k] = g.length;
+      m[k] = { weight: med(g.map(p => p.weight)), bright: Math.round(med(g.map(p => p.bright))), loud: Math.round(med(g.map(p => p.loud))),
+               dens: med(g.map(p => p.dens)), thud: med(g.map(p => p.thud)).toFixed(1), perc: med(g.map(p => p.perc)) };
     }
+    // where do "both" seconds cluster? (5-minute bins)
+    const bins = {};
+    P.filter(p => p.cat === "both").forEach(p => { const b = Math.floor(p.t / 300); bins[b] = (bins[b] || 0) + 1; });
+    const top = Object.entries(bins).sort((a, b) => b[1] - a[1]).slice(0, 2).map(([b]) => `${b * 5}–${b * 5 + 5} min`);
+    // percentile ranks for hover qualifiers
+    const ranks = {};
+    for (const k in AX) { ranks[k] = P.map(p => AX[k].f(p)).sort((a, b) => a - b); }
+    return { n, med: m, N: P.length, bothMin: top.join(" and "), ranks };
+  }
+  function rankOf(k, v) {
+    const r = STATS.ranks[k]; let lo = 0, hi = r.length;
+    while (lo < hi) { const mid = (lo + hi) >> 1; if (r[mid] < v) lo = mid + 1; else hi = mid; }
+    return lo / r.length;
+  }
+  function qualify(k, p) {
+    const q = rankOf(k, AX[k].f(p));
+    if (k === "t") return { word: q < 0.33 ? "early in the film" : q < 0.66 ? "middle of the film" : "late in the film", q };
+    const hi = AX[k].hi.split(",")[0], lo = AX[k].lo.split(",")[0];
+    const very = w => (w.includes(" ") ? w : `very ${w}`);
+    const word = q > 0.8 ? very(hi) : q > 0.6 ? hi : q < 0.2 ? very(lo) : q < 0.4 ? lo : "middling";
+    return { word, q };
+  }
+
+  function init() {
+    STATS = computeStats();
+    for (const id of ["#ax-x", "#ax-y", "#ax-z"]) { const s = $(id); for (const k in AX) s.add(new Option(AX[k].l, k)); }
     for (const k in COLOR_OPTS) $("#ax-c").add(new Option(COLOR_OPTS[k], k));
-    // presets
     PRESETS.forEach((p, i) => {
       const b = document.createElement("button");
-      b.innerHTML = `${p.name}<small>${p.note}</small>`;
-      b.onclick = () => applyPreset(i);
+      b.textContent = p.name; b.dataset.preset = p.id;
+      b.onclick = () => { endTour(); applyPreset(i); };
       $("#presets").appendChild(b);
     });
-    // legend
+    renderCatLegend();
     $("#legend").innerHTML = Object.entries(FAM).filter(([k]) => k !== "media").map(([, v]) => `<span style="--c:${v.c}">${v.label}</span>`).join("");
 
-    $("#ax-x").onchange = e => { state.x = e.target.value; clearPreset(); draw3d(); };
-    $("#ax-y").onchange = e => { state.y = e.target.value; clearPreset(); draw3d(); };
-    $("#ax-z").onchange = e => { state.z = e.target.value; clearPreset(); draw3d(); };
-    $("#ax-c").onchange = e => { state.c = e.target.value; clearPreset(); draw3d(); };
+    const onAx = () => { endTour(); clearPreset(); draw3d(); };
+    $("#ax-x").onchange = e => { state.x = e.target.value; onAx(); };
+    $("#ax-y").onchange = e => { state.y = e.target.value; onAx(); };
+    $("#ax-z").onchange = e => { state.z = e.target.value; onAx(); };
+    $("#ax-c").onchange = e => { state.c = e.target.value; onAx(); };
     $("#showPath").onchange = e => { state.path = e.target.checked; draw3d(); };
     $("#showRhymes").onchange = e => { state.rh = e.target.checked; draw3d(); };
+    $("#showNotes").onchange = e => { state.notes = e.target.checked; draw3d(); };
     $("#rhymeN").oninput = e => { state.rhN = +e.target.value; $("#rhymeNo").value = e.target.value; };
     $("#rhymeN").onchange = () => draw3d();
     $("#t0").onchange = e => { state.t0 = +e.target.value; draw3d(); };
     $("#t1").onchange = e => { state.t1 = +e.target.value; draw3d(); };
-
+    $("#storyNext").onclick = () => goTour(tourStep + 1);
+    $("#storyPrev").onclick = () => goTour(tourStep - 1);
     document.querySelectorAll(".tabs button").forEach(b => b.onclick = () => showTab(b.dataset.tab));
 
+    setupHover();
     setupPlayer();
     setupPlaces();
-    applyPreset(0);
+    applyPreset(0, true);
+    showIntro();
     drawStrata();
     drawImpacts();
     setTime(0);
+  }
+
+  function renderCatLegend() {
+    $("#catlegend").innerHTML = Object.entries(CAT).map(([k, v]) =>
+      `<button class="cat ${state.hidden.has(k) ? "off" : ""}" data-cat="${k}" aria-pressed="${!state.hidden.has(k)}">
+        <i style="background:${v.c}"></i><span><b>${v.label}</b> <em>${STATS.n[k].toLocaleString()} s</em><br><small>${v.long}</small></span></button>`).join("");
+    $("#catlegend").querySelectorAll("button").forEach(b => b.onclick = () => {
+      const k = b.dataset.cat; state.hidden.has(k) ? state.hidden.delete(k) : state.hidden.add(k);
+      state.only = null; renderCatLegend(); draw3d();
+    });
   }
 
   function showTab(name) {
@@ -121,135 +223,216 @@
     if (id) { Plotly.Plots.resize(id); updatePlayhead(); }
   }
 
-  function applyPreset(i) {
+  function applyPreset(i, quiet) {
     const p = PRESETS[i];
     Object.assign(state, { x: p.x, y: p.y, z: p.z, c: p.c, path: p.path, rh: p.rh });
     $("#ax-x").value = p.x; $("#ax-y").value = p.y; $("#ax-z").value = p.z; $("#ax-c").value = p.c;
     $("#showPath").checked = p.path; $("#showRhymes").checked = p.rh;
     document.querySelectorAll(".presets button").forEach((b, j) => b.classList.toggle("on", j === i));
+    if (!quiet && tourStep < 0) setStory("Question", p.name, p.body(STATS), false);
     draw3d();
   }
   function clearPreset() { document.querySelectorAll(".presets button").forEach(b => b.classList.remove("on")); }
 
-  // ---------------- 3D sound space ----------------
-  function placeOf(t) {
-    const hit = PLACES.find(r => t >= r.a && t < r.b);
-    return hit ? hit.kind : "unmarked";
+  // ---------------- story / tour panel ----------------
+  function setStory(step, title, body, inTour) {
+    $("#storyStep").textContent = step; $("#storyTitle").innerHTML = title; $("#storyBody").innerHTML = body;
+    $("#storyPrev").style.visibility = inTour && tourStep > 0 ? "visible" : "hidden";
+    $("#storyNext").textContent = inTour ? (tourStep < TOUR.length - 1 ? "Next →" : "Finish") : "Start the tour →";
+    $("#story").classList.toggle("touring", !!inTour);
   }
-  const PLACE_C = { "Beirut: construction site": "#c9b79c", "Beirut: barracks / underground": "#8a7f6e", "Beirut: city / sea": "#3fd0c9", "Syria: war footage": "#ff5a36", "Black screen / title": "#000000", "Other": "#b58cff", "unmarked": "#3a3e44" };
+  function showIntro() {
+    setStory("Start here", "How alike do building and bombing sound?",
+      `Take the 2-minute tour, pick a question on the left, or just hover over the dots. Blue is building work, orange is bombs, pink is both at once.`, false);
+  }
+  function goTour(i) {
+    if (i >= TOUR.length) { endTour(); showIntro(); return; }
+    if (i < 0) return;
+    tourStep = i;
+    const s = TOUR[i];
+    applyPreset(PRESETS.findIndex(p => p.id === s.preset), true);
+    state.only = s.only; state.focus = s.focus != null ? s.focus : null;
+    setStory(`Tour · ${i + 1} of ${TOUR.length}`, s.title, s.body(STATS), true);
+    draw3d();
+    if (s.focus != null) seek(s.focus);
+  }
+  function endTour() {
+    if (tourStep < 0) return;
+    tourStep = -1; state.only = null; state.focus = null;
+    $("#story").classList.remove("touring");
+  }
 
+  // ---------------- 3D sound space ----------------
+  function placeOf(t) { const hit = PLACES.find(r => t >= r.a && t < r.b); return hit ? hit.kind : "unmarked"; }
+  const PLACE_C = { "Beirut: construction site": C.blue, "Beirut: barracks / underground": C.maroon, "Beirut: city / sea": C.lblue, "Syria: war footage": C.orange, "Black screen / title": C.ink, "Other": C.green, "unmarked": "#ece3d8" };
+
+  let traceMeta = [];   // per trace: array of point times (for hover lookup)
   function draw3d() {
     const fx = AX[state.x].f, fy = AX[state.y].f, fz = AX[state.z].f;
     const inRange = p => p.t >= state.t0 * 60 && p.t <= state.t1 * 60;
-    const pts = P.filter(inRange);
-    const hover = p => `<b>${fmt(p.t)}</b> · ${FAM[p.fam] ? FAM[p.fam].label : p.fam}<br>${p.top.map(t => `${t[0]} ${Math.round(t[1] * 100)}%`).join(" · ")}<br>loud ${p.loud} dB · echo ${p.echo}`;
-    const traces = [];
-    const base = { type: "scatter3d", mode: "markers", hoverinfo: "text" };
+    const pts = P.filter(p => inRange(p) && !state.hidden.has(p.cat));
+    const traces = []; traceMeta = [];
+    const size = (p, k) => (k === "other" ? 1.2 : 2.2) + Math.max(0, (p.loud + 65) / (k === "other" ? 22 : 11));
+    const dim = k => state.only && !state.only.includes(k);
 
-    if (state.c === "fam" || state.c === "place") {
-      const key = state.c === "fam" ? (p => p.fam) : (p => placeOf(p.t));
+    if (state.c === "cat" || state.c === "place") {
+      const key = state.c === "cat" ? (p => p.cat) : (p => placeOf(p.t));
       const groups = {};
       for (const p of pts) (groups[key(p)] = groups[key(p)] || []).push(p);
-      const order = state.c === "fam" ? Object.keys(FAM) : Object.keys(PLACE_C);
+      const order = state.c === "cat" ? ["other", "engine", "tool", "bomb", "both"] : Object.keys(PLACE_C);
       for (const k of order) {
         const g = groups[k]; if (!g) continue;
-        const col = state.c === "fam" ? FAM[k].c : PLACE_C[k];
-        traces.push({ ...base, name: state.c === "fam" ? FAM[k].label : k, x: g.map(fx), y: g.map(fy), z: g.map(fz), text: g.map(hover), customdata: g.map(p => p.t),
-          marker: { size: g.map(p => 1.6 + Math.max(0, (p.loud + 65) / 14)), color: col, opacity: k === "war" ? 0.95 : 0.7, line: { width: 0 } } });
+        const col = state.c === "cat" ? CAT[k].c : PLACE_C[k];
+        const op = state.c === "cat" ? (dim(k) ? 0.06 : CAT[k].op) : 0.85;
+        traces.push({ type: "scatter3d", mode: "markers", name: state.c === "cat" ? CAT[k].label : k, hoverinfo: "none",
+          x: g.map(fx), y: g.map(fy), z: g.map(fz),
+          marker: { size: g.map(p => size(p, k)), color: col, opacity: op, line: { width: k === "other" ? 0 : 0.6, color: "#ffffff" } } });
+        traceMeta.push(g.map(p => p.t));
       }
     } else {
       const cf = state.c === "t" ? (p => p.t / 60) : AX[state.c].f;
-      const scale = state.c === "echo" ? [[0, "#c9b79c"], [0.5, "#55595f"], [1, "#ff5a36"]] : state.c === "t" ? "Cividis" : "Inferno";
-      traces.push({ ...base, name: COLOR_OPTS[state.c], x: pts.map(fx), y: pts.map(fy), z: pts.map(fz), text: pts.map(hover), customdata: pts.map(p => p.t),
-        marker: { size: pts.map(p => 1.6 + Math.max(0, (p.loud + 65) / 14)), color: pts.map(cf), colorscale: scale, cmid: state.c === "echo" ? 0 : undefined, opacity: 0.8, showscale: true,
+      const scale = state.c === "echo" ? [[0, C.blue], [0.5, C.cream], [1, C.orange]] : state.c === "t" ? [[0, C.lblue], [0.33, C.pink], [0.66, C.orange], [1, C.maroon]] : [[0, C.cream], [0.5, C.yellow], [1, C.maroon]];
+      traces.push({ type: "scatter3d", mode: "markers", name: COLOR_OPTS[state.c], hoverinfo: "none", x: pts.map(fx), y: pts.map(fy), z: pts.map(fz),
+        marker: { size: pts.map(p => size(p, p.cat)), color: pts.map(cf), colorscale: scale, cmid: state.c === "echo" ? 0 : undefined, opacity: 0.9, showscale: true,
           colorbar: { title: { text: COLOR_OPTS[state.c], side: "right" }, thickness: 10, len: 0.6, tickfont: { size: 10 } }, line: { width: 0 } } });
+      traceMeta.push(pts.map(p => p.t));
     }
 
     if (state.path) {
-      // smoothed (7 s) route through the space, coloured by echo index
       const k = 3, sm = f => pts.map((_, i) => { let a = 0, n = 0; for (let j = Math.max(0, i - k); j <= Math.min(pts.length - 1, i + k); j++) { a += f(pts[j]); n++; } return a / n; });
-      const ec = sm(p => p.echo);
-      traces.push({ type: "scatter3d", mode: "lines", name: "Path through time (7 s smoothed)", hoverinfo: "skip", x: sm(fx), y: sm(fy), z: sm(fz),
-        line: { color: ec, colorscale: [[0, "#c9b79c"], [0.5, "#55595f"], [1, "#ff5a36"]], cmin: -0.4, cmax: 0.4, width: 3.5 } });
-      traces.forEach(tr => { if (tr.mode === "markers" && tr.marker) tr.marker.opacity = 0.25; });
+      traces.push({ type: "scatter3d", mode: "lines", name: "Path through film time", hoverinfo: "skip", x: sm(fx), y: sm(fy), z: sm(fz),
+        line: { color: sm(p => p.echo), colorscale: [[0, C.blue], [0.5, C.cream], [1, C.orange]], cmin: -0.4, cmax: 0.4, width: 3 } });
+      traceMeta.push(null);
     }
     if (state.rh) {
-      const xs = [], ys = [], zs = [];
-      let n = 0;
+      const xs = [], ys = [], zs = []; let n = 0;
       for (const [a, b] of RH) {
         if (n >= state.rhN) break;
         const pa = P[a], pb = P[b];
         if (!inRange(pa) || !inRange(pb)) continue;
         xs.push(fx(pa), fx(pb), null); ys.push(fy(pa), fy(pb), null); zs.push(fz(pa), fz(pb), null); n++;
       }
-      traces.push({ type: "scatter3d", mode: "lines", name: "Rhyme: machine ↔ war", hoverinfo: "skip", x: xs, y: ys, z: zs, line: { color: "rgba(255,210,63,0.55)", width: 2 } });
+      traces.push({ type: "scatter3d", mode: "lines", name: "Echo: building → resembling bomb", hoverinfo: "skip", x: xs, y: ys, z: zs, line: { color: "rgba(147,42,16,0.5)", width: 2.5 } });
+      traceMeta.push(null);
     }
-    // playhead, A, B
-    traces.push({ type: "scatter3d", mode: "markers", name: "Now", hoverinfo: "skip", showlegend: false, x: [null], y: [null], z: [null], marker: { size: 9, color: "#ffffff", line: { color: "#000", width: 1 }, symbol: "diamond" } });
-    playheadIdx.space = traces.length - 1;
-    traces.push({ type: "scatter3d", mode: "markers+text", name: "A/B", hoverinfo: "skip", showlegend: false, x: [], y: [], z: [], text: [], textfont: { color: "#fff", size: 13 },
+    traces.push({ type: "scatter3d", mode: "markers", name: "Now playing", hoverinfo: "skip", showlegend: false, x: [null], y: [null], z: [null], marker: { size: 9, color: C.ink, line: { color: "#fff", width: 1 }, symbol: "diamond" } });
+    traceMeta.push(null); traceInfo.playhead = traces.length - 1;
+    traces.push({ type: "scatter3d", mode: "markers+text", name: "A/B", hoverinfo: "skip", showlegend: false, x: [], y: [], z: [], text: [], textposition: "top center", textfont: { color: C.ink, size: 13 },
       marker: { size: 8, color: [], symbol: "circle-open", line: { width: 3 } } });
+    traceMeta.push(null); traceInfo.ab = traces.length - 1;
 
-    const layout = { ...DARK, margin: { l: 0, r: 0, t: 10, b: 0 }, showlegend: true,
-      legend: { x: 0, y: 1, bgcolor: "rgba(18,19,21,0.7)", font: { size: 11 }, itemsizing: "constant" },
-      scene: { xaxis: sceneAxis(AX[state.x].l), yaxis: sceneAxis(AX[state.y].l), zaxis: sceneAxis(AX[state.z].l), aspectmode: "cube",
-        camera: { eye: { x: 1.6, y: 1.5, z: 0.9 } } },
+    // notes anchored in 3D
+    const annotations = [];
+    if (state.notes) {
+      for (const nt of NOTES) {
+        const p = P[nt.t];
+        if (!inRange(p) || state.hidden.has(p.cat)) continue;
+        const focus = state.focus === nt.t;
+        annotations.push({ x: fx(p), y: fy(p), z: fz(p), text: focus ? wrap(nt.text.replace(/<[^>]+>/g, ""), 46) : nt.short, showarrow: true, arrowhead: 0, arrowwidth: 1, arrowcolor: C.ink,
+          ax: 40, ay: -40, bgcolor: focus ? "rgba(255,255,255,0.92)" : "rgba(255,255,255,0.72)", bordercolor: focus ? C.ink : "rgba(29,27,25,0.25)", borderpad: 4,
+          font: { size: focus ? 12 : 11, color: C.ink }, align: "left", opacity: 1 });
+      }
+    }
+
+    const camera = state.z === "t" ? { eye: { x: 1.75, y: 1.75, z: 0.8 } } : { eye: { x: 1.8, y: -1.75, z: 0.9 } };
+    const layout = { ...LIGHT, margin: { l: 0, r: 0, t: 0, b: 0 }, showlegend: false, hovermode: "closest",
+      scene: { xaxis: sceneAxis(AX[state.x].t), yaxis: sceneAxis(AX[state.y].t), zaxis: sceneAxis(AX[state.z].t), aspectmode: "cube", camera, annotations },
       uirevision: state.x + state.y + state.z };
-    Plotly.react("plot3d", traces, layout, { displaylogo: false, responsive: true, modeBarButtonsToRemove: ["toImage"] });
-    const div = $("#plot3d");
-    div.removeAllListeners && div.removeAllListeners("plotly_click");
-    div.on("plotly_click", ev => {
-      const pt = ev.points && ev.points[0];
-      if (!pt || pt.customdata == null) return;
-      const t = pt.customdata;
-      const shift = ev.event && ev.event.shiftKey;
-      if (shift) B = t; else A = t;
-      seek(t);
-      updateCompare();
-    });
-    $("#axdesc").innerHTML = ["x", "y", "z"].map(k => `<b>${AX[state[k]].l}</b>: ${AX[state[k]].d}`).join("<br><br>");
+    Plotly.react("plot3d", traces, layout, { displaylogo: false, responsive: true, modeBarButtonsToRemove: ["toImage", "resetCameraLastSave3d"] });
+    $("#axdesc").innerHTML = [["Left–right", "x"], ["Front–back", "y"], ["Up–down", "z"]].map(([n, k]) => `<p><b>${n}: ${AX[state[k]].l}.</b> ${AX[state[k]].d}</p>`).join("");
     updatePlayhead();
     updateCompare();
   }
 
-  // ---------------- compare ----------------
-  const CMP_KEYS = ["loud", "weight", "bright", "noisy", "perc", "dens", "thud", "p_war", "p_machine", "echo"];
-  const RANGE = {};
-  function rangeOf(k) {
-    if (!RANGE[k]) {
-      const v = P.map(p => AX[k].f(p)).sort((a, b) => a - b);
-      RANGE[k] = [v[Math.floor(v.length * 0.01)], v[Math.floor(v.length * 0.99)]];
-    }
-    return RANGE[k];
+  // ---------------- hover card ----------------
+  let mouse = { x: 0, y: 0 };
+  function setupHover() {
+    const div = $("#plot3d"), card = $("#hovercard"), box = div.parentElement;
+    box.addEventListener("mousemove", e => { const b = box.getBoundingClientRect(); mouse = { x: e.clientX - b.left, y: e.clientY - b.top }; });
+    let bound = false;
+    const bind = () => {
+      if (bound) return; bound = true;
+      div.on("plotly_hover", ev => {
+        const pt = ev.points && ev.points[0]; if (!pt) return;
+        const meta = traceMeta[pt.curveNumber]; if (!meta) return;
+        showCard(meta[pt.pointNumber]);
+      });
+      div.on("plotly_unhover", () => card.classList.remove("on"));
+      div.on("plotly_click", ev => {
+        const pt = ev.points && ev.points[0]; if (!pt) return;
+        const meta = traceMeta[pt.curveNumber]; if (!meta) return;
+        const t = meta[pt.pointNumber];
+        if (ev.event && ev.event.shiftKey) B = t; else A = t;
+        seek(t); updateCompare(); showCard(t);
+      });
+    };
+    // plotly attaches .on after first plot
+    const wait = setInterval(() => { if (div.on) { clearInterval(wait); bind(); } }, 50);
   }
-  const norm = (k, v) => { const [a, b] = rangeOf(k); return Math.min(1, Math.max(0, (v - a) / (b - a || 1))); };
+  function showCard(t) {
+    const p = P[t], card = $("#hovercard"), box = card.parentElement;
+    const cat = CAT[p.cat];
+    const heard = p.cat === "other"
+      ? p.top.slice(0, 2).map(x => `${x[0]} (${pct(x[1])})`).join(", ")
+      : [p.p_tool > 0.1 ? `${p.lab.tool} (${pct(p.p_tool)})` : null, p.p_engine > 0.1 ? `${p.lab.engine} (${pct(p.p_engine)})` : null, p.p_bomb > 0.1 ? `${p.lab.bomb} (${pct(p.p_bomb)})` : null].filter(Boolean).join(", ") || p.top[0][0];
+    const meaning = {
+      tool: "A tool or metal sound: the work of building.",
+      engine: "Engine or heavy-machine sound: the building site's machines, or a vehicle.",
+      bomb: "Heard as a blast, gunfire or thunder: the war.",
+      both: "Heard as building work <b>and</b> a blast at the same moment: here the two worlds overlap.",
+      other: "Neither building nor bombing: voices, music, wind, the sea or silence.",
+    }[p.cat];
+    const rows = ["x", "y", "z"].filter((k, i, a) => a.findIndex(j => state[j] === state[k]) === i).map(k => {
+      const key = state[k]; const q = qualify(key, p);
+      return `<li><span>${AX[key].l}</span><b>${q.word}</b><em>${AX[key].v(p)}</em></li>`;
+    }).join("");
+    const note = NOTES.find(n => Math.abs(n.t - t) <= 2);
+    const rhyme = RH.find(r => r[0] === t);
+    card.innerHTML = `<div class="hc-head"><i style="background:${cat.c}"></i><b>${fmt(t)}</b> into the film · ${cat.label}</div>
+      <p class="hc-mean">${meaning}</p>
+      <p class="hc-heard">The computer hears: <b>${heard}</b></p>
+      <ul class="hc-rows">${rows}</ul>
+      ${rhyme ? `<p class="hc-note">Most resembles the bomb sound at <b>${fmt(rhyme[1])}</b>${Math.abs(rhyme[1] - t) > 60 ? `, ${Math.round(Math.abs(rhyme[1] - t) / 60)} minutes ${rhyme[1] > t ? "later" : "earlier"}` : ""}.</p>` : ""}
+      ${note ? `<p class="hc-note">${note.text}</p>` : ""}
+      <p class="hc-hint">${hasMedia ? "Click to hear this second (A). Shift-click sets B." : "Load the film above to hear it. Click sets A, shift-click sets B."}</p>`;
+    card.classList.add("on");
+    const bw = box.clientWidth, bh = box.clientHeight, cw = card.offsetWidth, ch = card.offsetHeight;
+    let x = mouse.x + 18, y = mouse.y + 14;
+    if (x + cw > bw - 8) x = mouse.x - cw - 18;
+    if (y + ch > bh - 8) y = Math.max(8, bh - ch - 8);
+    card.style.transform = `translate(${Math.max(8, x)}px, ${Math.max(8, y)}px)`;
+  }
 
+  // ---------------- compare ----------------
+  const CMP_KEYS = ["weight", "bright", "loud", "thud", "dens", "perc", "p_build", "p_bomb"];
+  const norm = (k, v) => rankOf(k, v);
   function updateCompare() {
-    const desc = t => { const p = P[t]; return `${fmt(t)} · ${p.top[0][0]} ${Math.round(p.top[0][1] * 100)}%`; };
-    $("#slotA span").textContent = A == null ? "click a point" : desc(A);
-    $("#slotB span").textContent = B == null ? "shift-click a point" : desc(B);
+    const desc = t => { const p = P[t]; return `${fmt(t)} · ${CAT[p.cat].label}`; };
+    $("#slotA span").textContent = A == null ? "click a dot" : desc(A);
+    $("#slotB span").textContent = B == null ? "shift-click a dot" : desc(B);
     $("#playA").disabled = A == null || !hasMedia;
     $("#playB").disabled = B == null || !hasMedia;
     $("#playAB").disabled = A == null || B == null || !hasMedia;
     let html = "";
     if (A != null || B != null) {
-      html += `<span></span><span style="color:#ffd23f">A</span><span style="color:#7fe3ff">B</span>`;
+      html += `<span></span><span style="color:${C.green}">A</span><span style="color:${C.maroon}">B</span>`;
       for (const k of CMP_KEYS) {
-        const bar = (t, c) => t == null ? "<span></span>" : `<div class="bar" title="${AX[k].f(P[t]).toFixed(2)}"><i style="width:${(norm(k, AX[k].f(P[t])) * 100).toFixed(0)}%;background:${c}"></i></div>`;
-        html += `<span>${AX[k].l.replace(/ \(.*\)/, "").replace("Classifier: ", "≈ ")}</span>${bar(A, "#ffd23f")}${bar(B, "#7fe3ff")}`;
+        const bar = (t, c) => t == null ? "<span></span>" : `<div class="bar" title="${AX[k].v(P[t])}"><i style="width:${(norm(k, AX[k].f(P[t])) * 100).toFixed(0)}%;background:${c}"></i></div>`;
+        html += `<span>${AX[k].l}</span>${bar(A, C.green)}${bar(B, C.maroon)}`;
       }
       if (A != null && B != null) {
         const d = Math.sqrt(CMP_KEYS.reduce((s, k) => s + (norm(k, AX[k].f(P[A])) - norm(k, AX[k].f(P[B]))) ** 2, 0) / CMP_KEYS.length);
-        html += `<span>difference</span><span style="grid-column:span 2">${(d * 100).toFixed(0)} / 100 · ${Math.abs(A - B) >= 60 ? (Math.abs(A - B) / 60).toFixed(1) + " min apart in the film" : Math.abs(A - B) + " s apart in the film"}</span>`;
+        const gap = Math.abs(A - B);
+        html += `<span>difference</span><span style="grid-column:span 2">${(d * 100).toFixed(0)} / 100 (${d < 0.15 ? "nearly identical" : d < 0.3 ? "similar" : d < 0.45 ? "different" : "very different"}) · ${gap >= 60 ? (gap / 60).toFixed(1) + " min" : gap + " s"} apart in the film</span>`;
       }
+      html += `<span class="cmpnote">Bars show where each second ranks against the whole film (left = lowest, right = highest).</span>`;
     }
     $("#cmpbars").innerHTML = html;
-    // A/B markers in 3D
     const div = $("#plot3d");
-    if (div && div.data && playheadIdx.space >= 0) {
+    if (div && div.data && traceInfo.ab >= 0) {
       const fx = AX[state.x].f, fy = AX[state.y].f, fz = AX[state.z].f;
-      const sel = [[A, "#ffd23f", "A"], [B, "#7fe3ff", "B"]].filter(s => s[0] != null);
-      Plotly.restyle(div, { x: [sel.map(s => fx(P[s[0]]))], y: [sel.map(s => fy(P[s[0]]))], z: [sel.map(s => fz(P[s[0]]))], text: [sel.map(s => s[2])], "marker.line.color": [sel.map(s => s[1])], "marker.color": [sel.map(s => s[1])] }, [playheadIdx.space + 1]);
+      const sel = [[A, C.green, "A"], [B, C.maroon, "B"]].filter(s => s[0] != null);
+      Plotly.restyle(div, { x: [sel.map(s => fx(P[s[0]]))], y: [sel.map(s => fy(P[s[0]]))], z: [sel.map(s => fz(P[s[0]]))], text: [sel.map(s => s[2])], "marker.line.color": [sel.map(s => s[1])], "marker.color": [sel.map(s => s[1])] }, [traceInfo.ab]);
     }
   }
 
@@ -257,43 +440,35 @@
   function drawStrata() {
     const T = P.map(p => p.t / 60);
     const shapes = [];
-    // region band (row 1)
     for (const r of REG) shapes.push({ type: "rect", xref: "x", yref: "paper", x0: r.a / 60, x1: r.b / 60, y0: 0.9, y1: 0.98, fillcolor: FAM[r.fam].c, line: { width: 0 }, opacity: 0.95 });
-    // places band
     for (const r of PLACES) shapes.push({ type: "rect", xref: "x", yref: "paper", x0: r.a / 60, x1: r.b / 60, y0: 0.985, y1: 1.0, fillcolor: PLACE_C[r.kind] || "#888", line: { width: 0 } });
-    // cuts
-    for (const c of CUTS) shapes.push({ type: "line", xref: "x", yref: "paper", x0: c.t / 60, x1: c.t / 60, y0: 0, y1: 0.88, line: { color: c.kind === "scene" ? "rgba(255,255,255,0.35)" : "rgba(127,183,255,0.18)", width: 1, dash: c.kind === "scene" ? "solid" : "dot" } });
-    // playhead
-    shapes.push({ type: "line", xref: "x", yref: "paper", x0: 0, x1: 0, y0: 0, y1: 1, line: { color: "#fff", width: 1.5 } });
+    for (const c of CUTS) shapes.push({ type: "line", xref: "x", yref: "paper", x0: c.t / 60, x1: c.t / 60, y0: 0, y1: 0.88, line: { color: c.kind === "scene" ? "rgba(29,27,25,0.35)" : "rgba(255,133,184,0.35)", width: 1, dash: c.kind === "scene" ? "solid" : "dot" } });
+    shapes.push({ type: "line", xref: "x", yref: "paper", x0: 0, x1: 0, y0: 0, y1: 1, line: { color: C.ink, width: 1.5 } });
 
-    // smoothed echo (5 s)
     const sm = (arr, k) => arr.map((_, i) => { let s = 0, n = 0; for (let j = Math.max(0, i - k); j <= Math.min(arr.length - 1, i + k); j++) { s += arr[j]; n++; } return s / n; });
     const echo = sm(P.map(p => p.echo), 3);
-    const loud = P.map(p => p.loud);
-
     const traces = [
-      { type: "scattergl", mode: "lines", x: T, y: loud, name: "Loudness (dB)", yaxis: "y3", line: { color: "#9a968e", width: 1 }, hovertemplate: "%{y:.0f} dB<extra></extra>" },
-      { type: "scattergl", mode: "lines", x: T, y: echo.map(v => Math.max(0, v)), name: "Echo → war", yaxis: "y2", fill: "tozeroy", line: { color: "#ff5a36", width: 0.5 }, fillcolor: "rgba(255,90,54,0.5)", hoverinfo: "skip" },
-      { type: "scattergl", mode: "lines", x: T, y: echo.map(v => Math.min(0, v)), name: "Echo → machine", yaxis: "y2", fill: "tozeroy", line: { color: "#c9b79c", width: 0.5 }, fillcolor: "rgba(201,183,156,0.5)", hoverinfo: "skip" },
+      { type: "scattergl", mode: "lines", x: T, y: P.map(p => Math.max(-90, p.loud)), name: "Loudness (dB)", yaxis: "y3", line: { color: C.mute, width: 1 }, hovertemplate: "%{y:.0f} dB<extra></extra>" },
+      { type: "scattergl", mode: "lines", x: T, y: echo.map(v => Math.max(0, v)), name: "Resembles bombing", yaxis: "y2", fill: "tozeroy", line: { color: C.orange, width: 0.5 }, fillcolor: "rgba(255,106,31,0.6)", hoverinfo: "skip" },
+      { type: "scattergl", mode: "lines", x: T, y: echo.map(v => Math.min(0, v)), name: "Resembles building", yaxis: "y2", fill: "tozeroy", line: { color: C.blue, width: 0.5 }, fillcolor: "rgba(31,99,173,0.5)", hoverinfo: "skip" },
     ];
     for (const k of ["war", "machine", "both", "unclear"]) {
       const g = IMP.filter(i => i.reading === k);
-      traces.push({ type: "scatter", mode: "markers", x: g.map(i => i.t / 60), y: g.map(i => i.decay), yaxis: "y", name: "Impact · " + READ[k].label.replace("Classifier hears: ", "").replace("Classifier: ", ""),
-        marker: { color: READ[k].c, size: g.map(i => 5 + Math.max(0, (i.peak + 40) / 3)), line: { width: 0 } },
-        text: g.map(i => `${fmt(i.t)} · ${i.label}<br>decay ${i.decay}s · weight ${i.weight}`), hoverinfo: "text" });
+      traces.push({ type: "scatter", mode: "markers", x: g.map(i => i.t / 60), y: g.map(i => i.decay), yaxis: "y", name: "Impact · " + READ[k].label.replace(/Computer( hears)?: /, ""),
+        marker: { color: READ[k].c, size: g.map(i => 5 + Math.max(0, (i.peak + 40) / 3)), line: { width: 1, color: "#fff" } },
+        text: g.map(i => `${fmt(i.t)} · ${i.label}<br>rings for ${i.decay}s · bass ${pct(i.weight)}`), hoverinfo: "text" });
     }
-    const layout = { ...DARK, margin: { l: 78, r: 20, t: 10, b: 70 }, shapes, hovermode: "closest",
+    const layout = { ...LIGHT, margin: { l: 78, r: 20, t: 10, b: 70 }, shapes, hovermode: "closest",
       legend: { orientation: "h", y: -0.13, font: { size: 11 } },
-      xaxis: { title: { text: "film time (minutes)", standoff: 6 }, range: [0, 85], gridcolor: "#2b2e33", dtick: 5, zeroline: false },
-      yaxis3: { domain: [0.62, 0.88], title: { text: "loudness dB", font: { size: 11 } }, gridcolor: "#2b2e33", range: [-80, -5] },
-      yaxis2: { domain: [0.32, 0.58], title: { text: "echo index", font: { size: 11 } }, gridcolor: "#2b2e33", range: [-0.6, 0.6], zerolinecolor: "#55595f" },
-      yaxis: { domain: [0, 0.28], title: { text: "impact decay s", font: { size: 11 } }, gridcolor: "#2b2e33", range: [0, 4.2] },
-      annotations: [{ xref: "paper", yref: "paper", x: 0, y: 0.99, xanchor: "right", text: "sound-world ", showarrow: false, font: { size: 10, color: "#9a968e" } }] };
+      xaxis: { title: { text: "film time (minutes)", standoff: 6 }, range: [0, 85], gridcolor: "#ece3d8", dtick: 5, zeroline: false },
+      yaxis3: { domain: [0.62, 0.88], title: { text: "loudness dB", font: { size: 11 } }, gridcolor: "#ece3d8", range: [-80, -5] },
+      yaxis2: { domain: [0.32, 0.58], title: { text: "building ↔ bombing", font: { size: 11 } }, gridcolor: "#ece3d8", range: [-0.6, 0.6], zerolinecolor: C.grey },
+      yaxis: { domain: [0, 0.28], title: { text: "impact rings for (s)", font: { size: 11 } }, gridcolor: "#ece3d8", range: [0, 4.2] },
+      annotations: [{ xref: "paper", yref: "paper", x: 0, y: 0.99, xanchor: "right", text: "sound-world ", showarrow: false, font: { size: 10, color: C.mute } }] };
     Plotly.react("plotStrata", traces, layout, { displaylogo: false, responsive: true });
     const div = $("#plotStrata");
     div.removeAllListeners && div.removeAllListeners("plotly_click");
     div.on("plotly_click", ev => { const p = ev.points && ev.points[0]; if (p) seek(p.x * 60); });
-    // click on empty area
     div.onclick = e => {
       if (e.target.closest(".modebar")) return;
       const xa = div._fullLayout && div._fullLayout.xaxis; if (!xa) return;
@@ -310,14 +485,15 @@
     for (const k of ["war", "machine", "both", "unclear"]) {
       const g = IMP.filter(i => i.reading === k);
       traces.push({ type: "scatter3d", mode: "markers", name: `${READ[k].label} (${g.length})`, x: g.map(i => i.decay), y: g.map(i => i.weight), z: g.map(i => Math.log10(Math.max(60, i.bright))),
-        customdata: g.map(i => i.t), text: g.map(i => `<b>${fmt(i.t)}</b> · ${i.label}<br>decay ${i.decay}s · weight ${i.weight} · ${Math.round(i.bright)} Hz<br>peak ${i.peak} dB · detonation ${Math.round(i.war * 100)}% · machine ${Math.round(i.machine * 100)}%`),
-        hoverinfo: "text", marker: { size: g.map(i => 4 + Math.max(0, (i.peak + 40) / 2.5)), color: READ[k].c, opacity: 0.9, line: { width: 0 } } });
+        customdata: g.map(i => i.t), text: g.map(i => `<b>${fmt(i.t)}</b> · ${i.label}<br>rings for ${i.decay}s · bass ${pct(i.weight)} · ${Math.round(i.bright)} Hz<br>bomb ${pct(i.war)} · machine ${pct(i.machine)}`),
+        hoverinfo: "text", hoverlabel: { bgcolor: "rgba(255,255,255,0.88)", bordercolor: C.ink, font: { color: C.ink } },
+        marker: { size: g.map(i => 4 + Math.max(0, (i.peak + 40) / 2.5)), color: READ[k].c, opacity: 0.95, line: { width: 1, color: "#ffffff" } } });
     }
-    traces.push({ type: "scatter3d", mode: "markers", hoverinfo: "skip", showlegend: false, x: [null], y: [null], z: [null], marker: { size: 10, color: "#fff", symbol: "diamond" } });
-    playheadIdx.imp = traces.length - 1;
-    const layout = { ...DARK, margin: { l: 0, r: 0, t: 10, b: 0 }, legend: { x: 0, y: 1, bgcolor: "rgba(18,19,21,0.7)" },
-      scene: { xaxis: sceneAxis("Decay: time to fade 12 dB (s)"), yaxis: sceneAxis("Low-frequency weight"),
-        zaxis: { ...sceneAxis("Brightness (Hz, log)"), tickvals: [2, 2.5, 3, 3.5], ticktext: ["100", "316", "1k", "3.2k"] }, aspectmode: "cube", camera: { eye: { x: 1.7, y: -1.5, z: 0.8 } } } };
+    traces.push({ type: "scatter3d", mode: "markers", hoverinfo: "skip", showlegend: false, x: [null], y: [null], z: [null], marker: { size: 10, color: C.ink, symbol: "diamond" } });
+    impPlayhead = traces.length - 1;
+    const layout = { ...LIGHT, margin: { l: 0, r: 0, t: 10, b: 0 }, legend: { x: 0, y: 1, bgcolor: "rgba(255,255,255,0.85)" },
+      scene: { xaxis: sceneAxis("Rings for: short → long (s)"), yaxis: sceneAxis("Heaviness: light → heavy"),
+        zaxis: { ...sceneAxis("Sharpness: muffled → sharp (Hz)"), tickvals: [2, 2.5, 3, 3.5], ticktext: ["100", "316", "1k", "3.2k"] }, aspectmode: "cube", camera: { eye: { x: 1.7, y: -1.5, z: 0.8 } } } };
     Plotly.react("plotImp", traces, layout, { displaylogo: false, responsive: true });
     $("#plotImp").on("plotly_click", ev => { const p = ev.points && ev.points[0]; if (p && p.customdata != null) seek(p.customdata); });
 
@@ -325,9 +501,9 @@
     let rows = "";
     for (const k of ["war", "machine", "both", "unclear"]) {
       const g = IMP.filter(i => i.reading === k);
-      rows += `<tr><td><span style="color:${READ[k].c}">●</span> ${k}</td><td>${g.length}</td><td>${med(g.map(i => i.decay)).toFixed(2)}</td><td>${med(g.map(i => i.weight)).toFixed(2)}</td><td>${Math.round(med(g.map(i => i.bright)))}</td></tr>`;
+      rows += `<tr><td><span style="color:${READ[k].c}">●</span> ${{ war: "bomb", machine: "machine", both: "both", unclear: "neither" }[k]}</td><td>${g.length}</td><td>${med(g.map(i => i.decay)).toFixed(2)}</td><td>${med(g.map(i => i.weight)).toFixed(2)}</td><td>${Math.round(med(g.map(i => i.bright)))}</td></tr>`;
     }
-    $("#impStats").innerHTML = `<table><tr><th>heard as</th><th>n</th><th>decay s</th><th>weight</th><th>Hz</th></tr>${rows}</table><p style="font-family:var(--sans);color:var(--mute)">Medians. Hits heard as detonations ring on for nearly twice as long, and are much darker, than hits heard as machines. That is the acoustics of distance and open space. Their low-frequency <i>weight</i> ranges overlap heavily: in the body, a slab and a shell can land the same way.</p>`;
+    $("#impStats").innerHTML = `<table><tr><th>heard as</th><th>n</th><th>rings s</th><th>bass</th><th>Hz</th></tr>${rows}</table><p style="font-family:var(--sans);color:var(--mute)">Medians. Hits heard as bombs ring on nearly twice as long, and are much more muffled, than hits heard as machines. That is the acoustics of distance and open space. Their heaviness overlaps heavily: in the body, a slab and a shell can land the same way.</p>`;
   }
 
   // ---------------- player ----------------
@@ -338,7 +514,7 @@
       media.classList.toggle("has", f.type.startsWith("video") || /\.(mp4|mov|m4v|webm|mkv)$/i.test(f.name));
       hasMedia = true;
       $("#play").disabled = false;
-      $("#mediaHint").textContent = `${f.name}: loaded locally. Press play, or click any point to hear that moment.`;
+      $("#mediaHint").textContent = `${f.name}: loaded locally. Press play, or click any dot to hear that moment.`;
       media.currentTime = cur;
       updateCompare();
     };
@@ -377,11 +553,10 @@
     if (!fromMedia || document.activeElement !== $("#scrub")) $("#scrub").value = Math.round(t);
     const p = P[Math.min(P.length - 1, Math.floor(t))];
     if (p) {
-      const reg = REG.find(r => t >= r.a && t < r.b);
       const pl = PLACES.find(r => t >= r.a && t < r.b);
-      $("#now").innerHTML = `<span class="chip" style="background:${FAM[p.fam].c}"></span><b>${FAM[p.fam].label}</b> · ${p.top.map(x => `${x[0]} ${Math.round(x[1] * 100)}%`).join(" · ")}<br>` +
-        `loudness ${p.loud <= -120 ? "digital zero (absolute silence)" : p.loud + " dB"} · weight ${p.weight} · brightness ${Math.round(p.bright)} Hz · echo ${p.echo > 0 ? "+" : ""}${p.echo}` +
-        (reg ? ` · stretch ${fmt(reg.a)}–${fmt(reg.b)}` : "") + (pl ? ` · <b>${pl.kind}</b>` : "");
+      $("#now").innerHTML = `<span class="chip" style="background:${CAT[p.cat].c}"></span><b>${CAT[p.cat].label}</b> · the computer hears ${p.top.map(x => `${x[0]} ${pct(x[1])}`).join(" · ")}<br>` +
+        `loudness ${p.loud <= -120 ? "total silence" : p.loud + " dB"} · heaviness ${pct(p.weight)} · sharpness ${Math.round(p.bright)} Hz · resembles ${p.echo > 0.05 ? "bombing" : p.echo < -0.05 ? "building" : "either"}` +
+        (pl ? ` · <b>${pl.kind}</b>` : "");
     }
     updatePlayhead();
   }
@@ -389,9 +564,9 @@
     const p = P[Math.min(P.length - 1, Math.floor(cur))];
     if (!p) return;
     const d3 = $("#plot3d");
-    if (d3.data && playheadIdx.space >= 0 && $("#pane-space").classList.contains("on")) {
+    if (d3.data && traceInfo.playhead >= 0 && $("#pane-space").classList.contains("on")) {
       const inR = p.t >= state.t0 * 60 && p.t <= state.t1 * 60;
-      Plotly.restyle(d3, { x: [[inR ? AX[state.x].f(p) : null]], y: [[inR ? AX[state.y].f(p) : null]], z: [[inR ? AX[state.z].f(p) : null]] }, [playheadIdx.space]);
+      Plotly.restyle(d3, { x: [[inR ? AX[state.x].f(p) : null]], y: [[inR ? AX[state.y].f(p) : null]], z: [[inR ? AX[state.z].f(p) : null]] }, [traceInfo.playhead]);
     }
     const ds = $("#plotStrata");
     if (ds.layout && $("#pane-strata").classList.contains("on")) {
@@ -399,9 +574,9 @@
       Plotly.relayout(ds, { [`shapes[${n}].x0`]: cur / 60, [`shapes[${n}].x1`]: cur / 60 });
     }
     const di = $("#plotImp");
-    if (di.data && playheadIdx.imp >= 0 && $("#pane-impacts").classList.contains("on")) {
+    if (di.data && impPlayhead >= 0 && $("#pane-impacts").classList.contains("on")) {
       const near = IMP.find(i => Math.abs(i.t - cur) < 1.5);
-      Plotly.restyle(di, { x: [[near ? near.decay : null]], y: [[near ? near.weight : null]], z: [[near ? Math.log10(Math.max(60, near.bright)) : null]] }, [playheadIdx.imp]);
+      Plotly.restyle(di, { x: [[near ? near.decay : null]], y: [[near ? near.weight : null]], z: [[near ? Math.log10(Math.max(60, near.bright)) : null]] }, [impPlayhead]);
     }
   }
 

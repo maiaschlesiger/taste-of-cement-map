@@ -23,5 +23,12 @@
  "silent_seconds": 382,
  "rhyme_count": 635,
  "war_seconds": 82,
- "machine_seconds": 635
+ "machine_seconds": 635,
+ "cats": {
+  "other": 3734,
+  "bomb": 177,
+  "engine": 936,
+  "tool": 204,
+  "both": 47
+ }
 }
