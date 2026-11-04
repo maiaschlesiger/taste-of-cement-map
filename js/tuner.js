@@ -37,7 +37,20 @@
       ["--c-engine", "Engines and machines", "color"],
       ["--c-bomb", "Bombs", "color"],
       ["--c-both", "Both at once", "color"],
-      ["--c-other", "Everything else", "color"],
+      ["--c-other", "Silence", "color"],
+      ["--c-voice", "Voices", "color"],
+      ["--c-music", "Music", "color"],
+      ["--c-water", "Water and sea", "color"],
+      ["--c-wind", "Wind and noise", "color"],
+      ["--c-ambient", "Other ambience", "color"],
+    ]],
+    ["Interaction", [
+      ["--bubble-k", "Group bubble size", "range", 0.3, 2.5, 0.05, ""],
+      ["--dim-op", "Faded groups opacity", "range", 0, 0.6, 0.01, ""],
+      ["--anim-ms", "Animation length", "range", 0, 1200, 10, ""],
+      ["--spin", "Spin speed", "range", 0, 3, 0.05, ""],
+      ["--vs-size", "Compare circle size", "range", 60, 160, 2, "px"],
+      ["--filter-w", "Filter sidebar width", "range", 220, 380, 2, "px"],
     ]],
     ["Shape", [
       ["--r-card", "Card corners", "range", 0, 32, 1, "px"],
@@ -67,7 +80,7 @@
       ["--plot-h", "Plot height", "range", 360, 1100, 10, "px"],
       ["--dot-scale", "Dot size", "range", 0.4, 2.5, 0.05, ""],
       ["--dot-op", "Dot opacity", "range", 0.2, 1, 0.01, ""],
-      ["--other-op", "Everything else opacity", "range", 0, 1, 0.01, ""],
+      ["--other-op", "Environment opacity", "range", 0, 1, 0.01, ""],
       ["--dot-rim", "Dot white rim", "range", 0, 2, 0.1, ""],
       ["--grid", "Grid lines", "color"],
       ["--note-a", "Note label opacity", "range", 0.2, 1, 0.01, ""],
@@ -77,7 +90,7 @@
       ["--hover-w", "Width", "range", 220, 440, 5, "px"],
     ]],
   ];
-  const PLOT_TOKENS = new Set(["--font", "--c-tool", "--c-engine", "--c-bomb", "--c-both", "--c-other", "--ink", "--mute", "--card", "--line", "--plot-h", "--dot-scale", "--dot-op", "--other-op", "--dot-rim", "--grid", "--note-a", "--side-w", "--maxw", "--page-pad", "--gap"]);
+  const PLOT_TOKENS = new Set(["--c-voice", "--c-music", "--c-water", "--c-wind", "--c-ambient", "--bubble-k", "--dim-op", "--anim-ms", "--spin", "--filter-w", "--font", "--c-tool", "--c-engine", "--c-bomb", "--c-both", "--c-other", "--ink", "--mute", "--card", "--line", "--plot-h", "--dot-scale", "--dot-op", "--other-op", "--dot-rim", "--grid", "--note-a", "--side-w", "--maxw", "--page-pad", "--gap"]);
 
   const base = {};             // stylesheet defaults
   const cs = getComputedStyle(root);

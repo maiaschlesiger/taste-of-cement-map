@@ -8,10 +8,12 @@ Made for a creative mapping assignment on film and migration.
 
 | Tab | What it shows |
 |---|---|
-| **Sound space** | Every second in 3D, built to compare **building sounds** (tools, metal, engines) with **bomb sounds** (explosions, gunfire, thunder). Includes an 8-step guided tour, four question views, plain-language axes, a semi-transparent hover card explaining each dot, notes on key moments, and echo lines joining each building sound to the bomb sound it most resembles. Click a dot to set A and shift-click to set B, then listen to them back to back. |
-| **Timeline** | The same data in film order: the dominant sound-world, loudness, the echo index (machine ↔ war), impacts and hard sound cuts. Includes a **Places** tool for marking where each shot actually is (Beirut site, barracks, Syria footage…), because the soundtrack alone can't tell you that. |
-| **Impacts** | The 75 isolated hits in the film (hammer, slab, shell, boom), measured by decay, low-frequency weight and brightness, and coloured by what the classifier thinks they are. |
-| **About the map** | Method and limitations. |
+| **Map** | Every second of the soundtrack in 3D. Filter construction, bomb and environmental sounds in the sidebar; nearby dots merge into bubbles sized by how many seconds they hold. Click a dot or a colour swatch to make that group stand out. Hold a dot and drag it into circle A or B, then press **Compare sounds**. |
+| **Compare** (opens from the map) | The two sounds overlapped and shifted so their most similar parts line up, with an overlap score, labels on the matching stretches, a pitch fingerprint, and playback (your film file, or a rough sketch rebuilt from the measurements). |
+| **Timeline** | The film in order: dominant sound-world, loudness, building-vs-bombing resemblance, hits and hard cuts. Includes a tool to mark what is on screen. |
+| **About** | The film, the method and the limits. |
+
+The speaker button sets the interface sounds: every event (click, hover, pick up, drop, highlight, compare…) has several synthesized options.
 
 ## Running it
 
@@ -34,11 +36,14 @@ Then open http://localhost:8000.
 ```
 index.html, css/, js/app.js    the map (no build step; Plotly is vendored in js/vendor/)
 js/tuner.js                    design tuner (opens with #tune)
+js/sfx.js                      synthesized interface sounds
+js/compare.js                  comparison page: alignment, overlap scoring, playback
 fonts/                         Figtree (SIL Open Font License)
 data/data.json                 5,098 per-second points + 400 rhymes + 57 sound-world regions
 data/impacts.json              75 impact events
 data/cuts.json                 hard level shifts in the sound edit
 data/places.json               your place annotations (export from the Timeline tab and commit)
+data/fine.json                 50 fps loudness envelope and 12-band spectrum for the comparison page
 data/summary.json              headline numbers
 analysis/                      the scripts that produced the data
 FINDINGS.md                    what the analysis found, with timestamps to verify against the film
@@ -71,6 +76,9 @@ python analysis/yam.py yamnet.h5 mono16.wav yam.npy yam_emb.npy
 ```
 ```bash
 python analysis/build_data.py feat_frames.npy yam.npy yam_emb.npy analysis/yamnet_class_map.csv data
+```
+```bash
+ffmpeg -i taste_of_cement.mp4 -vn -ac 1 -ar 22000 m22k.wav && python analysis/fine.py m22k.wav data/fine.json
 ```
 
 `analysis/yam.py` is a self-contained re-implementation of the YAMNet network (MobileNet v1, 521 AudioSet classes, Google, Apache 2.0) that loads only the published weight file. `yamnet_class_map.csv` is from the TensorFlow Models repository (Apache 2.0). Plotly.js is MIT-licensed.
