@@ -25,12 +25,16 @@ python3 -m http.server 8000
 
 Then open http://localhost:8000.
 
+**Design tuner:** add `#tune` to the address (e.g. `…/taste-of-cement-map/#tune`) and reload to open a slider panel for every colour, size, radius and spacing value. *Copy values* gives you the CSS to paste into `:root` in `css/style.css`.
+
 **Listening:** click *Load your copy of the film or its audio* and choose your local MP4 or audio file. It plays in the browser and is never uploaded. If you load the MP4, the video plays in sync with the map.
 
 ## What's in the repo
 
 ```
 index.html, css/, js/app.js    the map (no build step; Plotly is vendored in js/vendor/)
+js/tuner.js                    design tuner (opens with #tune)
+fonts/                         Figtree (SIL Open Font License)
 data/data.json                 5,098 per-second points + 400 rhymes + 57 sound-world regions
 data/impacts.json              75 impact events
 data/cuts.json                 hard level shifts in the sound edit

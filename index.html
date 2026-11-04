@@ -2,100 +2,140 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Sound Map of Taste of Cement</title>
-<meta name="description" content="An interactive acoustic map of Ziad Kalthoum's Taste of Cement (2017): where the sounds of building in Beirut and the sounds of destruction in Syria meet.">
+<meta name="description" content="An interactive acoustic map of Ziad Kalthoum's Taste of Cement (2017): where the sounds of building in Beirut and the sounds of bombing in Syria meet.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300..800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<header class="top">
-  <div class="title">
-    <h1>Sound Map of <em>Taste of Cement</em></h1>
-    <p class="sub">Ziad Kalthoum, 2017 · 85 min · every second of the soundtrack as one point</p>
-  </div>
-  <nav class="tabs" role="tablist">
-    <button role="tab" data-tab="space" class="on">Sound space</button>
-    <button role="tab" data-tab="strata">Timeline</button>
-    <button role="tab" data-tab="impacts">Impacts</button>
-    <button role="tab" data-tab="about">About the map</button>
+<!-- PAGE:START -->
+<header class="site">
+  <a class="brand" href="#space" data-tab="space" aria-label="Sound map home">
+    <svg class="mark" viewBox="0 0 32 32" aria-hidden="true">
+      <circle cx="9" cy="9" r="4.2" fill="var(--c-tool)"/><circle cx="20" cy="8" r="3.2" fill="var(--c-engine)"/>
+      <circle cx="24" cy="18" r="4.6" fill="var(--c-bomb)"/><circle cx="13" cy="20" r="5" fill="var(--c-both)"/>
+      <circle cx="6" cy="26" r="2.2" fill="var(--c-other)"/><circle cx="21" cy="28" r="2" fill="var(--c-tool)"/>
+    </svg>
+    <span class="brand-text"><b>Taste of Cement</b><small>Sound map</small></span>
+  </a>
+  <nav class="pillnav tabs" aria-label="Views">
+    <button data-tab="space" class="on">Sound space</button>
+    <button data-tab="strata">Timeline</button>
+    <button data-tab="impacts">Impacts</button>
+    <div class="dd">
+      <button class="dd-btn" id="aboutBtn" aria-haspopup="true" aria-expanded="false">About <svg class="chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <div class="dd-menu" id="aboutMenu" role="menu">
+        <button role="menuitem" data-about="ab-what">
+          <span class="ico"><svg viewBox="0 0 24 24"><path d="M3 12 21 4l-5 16-4-6-9-2Z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg></span>
+          <span><b>What this is</b><small>The film, and why map its sound</small></span>
+        </button>
+        <button role="menuitem" data-about="ab-method">
+          <span class="ico"><svg viewBox="0 0 24 24"><path d="M2 12h3l2-6 3 12 3-14 3 16 2-8h4" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"/></svg></span>
+          <span><b>Method</b><small>How each second was measured</small></span>
+        </button>
+        <button role="menuitem" data-about="ab-limits">
+          <span class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M12 7v6M12 16.5v.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
+          <span><b>Limits</b><small>What the map can't tell you</small></span>
+        </button>
+      </div>
+    </div>
   </nav>
 </header>
 
-<section class="player">
-  <div class="media">
-    <video id="media" playsinline preload="metadata"></video>
-    <label class="load">
-      <input type="file" id="file" accept="video/*,audio/*,.opus,.ogg,.m4a">
-      <span>Load your copy of the film or its audio</span>
-    </label>
-    <p class="hint" id="mediaHint">Nothing is uploaded: the file stays on your computer. Without it, clicking still moves the playhead.</p>
-  </div>
-  <div class="transport">
-    <button id="play" disabled aria-label="Play or pause">▶</button>
-    <span class="clock" id="clock">0:00</span>
-    <input type="range" id="scrub" min="0" max="5098" step="1" value="0" aria-label="Film time">
-    <span class="clock" id="dur">84:58</span>
-  </div>
-  <div class="now" id="now"></div>
-</section>
-
 <main>
+  <section class="card player" aria-label="Film player">
+    <div class="media">
+      <video id="media" playsinline preload="metadata"></video>
+      <label class="btn load">
+        <input type="file" id="file" accept="video/*,audio/*,.opus,.ogg,.m4a">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 11V3M4.5 6.5 8 3l3.5 3.5M3 13h10" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Load your copy of the film
+      </label>
+      <p class="hint" id="mediaHint">It stays on your computer</p>
+    </div>
+    <div class="transport-wrap">
+      <div class="transport">
+        <button id="play" class="btn icon" disabled aria-label="Play or pause"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3.5v9l7-4.5Z" fill="currentColor"/></svg></button>
+        <span class="clock" id="clock">0:00</span>
+        <input type="range" id="scrub" min="0" max="5098" step="1" value="0" aria-label="Film time">
+        <span class="clock" id="dur">84:58</span>
+      </div>
+      <div class="now" id="now"></div>
+    </div>
+  </section>
+
   <!-- SOUND SPACE -->
   <section class="pane on" id="pane-space">
-    <aside class="controls">
-      <h2>What am I looking at?</h2>
-      <p class="intro">Syrian workers build a tower in Beirut while their homes in Syria are bombed. The film barely lets them speak, so its <b>sound</b> tells the story. Here <b>every dot is one second of that soundtrack</b>. A dot's position shows what the sound is <i>like</i>, not where it was filmed. Hover over any dot for an explanation.</p>
-      <h2>Sounds <small>(click to hide or show)</small></h2>
-      <div class="catlegend" id="catlegend"></div>
-      <h2>Ask the map</h2>
-      <div class="presets" id="presets"></div>
-      <h2>Layers</h2>
-      <label class="chk"><input type="checkbox" id="showNotes" checked> Notes on key moments</label>
-      <label class="chk"><input type="checkbox" id="showRhymes"> Echo lines: each building sound → the bomb it most resembles</label>
-      <label class="chk"><input type="checkbox" id="showPath"> Path through film time</label>
-      <details class="own">
-        <summary>Build your own comparison</summary>
-        <label>Left–right <select id="ax-x"></select></label>
-        <label>Front–back <select id="ax-y"></select></label>
-        <label>Up–down <select id="ax-z"></select></label>
-        <label>Colour <select id="ax-c"></select></label>
-        <label class="rng">Echo lines <input type="range" id="rhymeN" min="10" max="300" value="40"><output id="rhymeNo">40</output></label>
-        <div class="range2">
-          <label>from <input type="number" id="t0" min="0" max="85" value="0" step="1"> min</label>
-          <label>to <input type="number" id="t1" min="0" max="85" value="85" step="1"> min</label>
-        </div>
-      </details>
-      <h2>The three directions</h2>
-      <div class="axdesc" id="axdesc"></div>
+    <aside class="card side">
+      <div>
+        <h3>About this map</h3>
+        <p class="intro">Syrian workers build a tower in Beirut while their homes in Syria are bombed. Each dot is one second of the film's sound, placed by how it sounds. Hover over a dot to see what it is.</p>
+      </div>
+      <div>
+        <h3>Sounds <small>click to hide</small></h3>
+        <div class="menu catlegend" id="catlegend"></div>
+      </div>
+      <div>
+        <h3>Questions</h3>
+        <div class="menu presets" id="presets"></div>
+      </div>
+      <div>
+        <h3>Layers</h3>
+        <label class="chk"><input type="checkbox" id="showNotes" checked> Notes on key moments</label>
+        <label class="chk"><input type="checkbox" id="showRhymes"> Echo lines to the closest bomb sound</label>
+        <label class="chk"><input type="checkbox" id="showPath"> Path through the film</label>
+        <details class="own">
+          <summary>Custom view</summary>
+          <label class="row">Left–right <select id="ax-x"></select></label>
+          <label class="row">Front–back <select id="ax-y"></select></label>
+          <label class="row">Up–down <select id="ax-z"></select></label>
+          <label class="row">Colour <select id="ax-c"></select></label>
+          <label class="row rng">Echo lines <input type="range" id="rhymeN" min="10" max="300" value="40"><output id="rhymeNo">40</output></label>
+          <div class="row">
+            <span>Film time</span>
+            <span class="range2">
+              <input type="number" id="t0" min="0" max="85" value="0" step="1" aria-label="From minute">
+              <span>to</span>
+              <input type="number" id="t1" min="0" max="85" value="85" step="1" aria-label="To minute">
+              <span>min</span>
+            </span>
+          </div>
+        </details>
+      </div>
+      <div>
+        <h3>Axes</h3>
+        <div class="axdesc" id="axdesc"></div>
+      </div>
     </aside>
-    <div class="plotwrap">
-      <div class="story" id="story">
+
+    <div class="card stage">
+      <div class="stage-head story" id="story">
         <div class="story-text">
-          <span class="story-step" id="storyStep"></span>
-          <h3 id="storyTitle"></h3>
+          <div class="dots" id="storyDots" aria-hidden="true"></div>
+          <h2 id="storyTitle"></h2>
           <p id="storyBody"></p>
         </div>
         <div class="story-nav">
-          <button id="storyPrev" aria-label="Previous step">←</button>
-          <button id="storyNext" class="primary">Start the tour →</button>
+          <button id="storyPrev" class="btn">Back</button>
+          <button id="storyNext" class="btn primary">Start the tour</button>
         </div>
       </div>
-      <div class="plotbox">
+      <div class="inner plotbox">
         <div id="plot3d" class="plot"></div>
         <div id="hovercard" class="hovercard" role="status" aria-live="polite"></div>
       </div>
       <div class="compare" id="compare">
         <div class="slots">
-          <div class="slot" id="slotA"><b>A</b> <span>click a point</span></div>
-          <div class="slot" id="slotB"><b>B</b> <span>shift-click a point</span></div>
+          <div class="slot" id="slotA"><b>A</b> <span>click a dot</span></div>
+          <div class="slot" id="slotB"><b>B</b> <span>shift-click a dot</span></div>
         </div>
         <div class="cmpbtns">
-          <button id="playA" disabled>Hear A</button>
-          <button id="playB" disabled>Hear B</button>
-          <button id="playAB" disabled>A then B</button>
+          <button id="playA" class="btn" disabled>Hear A</button>
+          <button id="playB" class="btn" disabled>Hear B</button>
+          <button id="playAB" class="btn" disabled>A then B</button>
         </div>
         <div id="cmpbars" class="cmpbars"></div>
       </div>
@@ -104,75 +144,107 @@
 
   <!-- TIMELINE -->
   <section class="pane" id="pane-strata">
-    <div class="strata-head">
-      <p>The film from start to finish. The top band shows which sound-world dominates each stretch. Below it are loudness, the <b>echo index</b> (does this second sound more like the building site or more like the war?), detected impacts, and hard cuts in the sound edit. Click anywhere to jump there.</p>
-      <div class="legend" id="legend"></div>
-    </div>
-    <div id="plotStrata" class="plot tall"></div>
-    <div class="places">
-      <h2>Places <small>(your annotations: the soundtrack alone can't say where a shot is)</small></h2>
-      <div class="placebar">
-        <select id="placeKind">
-          <option>Beirut: construction site</option>
-          <option>Beirut: barracks / underground</option>
-          <option>Beirut: city / sea</option>
-          <option>Syria: war footage</option>
-          <option>Black screen / title</option>
-          <option>Other</option>
-        </select>
-        <button id="markIn">Mark start</button>
-        <button id="markOut">Mark end</button>
-        <button id="exportPlaces">Export places.json</button>
-        <label class="btnlike">Import <input type="file" id="importPlaces" accept=".json"></label>
+    <div class="card stage wide">
+      <div class="stage-head">
+        <div class="story-text">
+          <h2>The film from start to finish</h2>
+          <p>Which sound dominates each stretch, how loud it is, whether it resembles building or bombing, and where the single hits and hard cuts fall. Click to jump there.</p>
+        </div>
       </div>
-      <ul id="placeList"></ul>
+      <div class="legend" id="legend"></div>
+      <div class="inner"><div id="plotStrata" class="plot tall"></div></div>
+      <div class="places">
+        <h3>Places <small>mark what's on screen</small></h3>
+        <div class="placebar">
+          <select id="placeKind">
+            <option>Beirut: construction site</option>
+            <option>Beirut: barracks / underground</option>
+            <option>Beirut: city / sea</option>
+            <option>Syria: war footage</option>
+            <option>Black screen / title</option>
+            <option>Other</option>
+          </select>
+          <button id="markIn" class="btn">Mark start</button>
+          <button id="markOut" class="btn">Mark end</button>
+          <button id="exportPlaces" class="btn">Export places</button>
+          <label class="btn">Import <input type="file" id="importPlaces" accept=".json"></label>
+        </div>
+        <ul id="placeList"></ul>
+      </div>
     </div>
   </section>
 
   <!-- IMPACTS -->
   <section class="pane" id="pane-impacts">
-    <aside class="controls">
-      <h2>Impacts</h2>
-      <p>Every sudden low-frequency hit in the film with no speech over it (a hammer, a slab, a shell, a boom). Each one is placed by three measurements:</p>
-      <ul class="defs">
-        <li><b>Decay</b>: how long the sound takes to fade by 12 dB. A short dry knock means the source is near; a long tail means space, distance and echo.</li>
-        <li><b>Weight</b>: the share of energy below 250 Hz, which you feel in your chest.</li>
-        <li><b>Brightness</b>: the spectral centre of gravity.</li>
-      </ul>
-      <p>Colour shows what a machine listener (Google's YAMNet AudioSet classifier) thought the hit was.</p>
-      <div id="impStats" class="stats"></div>
+    <aside class="card side">
+      <div>
+        <h3>Impacts</h3>
+        <p class="intro">Every sudden bass hit with no speech over it: hammers, slabs, shells, booms.</p>
+      </div>
+      <div class="menu static">
+        <div class="mrow"><span class="ico"><svg viewBox="0 0 24 24"><path d="M2 16c3 0 3-9 6-9s3 6 6 6 3-3 6-3" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></span><span><b>Rings for</b><small>A short knock is close by; a long tail means distance</small></span></div>
+        <div class="mrow"><span class="ico"><svg viewBox="0 0 24 24"><path d="M3 20h18M6 20v-8M10 20V5M14 20V9M18 20v-6" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></span><span><b>Heaviness</b><small>Share of deep bass, felt in the chest</small></span></div>
+        <div class="mrow"><span class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></span><span><b>Sharpness</b><small>Metal is sharp; a distant blast is muffled</small></span></div>
+      </div>
+      <div>
+        <h3>What the computer heard</h3>
+        <div id="impStats" class="stats"></div>
+      </div>
     </aside>
-    <div class="plotwrap"><div id="plotImp" class="plot"></div></div>
+    <div class="card stage">
+      <div class="stage-head">
+        <div class="story-text">
+          <h2>Hammer against shell</h2>
+          <p>Colour shows what the sound-recognition program heard. Drag to rotate; click a hit to jump to it.</p>
+        </div>
+      </div>
+      <div class="inner"><div id="plotImp" class="plot"></div></div>
+    </div>
   </section>
 
   <!-- ABOUT -->
-  <section class="pane prose" id="pane-about">
-    <div class="cols">
-      <div>
-        <h2>What this is</h2>
-        <p><em>Taste of Cement</em> follows Syrian men building a high-rise in Beirut while their own houses in Syria are being bombed. Lebanese curfews confine them to the building's foundations after dark. They are forbidden to speak about their conditions, and the film barely lets them speak at all. The soundtrack does the talking: the grinding of the cement mixer, hammering, a tank's tracks, shelling, the sea, long silences.</p>
-        <p>This map treats that soundtrack as a territory. Each of the film's 5,098 seconds is a point. Its position is set by measurements of how it sounds, not by where it was filmed. The question the map asks is the one the film asks without words: <b>how far apart do building and destroying actually sound?</b></p>
-        <h2>How to read it</h2>
-        <p><b>Sound space</b> puts every second in 3D. Choose any three measurements as axes, or start from a preset. <b>Echo lines</b> join a building-sound second to the war-dominated second it sounds most like, judged by the classifier's 1,024-dimensional "hearing" of each moment. Click a point to set A, shift-click to set B, and listen to them one after the other.</p>
-        <p><b>Timeline</b> lays the same data out in film order. <b>Impacts</b> isolates the single hits: hammer against shell.</p>
-      </div>
-      <div>
-        <h2>Method</h2>
-        <p>Audio: the film's soundtrack (AAC, 44.1 kHz). The source copy is effectively mono, so stereo position is not measured. Signal measurements come from <code>librosa</code> on 23 ms frames, averaged to one value per second. Sound-type probabilities come from YAMNet, a MobileNet classifier trained by Google on 2 million YouTube clips across 521 AudioSet classes. YAMNet's classes are grouped into families: <i>war</i> (Explosion, Boom, Gunshot, Artillery, Thunder…), <i>machine</i> (Hammer, Jackhammer, Drill, Engine, Vehicle, Rumble…), <i>voice</i>, <i>music</i>, <i>water</i>, <i>silence</i>, <i>air</i>. All scripts are in <code>/analysis</code>.</p>
-        <h2>Limits, honestly</h2>
+  <section class="pane" id="pane-about">
+    <article class="card letter">
+      <header class="letter-head">
+        <h2>How alike do building and bombing sound?</h2>
+        <p>Taste of Cement follows Syrian men building a high-rise in Beirut while their own homes in Syria are bombed. This map turns its soundtrack into a space you can explore.</p>
+        <button class="link" data-tab="space">Open the sound space</button>
+      </header>
+      <section id="ab-what">
+        <h3>What this is</h3>
+        <p>A curfew keeps the workers in the building's foundations after dark. The programme notes say they were not allowed to talk about their conditions, and the film barely lets them speak. Its sound carries the story: the cement mixer, hammering, a tank, shelling, the sea, silence.</p>
+        <p>Each of the film's 5,098 seconds is placed by how it sounds, not where it was filmed.</p>
+      </section>
+      <section id="ab-method">
+        <h3>Method</h3>
+        <p>The soundtrack was measured every 23 milliseconds and averaged per second. A Google sound-recognition model, YAMNet, trained on about 2 million clips, named each sound. Its labels are grouped into tools and metal, engines and machines, bombs, voice, music, water, silence and wind. The analysis scripts are in the project's analysis folder.</p>
+        <button class="btn" data-tab="impacts">See the impacts</button>
+      </section>
+      <section id="ab-limits">
+        <h3>Limits</h3>
         <ul>
-          <li>The classifier hears sound types, not places. A "war" label means <i>sounds like a detonation</i>, not <i>filmed in Syria</i>. Use the Places annotations to add where each shot actually is.</li>
-          <li>YAMNet has no "tank" or "cement mixer" class. Heavy machinery and armoured vehicles both land on Vehicle / Truck / Rumble. That blind spot is part of the finding.</li>
-          <li>The audio is a lossy web copy, so content above about 16 kHz is missing and is not used.</li>
-          <li>Thresholds (what counts as an impact or a cut) are choices. They are listed in the code.</li>
+          <li>The model hears types of sound, not places. "Bomb" means it sounds like a blast, not that it was filmed in Syria. Use Places on the Timeline to record what's on screen.</li>
+          <li>It has no category for a tank or a cement mixer; both count as engines.</li>
+          <li>The audio is a compressed web copy, so the highest frequencies are missing.</li>
         </ul>
-        <p class="small"><em>Taste of Cement</em> is directed by Ziad Kalthoum; all rights to the film belong to its makers. This site contains no audio or images from the film, only numerical measurements derived from it.</p>
-      </div>
-    </div>
+      </section>
+      <footer class="letter-foot">
+        <p>Taste of Cement is directed by Ziad Kalthoum; all rights belong to its makers. This site holds no audio or images from the film, only numbers measured from it.</p>
+      </footer>
+    </article>
   </section>
 </main>
 
+<footer class="meta">
+  <div><b>Taste of Cement</b><span>Ziad Kalthoum, 2017</span></div>
+  <div><b>Sound map</b><span>5,098 seconds</span></div>
+  <div><b>Analysis</b><span>YAMNet and librosa</span></div>
+  <div class="right"><b>Creative mapping</b><span>Film and migration</span></div>
+</footer>
+<!-- PAGE:END -->
+
 <script src="js/vendor/plotly.min.js"></script>
 <script src="js/app.js"></script>
+<script>if (location.hash === "#tune") { var s = document.createElement("script"); s.src = "js/tuner.js"; document.body.appendChild(s); }</script>
 </body>
 </html>
