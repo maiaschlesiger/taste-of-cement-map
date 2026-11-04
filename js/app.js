@@ -10,6 +10,7 @@
   const tok = (n, d) => { const v = getComputedStyle(root).getPropertyValue(n).trim(); return v || d; };
   const num = (n, d) => { const v = parseFloat(tok(n, "")); return isNaN(v) ? d : v; };
   let TH = {}, LIGHT = {};
+  const light = () => ({ paper_bgcolor: LIGHT.paper_bgcolor, plot_bgcolor: LIGHT.plot_bgcolor, font: { ...LIGHT.font } });
   const reduceMotion = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   // sound groups: two building groups, bombs, both, and six environmental groups
@@ -334,8 +335,14 @@
 
   // ---------------- 3D sound space with population-style grouping ----------------
   let traceMeta = [], groupTrace = {}, lastDrawKey = "";
+  function takenSet() {
+    const t = new Set();
+    for (const it of [slots.A, slots.B, drag.active ? itemFrom(drag.item) : null]) if (it) it.ts.forEach(x => t.add(x));
+    return t;
+  }
   function visible() {
-    return P.filter(p => state.on.has(p.kind) && p.t >= state.t0 * 60 && p.t <= state.t1 * 60 && Math.max(-90, p.loud) >= state.l0 && Math.max(-90, p.loud) <= state.l1);
+    const taken = takenSet();
+    return P.filter(p => !taken.has(p.t) && state.on.has(p.kind) && p.t >= state.t0 * 60 && p.t <= state.t1 * 60 && Math.max(-90, p.loud) >= state.l0 && Math.max(-90, p.loud) <= state.l1);
   }
   function clusterize(pts) {
     const fx = AX[state.x].f, fy = AX[state.y].f, fz = AX[state.z].f;
@@ -359,7 +366,7 @@
   const opFor = g => state.hl ? (g === state.hl ? 1 : TH.dim) : (G[g].fam === "env" ? TH.envOp : TH.dotOp);
 
   function cameraFor() {
-    return state.z === "t" ? { eye: { x: 1.5, y: 1.5, z: 0.68 }, up: { x: 0, y: 0, z: 1 }, center: { x: 0, y: 0, z: -0.05 } } : { eye: { x: 1.55, y: -1.5, z: 0.78 }, up: { x: 0, y: 0, z: 1 }, center: { x: 0, y: 0, z: -0.05 } };
+    return state.z === "t" ? { eye: { x: 1.5, y: 1.5, z: 0.68 }, up: { x: 0, y: 0, z: 1 }, center: { x: 0, y: 0, z: 0 } } : { eye: { x: 1.55, y: -1.5, z: 0.76 }, up: { x: 0, y: 0, z: 1 }, center: { x: 0, y: 0, z: 0 } };
   }
 
   function draw3d(quick) {
@@ -389,6 +396,15 @@
       traces.push({ type: "scatter3d", mode: "lines", name: "Echo lines", hoverinfo: "skip", x: xs, y: ys, z: zs, line: { color: C.maroon, width: 1.5 } });
       traceMeta.push(null);
     }
+    const holes = [slots.A, slots.B, drag.active ? itemFrom(drag.item) : null].filter(Boolean);
+    if (holes.length) {
+      const pos = it => { const ps = it.ts.map(t => P[t]); const m = f => ps.reduce((a, p) => a + f(p), 0) / ps.length; return [m(fx), m(fy), m(fz)]; };
+      const xyz = holes.map(pos);
+      traces.push({ type: "scatter3d", mode: "markers+text", name: "Moved out", hoverinfo: "skip", x: xyz.map(v => v[0]), y: xyz.map(v => v[1]), z: xyz.map(v => v[2]),
+        text: holes.map(it => it === slots.A ? "A" : it === slots.B ? "B" : ""), textposition: "middle center", textfont: { size: 12, color: C.ink, family: TH.font },
+        marker: { size: holes.map(it => Math.max(30, Math.min(56, dotSize({ n: it.n, g: it.g, loud: -30 }) * 1.3))), color: holes.map(it => it.color), symbol: "circle-open", line: { width: 3 }, opacity: 1 } });
+      traceMeta.push(null);
+    }
     traces.push({ type: "scatter3d", mode: "markers", name: "Now", hoverinfo: "skip", showlegend: false, x: [null], y: [null], z: [null], marker: { size: 8, color: C.ink, line: { color: TH.card, width: 1 }, symbol: "diamond" } });
     traceMeta.push(null); traceInfo.playhead = traces.length - 1;
 
@@ -397,11 +413,12 @@
       ax: 36, ay: -34, bgcolor: `rgba(255,255,255,${TH.noteA})`, borderwidth: 0, borderpad: 3, font: { size: 11, color: C.ink } })) : [];
     const [rx, ry, rz] = [state.x, state.y, state.z].map(k => STATS.range[k]);
     const pad = r => { const d = (r[1] - r[0]) * 0.04; return [r[0] - d, r[1] + d]; };
-    const layout = { ...LIGHT, margin: { l: 0, r: 0, t: 0, b: 0 }, showlegend: false, hovermode: "closest", dragmode: "turntable",
+    const layout = { ...light(), margin: { l: 0, r: 0, t: 0, b: 0 }, showlegend: false, hovermode: "closest", dragmode: "turntable",
       scene: { xaxis: { ...sceneAxis(AX[state.x].t), range: pad(rx) }, yaxis: { ...sceneAxis(AX[state.y].t), range: pad(ry) }, zaxis: { ...sceneAxis(AX[state.z].t), range: pad(rz) },
-        aspectmode: "manual", aspectratio: { x: 1, y: 1, z: 1.15 }, camera: (div.layout && div.layout.scene && div.layout.scene.camera) || cameraFor(), annotations },
+        aspectmode: "manual", aspectratio: { x: 1, y: 1, z: 0.95 }, camera: (div.layout && div.layout.scene && div.layout.scene.camera) || cameraFor(), annotations },
       uirevision: state.x + state.y + state.z };
     Plotly.react(div, traces, layout, { displaylogo: false, responsive: true, displayModeBar: false });
+    hovered = null;
     const key = state.x + state.y + state.z;
     if (!quick && TH.anim > 0) growIn(key !== lastDrawKey ? 0.05 : 0.6);
     lastDrawKey = key;
@@ -461,7 +478,8 @@
   function stopSpin() { spinId++; }
 
   // ---------------- hover, click, hold-and-drag ----------------
-  let hovered = null, mouse = { x: 0, y: 0 }, pinned = false;
+  let lastPointer = "mouse", inClick = false;
+  let hovered = null, mouse = { x: 0, y: 0 }, pinned = false, lastHover = null, lastClient = { x: 0, y: 0 }, unhoverT = 0;
   const drag = { active: false, pending: false, item: null, sx: 0, sy: 0, t: 0 };
   function itemFrom(b) {
     const kindsTop = Object.entries(b.kinds).sort((x, y) => y[1] - x[1])[0][0];
@@ -470,20 +488,25 @@
   }
   function setupPlot() {
     const div = $("#plot3d"), box = $("#plotbox"), card = $("#hovercard");
-    box.addEventListener("mousemove", e => { const r = box.getBoundingClientRect(); mouse = { x: e.clientX - r.left, y: e.clientY - r.top }; });
+    box.addEventListener("mousemove", e => { const r = box.getBoundingClientRect(); mouse = { x: e.clientX - r.left, y: e.clientY - r.top }; lastClient = { x: e.clientX, y: e.clientY }; }, true);
     const bind = () => {
       div.on("plotly_hover", ev => {
         const pt = ev.points && ev.points[0]; if (!pt) return;
         const cs = traceMeta[pt.curveNumber]; if (!cs) return;
         const b = cs[pt.pointNumber]; if (!b) return;
         if (hovered !== b) sfx("hover");
-        hovered = b; if (!pinned && !drag.active) showCard(b);
+        hovered = b; lastHover = { b, x: lastClient.x, y: lastClient.y, t: performance.now() }; clearTimeout(unhoverT);
+        if (!pinned && !drag.active) showCard(b);
       });
-      div.on("plotly_unhover", () => { hovered = null; if (!pinned) card.classList.remove("on"); });
-      div.on("plotly_click", ev => {   // touch and keyboard path: pin the card with buttons
+      div.on("plotly_unhover", () => {
+        clearTimeout(unhoverT);
+        unhoverT = setTimeout(() => { hovered = null; if (!pinned && !drag.active) card.classList.remove("on"); }, 140);
+      });
+      div.on("plotly_click", ev => {   // touch path only: pin the card with buttons (mouse clicks are handled below)
+        if (lastPointer === "mouse" || inClick) return;
         const pt = ev.points && ev.points[0]; if (!pt) return;
         const cs = traceMeta[pt.curveNumber]; if (!cs) return;
-        const b = cs[pt.pointNumber]; if (b) { clickItem(b); pinned = true; showCard(b, true); }
+        const b = cs[pt.pointNumber]; if (b) { inClick = true; try { clickItem(b); pinned = true; showCard(b, true); } finally { setTimeout(() => { inClick = false; }, 0); } }
       });
     };
     const wait = setInterval(() => { if (div.on) { clearInterval(wait); bind(); } }, 50);
@@ -492,17 +515,20 @@
     const down = e => {
       stopSpin();
       if (e.button && e.button !== 0) return;
-      if (!hovered) { if (pinned) { pinned = false; card.classList.remove("on"); } return; }
+      const near = lastHover && performance.now() - lastHover.t < 600 && Math.hypot(e.clientX - lastHover.x, e.clientY - lastHover.y) < 18 ? lastHover.b : null;
+      const target = hovered || near;
+      if (!target) { if (pinned) { pinned = false; card.classList.remove("on"); } return; }
       e.preventDefault(); e.stopPropagation();
-      Object.assign(drag, { pending: true, active: false, item: hovered, sx: e.clientX, sy: e.clientY, t: performance.now() });
-      drag.timer = setTimeout(() => { if (drag.pending) beginDrag(drag.sx, drag.sy); }, 220);
+      Object.assign(drag, { pending: true, active: false, item: target, sx: e.clientX, sy: e.clientY, t: performance.now() });
+      drag.timer = setTimeout(() => { if (drag.pending) beginDrag(lastClient.x, lastClient.y); }, 170);
     };
     box.addEventListener("mousedown", down, true);
-    box.addEventListener("pointerdown", e => { if (e.pointerType === "mouse" && hovered) { e.stopPropagation(); } }, true);
+    box.addEventListener("pointerdown", e => { lastPointer = e.pointerType; }, true);
+    box.addEventListener("pointerdown", e => { if (e.pointerType === "mouse" && (hovered || (lastHover && performance.now() - lastHover.t < 600 && Math.hypot(e.clientX - lastHover.x, e.clientY - lastHover.y) < 18))) { e.stopPropagation(); } }, true);
     box.addEventListener("wheel", stopSpin, { passive: true });
     window.addEventListener("mousemove", e => {
-      if (drag.pending && !drag.active && Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) > 6) beginDrag(e.clientX, e.clientY);
-      if (drag.active) moveGhost(e.clientX, e.clientY);
+      if (drag.pending && !drag.active && Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) > 4) beginDrag(e.clientX, e.clientY);
+      if (drag.active) { e.preventDefault(); moveGhost(e.clientX, e.clientY); }
     });
     window.addEventListener("mouseup", e => {
       clearTimeout(drag.timer);
@@ -546,6 +572,7 @@
     g.classList.add("on"); document.body.classList.add("dragging");
     moveGhost(x, y);
     sfx("pickup");
+    draw3d(true);
   }
   function zoneAt(x, y) {
     for (const z of document.querySelectorAll(".vs-slot")) { const r = z.getBoundingClientRect(); const pad = 24; if (x > r.left - pad && x < r.right + pad && y > r.top - pad && y < r.bottom + pad) return z; }
@@ -556,6 +583,7 @@
     document.querySelectorAll(".vs-slot").forEach(z => z.classList.toggle("over", z === zoneAt(x, y)));
   }
   function endDrag(x, y) {
+    const item = itemFrom(drag.item);
     drag.active = false; document.body.classList.remove("dragging");
     const z = zoneAt(x, y), g = $("#ghost");
     document.querySelectorAll(".vs-slot").forEach(s => s.classList.remove("over"));
@@ -565,25 +593,30 @@
       g.style.transform = `translate(${r.left + r.width / 2}px, ${r.top + r.height / 2}px) translate(-50%, -50%) scale(.4)`;
       g.style.opacity = "0";
       setTimeout(() => { g.classList.remove("on"); g.style.transition = ""; g.style.opacity = ""; }, 190);
-      putInSlot(z.dataset.slot, itemFrom(drag.item));
+      putInSlot(z.dataset.slot, item);
     } else {
       g.style.transition = "opacity .2s"; g.style.opacity = "0";
       setTimeout(() => { g.classList.remove("on"); g.style.transition = ""; g.style.opacity = ""; }, 200);
+      draw3d(true);   // dropped outside: the dot goes back
     }
   }
 
   // ---------------- comparison dock ----------------
   function setupDock() {
-    document.querySelectorAll(".vs-slot .vs-x").forEach(b => b.onclick = e => { e.stopPropagation(); const s = b.closest(".vs-slot").dataset.slot; slots[s] = null; renderSlot(s); sfx("clear"); });
+    document.querySelectorAll(".vs-slot .vs-x").forEach(b => b.onclick = e => { e.stopPropagation(); const s = b.closest(".vs-slot").dataset.slot; slots[s] = null; renderSlot(s); sfx("clear"); draw3d(true); });
     $("#compareBtn").onclick = () => { if (slots.A && slots.B && window.COMPARE) { sfx("compare"); window.COMPARE.open(slots.A, slots.B); } };
     ["A", "B"].forEach(renderSlot);
   }
-  function putInSlot(s, it) { slots[s] = it; renderSlot(s, true); sfx("drop"); }
+  function putInSlot(s, it) {
+    const other = s === "A" ? "B" : "A";
+    if (slots[other] && slots[other].ts.some(t => it.ts.includes(t))) slots[other] = null, renderSlot(other);   // same dot can't be in both
+    slots[s] = it; renderSlot(s, true); sfx("drop"); draw3d(true);
+  }
   function renderSlot(s, anim) {
     const el = $("#slot" + s), it = slots[s];
     el.classList.toggle("full", !!it);
     el.style.setProperty("--fill", it ? it.color : "transparent");
-    el.querySelector(".vs-text").innerHTML = it ? `<b>${it.n > 1 ? it.n + " s" : fmt(it.rep)}</b><small>${it.label}</small>` : `<b>${s}</b><small>Drag a dot here</small>`;
+    el.querySelector(".vs-text").innerHTML = it ? `<b>${it.n > 1 ? it.n + " s" : fmt(it.rep)}</b><small>${it.label}</small>` : `<b>${s}</b><small>Drop a dot</small>`;
     el.setAttribute("aria-label", `Comparison slot ${s}, ${it ? it.label : "empty"}`);
     if (anim) { el.classList.remove("pop"); void el.offsetWidth; el.classList.add("pop"); }
     const ready = !!(slots.A && slots.B);
@@ -614,7 +647,7 @@
         marker: { color: READ[k].c, size: g.map(i => 5 + Math.max(0, (i.peak + 40) / 3)), line: { width: 1, color: TH.card } },
         text: g.map(i => `${fmt(i.t)} · ${i.label}<br>rings for ${i.decay}s · bass ${pct(i.weight)}`), hoverinfo: "text" });
     }
-    const layout = { ...LIGHT, margin: { l: 78, r: 20, t: 10, b: 70 }, shapes, hovermode: "closest",
+    const layout = { ...light(), margin: { l: 78, r: 20, t: 10, b: 70 }, shapes, hovermode: "closest",
       legend: { orientation: "h", y: -0.13, font: { size: 11 } },
       xaxis: { title: { text: "Film time (minutes)", standoff: 6 }, range: [0, 85], gridcolor: TH.grid, dtick: 5, zeroline: false },
       yaxis3: { domain: [0.62, 0.88], title: { text: "Loudness", font: { size: 11 } }, gridcolor: TH.grid, range: [-80, -5] },
@@ -647,9 +680,9 @@
     }
     traces.push({ type: "scatter3d", mode: "markers", hoverinfo: "skip", showlegend: false, x: [null], y: [null], z: [null], marker: { size: 10, color: C.ink, symbol: "diamond" } });
     impPlayhead = traces.length - 1;
-    const layout = { ...LIGHT, margin: { l: 0, r: 0, t: 10, b: 0 }, legend: { x: 0, y: 1, bgcolor: TH.card, font: { size: 12 } },
+    const layout = { ...light(), margin: { l: 0, r: 0, t: 10, b: 0 }, legend: { x: 0, y: 1, bgcolor: TH.card, font: { size: 12 } },
       scene: { xaxis: sceneAxis("Rings for: short → long (s)"), yaxis: sceneAxis("Heaviness: light → heavy"),
-        zaxis: { ...sceneAxis("Sharpness: muffled → sharp (Hz)"), tickvals: [2, 2.5, 3, 3.5], ticktext: ["100", "316", "1k", "3.2k"] }, aspectmode: "manual", aspectratio: { x: 1, y: 1, z: 1.15 }, camera: { eye: { x: 1.7, y: -1.5, z: 0.8 } } } };
+        zaxis: { ...sceneAxis("Sharpness: muffled → sharp (Hz)"), tickvals: [2, 2.5, 3, 3.5], ticktext: ["100", "316", "1k", "3.2k"] }, aspectmode: "manual", aspectratio: { x: 1, y: 1, z: 0.95 }, camera: { eye: { x: 1.7, y: -1.5, z: 0.8 } } } };
     Plotly.react("plotImp", traces, layout, { displaylogo: false, responsive: true });
     $("#plotImp").on("plotly_click", ev => { const p = ev.points && ev.points[0]; if (p && p.customdata != null) seek(p.customdata); });
 

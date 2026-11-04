@@ -47,6 +47,19 @@
       <div id="facets"></div>
       <h3>Film time</h3>
       <div class="dual" id="rangeTime"></div>
+      <h3 class="dock-title">Compare</h3>
+      <div class="dock vertical" id="dock">
+        <div class="vs-slot" id="slotA" data-slot="A" tabindex="0" aria-label="Comparison slot A, empty">
+          <div class="vs-fill"></div><div class="vs-text"><b>A</b><small>Drop a dot</small></div>
+          <button class="vs-x" aria-label="Clear A">×</button>
+        </div>
+        <span class="vs-word">vs</span>
+        <div class="vs-slot" id="slotB" data-slot="B" tabindex="0" aria-label="Comparison slot B, empty">
+          <div class="vs-fill"></div><div class="vs-text"><b>B</b><small>Drop a dot</small></div>
+          <button class="vs-x" aria-label="Clear B">×</button>
+        </div>
+        <button id="compareBtn" class="btn primary big" disabled>Compare sounds</button>
+      </div>
     </aside>
 
     <div class="card stage">
@@ -71,18 +84,6 @@
             <label class="row">Up–down <select id="ax-z"></select></label>
           </div>
         </div>
-      </div>
-      <div class="dock" id="dock">
-        <div class="vs-slot" id="slotA" data-slot="A" tabindex="0" aria-label="Comparison slot A, empty">
-          <div class="vs-fill"></div><div class="vs-text"><b>A</b><small>Drag a dot here</small></div>
-          <button class="vs-x" aria-label="Clear A">×</button>
-        </div>
-        <span class="vs-word">vs</span>
-        <div class="vs-slot" id="slotB" data-slot="B" tabindex="0" aria-label="Comparison slot B, empty">
-          <div class="vs-fill"></div><div class="vs-text"><b>B</b><small>Drag a dot here</small></div>
-          <button class="vs-x" aria-label="Clear B">×</button>
-        </div>
-        <button id="compareBtn" class="btn primary big" disabled>Compare sounds</button>
       </div>
     </div>
   </section>

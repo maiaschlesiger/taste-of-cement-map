@@ -72,7 +72,7 @@
   --dim-op: 0.12;
   --anim-ms: 320;
   --spin: 0.5;
-  --vs-size: 92px;
+  --vs-size: 84px;
   --filter-w: 268px;
 
   --shadow: 0 var(--sh-y) var(--sh-blur) rgb(20 20 30 / var(--sh-a));
@@ -428,3 +428,17 @@ body.has-film .mini { display: flex; animation: pageIn .35s ease-out; }
 
 .vs-slot.full .vs-text b { color: #fff; }
 .vs-slot .vs-text b { color: var(--ink); width: auto; }
+
+/* ---------- map fits one screen ---------- */
+@media (min-width: 901px) {
+  #pane-space.on { height: calc(100dvh - 98px); min-height: 520px; align-items: stretch; }
+  #pane-space .filters { height: 100%; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding-bottom: 14px; }
+  #pane-space .stage { height: 100%; }
+  #pane-space .plotbox { flex: 1; min-height: 0; }
+  #pane-space .plot { height: 100%; }
+  main { padding-bottom: 16px; }
+}
+.dock-title { margin-top: auto !important; padding-top: 14px; }
+.dock.vertical { flex-direction: column; gap: 8px; padding: 6px 0 0; align-items: center; }
+.dock.vertical .vs-word { font-size: 13px; line-height: 1; }
+.dock.vertical .btn.big { margin: 8px 0 0; width: 100%; justify-content: center; }
