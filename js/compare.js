@@ -85,7 +85,7 @@
     // spectrum profiles over active frames
     const prof = off => { const p = new Float32Array(F.nb); let c = 0; for (let i = 0; i < n; i++) { if (sims[i] == null) continue; for (let b = 0; b < F.nb; b++) p[b] += band(off + i, b); c++; } for (let b = 0; b < F.nb; b++) p[b] /= c || 1; return p; };
     const pa = prof(a0), pb = prof(b0 + lag);
-    return { score, sims: sm, regs: top, pa, pb };
+    return { score, sims: sm, regs: score >= 30 ? top : [], pa, pb };
   }
   function regionKind(fa, fb, r) {
     // hits that start together?
@@ -157,26 +157,24 @@
     [[A.color, "A"], [B.color, "B"], [css("--ink"), "Shared"]].forEach(([col, s], i) => { g.fillStyle = col; g.beginPath(); g.arc(14, mid - 28 + i * 28, 6, 0, 7); g.fill(); g.fillStyle = css("--ink"); g.font = `600 12px ${css("--font")}`; g.fillText(s, 24, mid - 28 + i * 28); });
     if (playT != null) { g.strokeStyle = css("--ink"); g.lineWidth = 1.5; g.beginPath(); g.moveTo(X(playT), top - 8); g.lineTo(X(playT), h - bot + 4); g.stroke(); }
   }
-  function drawSpec(progress) {
-    const c = $("#cmpSpec"), { g, w, h } = sizeCanvas(c);
-    const { A, B, res } = cur, n = F.nb, padL = 30, padR = 34, top = 14, bot = 40;
-    const X = b => padL + b / (n - 1) * (w - padL - padR);
-    const lo = Math.min(...res.pa, ...res.pb) - 8, hi = Math.max(...res.pa, ...res.pb) + 4;
-    const Y = v => top + (1 - (v - lo) / (hi - lo)) * (h - top - bot) * progress + (h - top - bot) * (1 - progress);
-    g.clearRect(0, 0, w, h);
-    // group with most overlap
-    let best = null, bv = -1;
-    BANDS.forEach(([a, b, name]) => { let v = 0; for (let i = a; i <= b; i++) v += Math.min(res.pa[i], res.pb[i]) - Math.abs(res.pa[i] - res.pb[i]); if (v > bv) { bv = v; best = [a, b, name]; } });
-    g.fillStyle = css("--canvas"); g.fillRect(X(best[0]) - 10, top, X(best[1]) - X(best[0]) + 20, h - top - bot);
-    const area = (f, col, al) => { g.fillStyle = col; g.globalAlpha = al; g.beginPath(); g.moveTo(X(0), h - bot); for (let b = 0; b < n; b++) g.lineTo(X(b), Y(f(b))); g.lineTo(X(n - 1), h - bot); g.closePath(); g.fill(); g.globalAlpha = 1; };
-    area(b => res.pa[b], A.color, 0.9); area(b => res.pb[b], B.color, 0.9); area(b => Math.min(res.pa[b], res.pb[b]), css("--ink"), 1);
-    g.font = `12px ${css("--font")}`; g.fillStyle = css("--mute"); g.textAlign = "center";
-    [["Bass", 1.5], ["Body", 5.5], ["Edge", 9.5]].forEach(([t, b]) => g.fillText(t, X(b), h - 22));
-    [0, 4, 8, 11].forEach(b => g.fillText(F.hz[b] >= 1000 ? (F.hz[b] / 1000).toFixed(1) + " kHz" : F.hz[b] + " Hz", X(b), h - 6));
-    g.fillStyle = css("--ink"); g.font = `600 12.5px ${css("--font")}`;
-    g.fillText("Most alike", X((best[0] + best[1]) / 2), top + 12);
-    g.textAlign = "left";
+  // ---------- short description ----------
+  function describe(A, B, r) {
+    const fmt = window.TOC.fmt, when = it => it.n > 1 ? `${it.n} seconds around ${fmt(it.rep)}` : fmt(it.rep);
+    const fam = g => (g === "tool" || g === "engine" ? "build" : g === "bomb" || g === "both" ? "bomb" : "env");
+    const fa = fam(A.g), fb = fam(B.g), s = r.score;
+    let out = `${A.label} (${when(A)}) and ${B.label.toLowerCase()} (${when(B)}) overlap by ${s}% once lined up.`;
+    if (r.regs.length) {
+      const g = r.regs[0], [t1, t2] = LABEL[g.kind];
+      out += ` They match most from ${(g.a / BF).toFixed(1)} to ${(g.b / BF).toFixed(1)} s: ${t1.toLowerCase()}, ${t2.toLowerCase()}.`;
+    }
+    if ((fa === "build" && fb === "bomb") || (fa === "bomb" && fb === "build")) {
+      out += s >= 65 ? " Here the sound of building carries the sound of the war."
+        : s >= 45 ? " Part of the work still echoes the war."
+        : " Here the two worlds stay apart.";
+    } else if (fa === fb && fa !== "env") out += " Two moments from the same sound-world, heard side by side.";
+    return out;
   }
+
   function animate(dur, fn, done) {
     if (reduce || dur <= 0) { fn(1); if (done) done(); return; }
     const t0 = performance.now();
@@ -196,7 +194,7 @@
     sketchNodes.forEach(n => { try { n.stop(); } catch (e) { /* already stopped */ } }); sketchNodes = [];
     if (cur) drawWave(1, cur.shift, null);
   }
-  function mixGains() { const m = +$("#cmpMix").value / 100; return [Math.cos(m * Math.PI / 2), Math.sin(m * Math.PI / 2)]; }
+  function mixGains() { return [0.75, 0.75]; }
   function play(which) {
     stop();
     const media = window.TOC && window.TOC.media();
@@ -241,11 +239,7 @@
       }
     });
   }
-  function srcLabel() {
-    const m = window.TOC && window.TOC.media();
-    $("#cmpSrc").textContent = m ? "Film audio" : "Sketch rebuilt from the measurements";
-    $("#cmpLoad").hidden = !!m;
-  }
+
 
   // ---------- open ----------
   function chip(it, s) { return `<span class="chip-pill" style="--c:${it.color}"><i></i><b>${s}</b> ${it.label} · ${it.n > 1 ? it.n + " s" : window.TOC.fmt(it.rep)}</span>`; }
@@ -255,8 +249,7 @@
     const pane = $("#pane-compare"); pane.classList.remove("enter"); void pane.offsetWidth; pane.classList.add("enter");
     $("#cmpChips").innerHTML = chip(A, "A") + `<span class="vs-word">vs</span>` + chip(B, "B");
     $("#cmpTitle").textContent = `${A.label} vs ${B.label}`;
-    $("#cmpSay").textContent = "Lining them up…"; $("#cmpPct").textContent = "0%";
-    srcLabel();
+    $("#cmpSay").textContent = "Lining them up…"; $("#cmpPct").textContent = "0%"; $("#cmpDesc").textContent = "";
     if (window.SFX) window.SFX.startLoop("working");
     load().then(() => {
       if (window.SFX) { window.SFX.stopLoop("working"); setTimeout(() => window.SFX.play("done"), 380); }
@@ -269,7 +262,7 @@
       $("#cmpSay").textContent = verdict(A, B, res);
       countUp(res.score);
       animate(800, k => drawWave(k, 0, null), () => animate(600, k => { cur.shift = k; drawWave(1, k, null); }));
-      animate(900, k => drawSpec(k));
+      $("#cmpDesc").textContent = describe(A, B, res);
     });
   }
 
@@ -279,14 +272,11 @@
     $("#cmpPlayBoth").onclick = () => { sfx("play"); setTimeout(() => play("both"), 120); };
     $("#cmpPlayA").onclick = () => { sfx("play"); setTimeout(() => play("A"), 120); };
     $("#cmpPlayB").onclick = () => { sfx("play"); setTimeout(() => play("B"), 120); };
-    $("#cmpMix").oninput = () => { const [ga, gb] = mixGains(); if (players[0]) players[0].volume = ga; if (players[1]) players[1].volume = gb; };
     $("#cmpAlign").onchange = e => {
       if (!cur) return; const from = cur.shift, to = e.target.checked ? 1 : 0;
       animate(500, k => { cur.shift = from + (to - from) * k; drawWave(1, cur.shift, null); });
     };
-    $("#cmpFile").onchange = e => { const f = e.target.files[0]; if (!f) return; const main = $("#file"); const dt = new DataTransfer(); dt.items.add(f); main.files = dt.files; main.dispatchEvent(new Event("change")); };
-    document.addEventListener("toc-media", srcLabel);
-    window.addEventListener("resize", () => { if (cur && $("#pane-compare").classList.contains("on")) { drawWave(1, cur.shift, null); drawSpec(1); } });
+    window.addEventListener("resize", () => { if (cur && $("#pane-compare").classList.contains("on")) drawWave(1, cur.shift, null); });
   }
   window.COMPARE = { open, _test: { load, align, analyse, get F() { return F; } } };
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", setup); else setup();

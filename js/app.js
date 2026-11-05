@@ -241,7 +241,10 @@
     };
     menu("#sfxBtn", "#sfxMenu", m => window.SFX && window.SFX.renderMenu(m));
     menu("#viewBtn", "#viewMenu");
-    document.addEventListener("click", e => { if (!e.target.closest(".dd")) closeMenus(); });
+    document.addEventListener("click", e => {
+      if (!e.target.closest(".dd")) closeMenus();
+      if (state.hl && !e.target.closest("#plotbox, .swatch, .dd, .vs-slot, #compareBtn, #facets input, .fc-more")) setHighlight(null);
+    });
     document.addEventListener("keydown", e => { if (e.key === "Escape") { closeMenus(); if (state.hl) setHighlight(null); } });
 
     setupPlot();
@@ -478,7 +481,7 @@
   function stopSpin() { spinId++; }
 
   // ---------------- hover, click, hold-and-drag ----------------
-  let lastPointer = "mouse", inClick = false;
+  let lastPointer = "mouse", inClick = false, emptyDown = null;
   let hovered = null, mouse = { x: 0, y: 0 }, pinned = false, lastHover = null, lastClient = { x: 0, y: 0 }, unhoverT = 0;
   const drag = { active: false, pending: false, item: null, sx: 0, sy: 0, t: 0 };
   function itemFrom(b) {
@@ -517,7 +520,7 @@
       if (e.button && e.button !== 0) return;
       const near = lastHover && performance.now() - lastHover.t < 600 && Math.hypot(e.clientX - lastHover.x, e.clientY - lastHover.y) < 18 ? lastHover.b : null;
       const target = hovered || near;
-      if (!target) { if (pinned) { pinned = false; card.classList.remove("on"); } return; }
+      if (!target) { emptyDown = { x: e.clientX, y: e.clientY }; if (pinned) { pinned = false; card.classList.remove("on"); } return; }
       e.preventDefault(); e.stopPropagation();
       Object.assign(drag, { pending: true, active: false, item: target, sx: e.clientX, sy: e.clientY, t: performance.now() });
       drag.timer = setTimeout(() => { if (drag.pending) beginDrag(lastClient.x, lastClient.y); }, 170);
@@ -532,6 +535,9 @@
     });
     window.addEventListener("mouseup", e => {
       clearTimeout(drag.timer);
+      // a click (not a rotate) on empty map space clears the highlight
+      if (emptyDown && Math.hypot(e.clientX - emptyDown.x, e.clientY - emptyDown.y) < 5 && state.hl) setHighlight(null);
+      emptyDown = null;
       if (drag.active) { endDrag(e.clientX, e.clientY); return; }
       if (drag.pending) { drag.pending = false; clickItem(drag.item); }
     });
@@ -703,7 +709,7 @@
       media.classList.toggle("has", f.type.startsWith("video") || /\.(mp4|mov|m4v|webm|mkv)$/i.test(f.name));
       hasMedia = true;
       $("#play").disabled = false;
-      $("#mediaHint").textContent = "Film loaded"; document.body.classList.add("has-film");
+      document.body.classList.add("has-film");
       media.currentTime = cur;
       document.dispatchEvent(new Event("toc-media"));
     };

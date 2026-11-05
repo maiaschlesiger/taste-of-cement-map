@@ -450,3 +450,4 @@ body.has-film .mini { display: flex; }
 .sfx-credit a { color: var(--mute); }
 .sfx-dd .dd-menu { max-height: min(80vh, 640px); overflow-y: auto; }
 [hidden] { display: none !important; }
+.cmp-desc { margin: 0; max-width: 70ch; font-size: 15px; line-height: 1.6; color: var(--ink); }
