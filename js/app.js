@@ -19,12 +19,7 @@
     engine:  { c: "#8fb8e3", label: "Engines and machines", fam: "build" },
     bomb:    { c: "#ff6a1f", label: "Bombs", fam: "bomb" },
     both:    { c: "#ff85b8", label: "Heard as both", fam: "both" },
-    voice:   { c: "#5f6b7a", label: "Voices", fam: "env" },
-    music:   { c: "#7b8697", label: "Music", fam: "env" },
-    water:   { c: "#98a2b1", label: "Water and sea", fam: "env" },
-    air:     { c: "#b3bbc7", label: "Wind and noise", fam: "env" },
-    silence: { c: "#e0e4ea", label: "Silence", fam: "env" },
-    ambient: { c: "#c9cfd8", label: "Other ambience", fam: "env" },
+    env:     { c: "#a7b0bd", label: "Environment", fam: "env" },
   };
   // sub-types shown as nested checkboxes
   const KIND_OF_LABEL = {
@@ -42,22 +37,20 @@
     build: { label: "Construction sounds", kinds: ["Hammering and drilling", "Metal and clatter", "Engines", "Vehicles", "Rumble"] },
     bomb:  { label: "Bomb sounds", kinds: ["Explosions", "Booms", "Gunfire", "Thunder"] },
     both:  { label: "Heard as both", kinds: [] },
-    env:   { label: "Environment", kinds: ["voice", "music", "water", "air", "silence", "ambient"] },
+    env:   { label: "Environment", kinds: ["env"] },
   };
 
   function refreshTheme() {
     C.blue = tok("--c-tool", C.blue); C.lblue = tok("--c-engine", C.lblue); C.orange = tok("--c-bomb", C.orange); C.pink = tok("--c-both", C.pink);
     C.cream = tok("--c-other", C.cream); C.maroon = tok("--c-maroon", C.maroon); C.green = tok("--c-green", C.green);
     C.ink = tok("--ink", C.ink); C.mute = tok("--mute", C.mute);
-    G.tool.c = C.blue; G.engine.c = C.lblue; G.bomb.c = C.orange; G.both.c = C.pink; G.silence.c = C.cream;
-    G.voice.c = tok("--c-voice", G.voice.c); G.music.c = tok("--c-music", G.music.c); G.water.c = tok("--c-water", G.water.c);
-    G.air.c = tok("--c-wind", G.air.c); G.ambient.c = tok("--c-ambient", G.ambient.c);
+    G.tool.c = C.blue; G.engine.c = C.lblue; G.bomb.c = C.orange; G.both.c = C.pink; G.env.c = tok("--c-env", G.env.c);
     TH = { card: tok("--card", "#fff"), grid: tok("--grid", "#ececef"), line: tok("--line", "#e8e8eb"),
            font: tok("--font", "sans-serif").replace(/"/g, ""), dot: num("--dot-scale", 1), dotOp: num("--dot-op", 1), envOp: num("--other-op", 1),
            rim: num("--dot-rim", 0.6), noteA: num("--note-a", 1), bubble: num("--bubble-k", 1), dim: num("--dim-op", 0.12),
            anim: reduceMotion ? 0 : num("--anim-ms", 320), spin: num("--spin", 0.5) };
-    FAM.machine.c = C.blue; FAM.war.c = C.orange; FAM.voice.c = G.voice.c; FAM.music.c = G.music.c; FAM.water.c = G.water.c;
-    FAM.silence.c = C.cream; FAM.air.c = G.air.c; FAM.ambient.c = G.ambient.c;
+    FAM.machine.c = C.blue; FAM.war.c = C.orange;
+    for (const k of ["voice", "music", "water", "silence", "air", "ambient", "media"]) FAM[k].c = G.env.c;
     READ.war.c = C.orange; READ.machine.c = C.blue; READ.both.c = C.pink;
     LIGHT = { paper_bgcolor: TH.card, plot_bgcolor: TH.card, font: { color: C.ink, family: TH.font, size: 12 } };
   }
@@ -65,13 +58,13 @@
   const FAM = {
     machine: { c: C.blue,   label: "Machines and tools" },
     war:     { c: C.orange, label: "Bombs" },
-    voice:   { c: C.yellow, label: "Voices" },
-    music:   { c: C.maroon, label: "Music" },
-    water:   { c: C.green,  label: "Water" },
-    silence: { c: C.cream,  label: "Silence" },
-    air:     { c: C.olive,  label: "Wind and noise" },
-    ambient: { c: C.grey,   label: "Ambience" },
-    media:   { c: C.grey,   label: "TV and radio" },
+    voice:   { c: C.grey, label: "Environment" },
+    music:   { c: C.grey, label: "Environment" },
+    water:   { c: C.grey,  label: "Environment" },
+    silence: { c: C.grey,  label: "Environment" },
+    air:     { c: C.grey,  label: "Environment" },
+    ambient: { c: C.grey,   label: "Environment" },
+    media:   { c: C.grey,   label: "Environment" },
   };
   const READ = {
     war:     { c: C.orange, label: "Heard as a bomb" },
@@ -82,31 +75,31 @@
 
   const pct = v => Math.round(v * 100) + "%";
   const AX = {
-    weight:   { l: "Heaviness", t: "Heaviness: light → heavy", f: p => p.weight, lo: "light", hi: "heavy, felt in the chest", v: p => pct(p.weight) + " of its energy is deep bass",
+    weight:   { l: "Heaviness", t: "Heavier →", f: p => p.weight, lo: "light", hi: "heavy, felt in the chest", v: p => pct(p.weight) + " of its energy is deep bass",
                 d: "Share of deep bass, the part you feel in your chest. Blasts and engines are heavy; hammer taps and voices are light." },
-    bright:   { l: "Sharpness", t: "Sharpness: muffled → sharp (Hz)", f: p => p.bright, lo: "muffled, dull", hi: "sharp, metallic", v: p => Math.round(p.bright) + " Hz",
+    bright:   { l: "Sharpness", t: "Sharper →", f: p => p.bright, lo: "muffled, dull", hi: "sharp, metallic", v: p => Math.round(p.bright) + " Hz",
                 d: "Where the sound sits in pitch. Metal on metal is sharp; a distant blast loses its high tones and sounds muffled." },
-    loud:     { l: "Loudness", t: "Loudness: quiet → loud (dB)", f: p => Math.max(-90, p.loud), lo: "quiet", hi: "loud", v: p => p.loud <= -120 ? "total silence" : p.loud + " dB",
+    loud:     { l: "Loudness", t: "Louder →", f: p => Math.max(-90, p.loud), lo: "quiet", hi: "loud", v: p => p.loud <= -120 ? "total silence" : p.loud + " dB",
                 d: "Level in decibels. 0 is the loudest the recording allows; −60 is near silence." },
-    thud:     { l: "Jolt", t: "Jolt: soft → jolting (dB)", f: p => p.thud, lo: "soft onset", hi: "jolting", v: p => p.thud + " dB jump",
+    thud:     { l: "Jolt", t: "Harder jolt →", f: p => p.thud, lo: "soft onset", hi: "jolting", v: p => p.thud + " dB jump",
                 d: "The biggest sudden jump in bass within the second, like a dropped slab or a shell landing." },
-    dens:     { l: "Pace", t: "Pace: sparse → rapid (hits per second)", f: p => p.dens, lo: "sparse", hi: "rapid", v: p => p.dens + " hits/s",
+    dens:     { l: "Pace", t: "Faster hits →", f: p => p.dens, lo: "sparse", hi: "rapid", v: p => p.dens + " hits/s",
                 d: "Separate hits per second: the rhythm of hammering, or of gunfire." },
-    perc:     { l: "Hits vs. hum", t: "Hits vs. hum: steady → percussive", f: p => p.perc, lo: "steady hum", hi: "sharp hits", v: p => pct(p.perc) + " in hits",
+    perc:     { l: "Hits vs. hum", t: "More percussive →", f: p => p.perc, lo: "steady hum", hi: "sharp hits", v: p => pct(p.perc) + " in hits",
                 d: "Short hits, like hammering, or a continuous hum, like an engine." },
-    noisy:    { l: "Noisiness", t: "Noisiness: tonal → noisy", f: p => p.noisy, lo: "tonal (a note, a hum)", hi: "noise-like (debris, wind)", v: p => p.noisy.toFixed(3),
+    noisy:    { l: "Noisiness", t: "Noisier →", f: p => p.noisy, lo: "tonal (a note, a hum)", hi: "noise-like (debris, wind)", v: p => p.noisy.toFixed(3),
                 d: "A clear tone or hum at 0; pure noise, like wind or debris, at 1." },
-    t:        { l: "Film time", t: "Film time: start → end (min)", f: p => p.t / 60, lo: "early in the film", hi: "late in the film", v: p => fmt(p.t),
+    t:        { l: "Film time", t: "Later in the film →", f: p => p.t / 60, lo: "early in the film", hi: "late in the film", v: p => fmt(p.t),
                 d: "When the second happens in the film." },
-    p_build:  { l: "Sounds like building", t: "Sounds like building work (computer's confidence)", f: p => p.p_build, lo: "not like building", hi: "clearly building work", v: p => pct(p.p_build),
+    p_build:  { l: "Sounds like building", t: "More like building →", f: p => p.p_build, lo: "not like building", hi: "clearly building work", v: p => pct(p.p_build),
                 d: "How sure Google's sound-recognition model is that the second contains tools, metal or engines." },
-    p_bomb:   { l: "Sounds like bombs", t: "Sounds like bombs (computer's confidence)", f: p => p.p_bomb, lo: "not like a blast", hi: "clearly a blast", v: p => pct(p.p_bomb),
+    p_bomb:   { l: "Sounds like bombs", t: "More like bombs →", f: p => p.p_bomb, lo: "not like a blast", hi: "clearly a blast", v: p => pct(p.p_bomb),
                 d: "How sure the model is that the second contains an explosion, gunfire or thunder." },
-    p_tool:   { l: "Sounds like tools", t: "Sounds like tools & metal (confidence)", f: p => p.p_tool, lo: "no tools", hi: "clearly tools", v: p => pct(p.p_tool),
+    p_tool:   { l: "Sounds like tools", t: "More like tools →", f: p => p.p_tool, lo: "no tools", hi: "clearly tools", v: p => pct(p.p_tool),
                 d: "How sure the model is that it hears hammers, drills or metal." },
-    p_engine: { l: "Sounds like engines", t: "Sounds like engines (confidence)", f: p => p.p_engine, lo: "no engines", hi: "clearly engines", v: p => pct(p.p_engine),
+    p_engine: { l: "Sounds like engines", t: "More like engines →", f: p => p.p_engine, lo: "no engines", hi: "clearly engines", v: p => pct(p.p_engine),
                 d: "How sure the model is that it hears engines or heavy machinery." },
-    echo:     { l: "Building ↔ bombing", t: "Resembles: building ← → bombing", f: p => p.echo, lo: "resembles building work", hi: "resembles bombing", v: p => (p.echo > 0 ? "+" : "") + p.echo.toFixed(2),
+    echo:     { l: "Building ↔ bombing", t: "Closer to bombs →", f: p => p.echo, lo: "resembles building work", hi: "resembles bombing", v: p => (p.echo > 0 ? "+" : "") + p.echo.toFixed(2),
                 d: "Whether the model's overall impression of the second is closer to a typical building sound (negative) or a typical bomb sound (positive)." },
   };
   const NOTES = [
@@ -131,12 +124,13 @@
   const $ = s => document.querySelector(s);
   const wrap = (txt, n) => { const out = []; let line = ""; for (const w of txt.split(" ")) { if ((line + " " + w).trim().length > n) { out.push(line.trim()); line = w; } else line += " " + w; } out.push(line.trim()); return out.join("<br>"); };
   const fmt = s => { s = Math.max(0, Math.round(s)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`; };
-  const sceneAxis = title => ({ title: { text: title, font: { size: 12 } }, gridcolor: TH.grid, zerolinecolor: TH.line, showbackground: false, color: C.mute, showspikes: false });
+  const sceneAxis = title => ({ title: { text: title, font: { size: 13, color: C.ink } }, showticklabels: false, ticks: "", gridcolor: TH.grid, zeroline: false, showline: false,
+    showbackground: false, color: C.mute, showspikes: false, nticks: 5 });
   const sfx = (e, d) => { if (window.SFX) window.SFX.play(e, d); };
 
   let P = [], RH = [], REG = [], IMP = [], CUTS = [], PLACES = [], STATS = null;
-  const state = { x: "p_build", y: "p_bomb", z: "t", rh: false, notes: true, path: false, rhN: 40, t0: 0, t1: 85, l0: -90, l1: 0,
-                  cluster: true, clusterN: 14, spin: true, hl: null, on: new Set(), preset: 0 };
+  const state = { x: "p_build", y: "p_bomb", z: "t", rh: false, notes: false, path: false, rhN: 40, t0: 0, t1: 85, l0: -90, l1: 0,
+                  cluster: true, clusterN: 14, spin: false, hl: null, on: new Set(), preset: 0 };
   let traceInfo = { playhead: -1 }, impPlayhead = -1;
   let cur = 0, stopAt = null;
   const media = $("#media");
@@ -166,9 +160,7 @@
     } else if (p.cat === "bomb") { p.group = "bomb"; p.kind = KIND_OF_LABEL[p.lab.bomb] || "Explosions"; }
     else if (p.cat === "both") { p.group = "both"; p.kind = "both"; }
     else {
-      const f = p.fam;
-      p.group = f === "voice" ? "voice" : f === "music" ? "music" : f === "water" ? "water" : f === "air" ? "air" : f === "silence" || p.loud < -55 ? "silence" : "ambient";
-      p.kind = p.group;
+      p.group = "env"; p.kind = "env";
     }
     p.score = p.group === "bomb" || p.group === "both" ? p.p_bomb : p.group === "tool" ? p.p_tool : p.group === "engine" ? p.p_engine : (p.top[0] ? p.top[0][1] : 0);
   }
@@ -220,7 +212,7 @@
     });
     renderFacets();
     dualRange($("#rangeTime"), { min: 0, max: 85, step: 1, from: 0, to: 85, fmt: v => `${v} min`, onchange: (a, b) => { state.t0 = a; state.t1 = b; draw3d(); } });
-    if ($("#legend")) $("#legend").innerHTML = Object.entries(FAM).filter(([k]) => k !== "media").map(([, v]) => `<span style="--c:${v.c}">${v.label}</span>`).join("");
+    if ($("#legend")) $("#legend").innerHTML = [...new Map(Object.values(FAM).map(v => [v.label, v])).values()].map(v => `<span style="--c:${v.c}">${v.label}</span>`).join("");
 
     const onAx = () => { document.querySelectorAll(".qpill").forEach(b => b.classList.remove("on")); $("#finding").innerHTML = ""; draw3d(); };
     $("#ax-x").onchange = e => { state.x = e.target.value; onAx(); };
@@ -241,6 +233,9 @@
     };
     menu("#sfxBtn", "#sfxMenu", m => window.SFX && window.SFX.renderMenu(m));
     menu("#viewBtn", "#viewMenu");
+    $("#resetView").onclick = () => { sfx("toggle"); Plotly.relayout("plot3d", { "scene.camera": cameraFor() }); };
+    const hideHint = () => { $("#plotHint").classList.add("gone"); };
+    $("#plotbox").addEventListener("mousedown", () => setTimeout(hideHint, 4000), { once: true });
     document.addEventListener("click", e => {
       if (!e.target.closest(".dd")) closeMenus();
       if (state.hl && !e.target.closest("#plotbox, .swatch, .dd, .vs-slot, #compareBtn, #facets input, .fc-more")) setHighlight(null);
@@ -300,7 +295,7 @@
       { id: "build", label: "Construction", sw: ["tool", "engine"], kinds: FACETS.build.kinds, name: k => k },
       { id: "bomb", label: "Bombs", sw: ["bomb"], kinds: FACETS.bomb.kinds, name: k => k },
       { id: "both", label: "Both at once", sw: ["both"], kinds: ["both"], name: () => "" },
-      { id: "env", label: "Environment", sw: ["voice", "water", "air", "silence"], kinds: FACETS.env.kinds, name: k => G[k].label },
+      { id: "env", label: "Environment", sw: ["env"], kinds: FACETS.env.kinds, name: () => "" },
     ];
     $("#facets").innerHTML = groups.map(gr => {
       const on = gr.kinds.filter(k => state.on.has(k)).length, n = gr.kinds.reduce((a, k) => a + (c[k] || 0), 0);
@@ -378,7 +373,7 @@
     const pts = visible();
     const clusters = clusterize(pts);
     const traces = []; traceMeta = []; groupTrace = {};
-    const order = ["silence", "ambient", "air", "water", "music", "voice", "engine", "tool", "bomb", "both"];
+    const order = ["env", "engine", "tool", "bomb", "both"];
     for (const g of order) {
       const cs = clusters.filter(b => b.g === g); if (!cs.length) continue;
       groupTrace[g] = traces.length;
@@ -553,12 +548,10 @@
     const card = $("#hovercard"), box = card.parentElement; pinnedItem = b;
     const it = itemFrom(b), p = b.rep;
     const span = b.n > 1 ? `${b.n} seconds · ${fmt(it.ts[0])}–${fmt(it.ts[it.ts.length - 1])}` : fmt(p.t);
-    const heard = (G[b.g].fam === "env" ? p.top.slice(0, 1).map(x => x[0]) : [p.p_tool > 0.1 && p.lab.tool, p.p_engine > 0.1 && p.lab.engine, p.p_bomb > 0.1 && p.lab.bomb].filter(Boolean)).join(" · ") || p.top[0][0];
-    const vals = { x: b.x, y: b.y, z: b.z };
-    const rows = ["x", "y", "z"].filter((k, i, a) => a.findIndex(j => state[j] === state[k]) === i).map(k => `<li><span>${AX[state[k]].l}</span><b>${qualify(state[k], vals[k])}</b></li>`).join("");
+    const heard = G[b.g].fam === "env" ? "" : [p.p_tool > 0.1 && p.lab.tool, p.p_engine > 0.1 && p.lab.engine, p.p_bomb > 0.1 && p.lab.bomb].filter(Boolean).join(" · ");
     const note = NOTES.find(n => b.ts.includes(n.t));
     card.innerHTML = `<div class="hc-head"><i style="background:${it.color}"></i><b>${it.label}</b></div>
-      <p class="hc-sub">${span}</p><p class="hc-sub">${heard}</p><ul class="hc-rows">${rows}</ul>
+      <p class="hc-sub">${span}</p>${heard ? `<p class="hc-sub">Heard as ${heard.toLowerCase()}</p>` : ""}
       ${note ? `<p class="hc-note">${note.text}</p>` : ""}
       ${pin ? `<div class="hc-btns"><button class="btn" data-put="A">Put in A</button><button class="btn" data-put="B">Put in B</button></div>` : `<p class="hc-hint">Hold and drag to compare</p>`}`;
     card.classList.toggle("pinned", !!pin);

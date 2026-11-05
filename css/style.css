@@ -18,11 +18,7 @@
   --c-both: #ff85b8;
   --c-other: #e0e4ea;
   --c-maroon: #932a10;
-  --c-voice: #5f6b7a;
-  --c-music: #7b8697;
-  --c-water: #98a2b1;
-  --c-wind: #b3bbc7;
-  --c-ambient: #c9cfd8;
+  --c-env: #a7b0bd;
   --c-green: #3a7d3e;
   --grid: #ececef;
 
@@ -300,7 +296,6 @@ details.own[open] summary { margin-bottom: 8px; }
 .swatch { width: 12px; height: 12px; border-radius: 50%; cursor: pointer; transition: transform .15s, box-shadow .15s; }
 .swatches { display: inline-flex; gap: 3px; }
 .swatch:hover { transform: scale(1.25); }
-.swatch.hl { box-shadow: 0 0 0 2px var(--card), 0 0 0 4px var(--ink); }
 .filters .chk { display: flex; gap: 8px; align-items: center; margin: 5px 0; cursor: pointer; }
 .filters .row { display: grid; grid-template-columns: 82px minmax(0, 1fr); align-items: center; column-gap: 10px; padding: 4px 0; font-size: 13px; color: var(--mute); }
 .filters .row select { width: 100%; min-width: 0; color: var(--ink); }
@@ -451,3 +446,9 @@ body.has-film .mini { display: flex; }
 .sfx-dd .dd-menu { max-height: min(80vh, 640px); overflow-y: auto; }
 [hidden] { display: none !important; }
 .cmp-desc { margin: 0; max-width: 70ch; font-size: 15px; line-height: 1.6; color: var(--ink); }
+
+/* map: plain guidance */
+.plot-hint { position: absolute; left: 16px; bottom: 12px; margin: 0; z-index: 4; font-size: 12.5px; color: var(--mute); background: var(--card); padding: 4px 8px; border-radius: var(--r-btn); pointer-events: none; transition: opacity .6s; }
+.plot-hint.gone { opacity: 0; }
+.reset-view { position: absolute; top: 12px; right: 60px; z-index: 6; box-shadow: none; background: var(--canvas); }
+.hovercard .hc-sub:first-of-type { color: var(--ink); }

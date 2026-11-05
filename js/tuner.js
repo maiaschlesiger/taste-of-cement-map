@@ -37,12 +37,7 @@
       ["--c-engine", "Engines and machines", "color"],
       ["--c-bomb", "Bombs", "color"],
       ["--c-both", "Both at once", "color"],
-      ["--c-other", "Silence", "color"],
-      ["--c-voice", "Voices", "color"],
-      ["--c-music", "Music", "color"],
-      ["--c-water", "Water and sea", "color"],
-      ["--c-wind", "Wind and noise", "color"],
-      ["--c-ambient", "Other ambience", "color"],
+      ["--c-env", "Environment", "color"],
     ]],
     ["Interaction", [
       ["--bubble-k", "Group bubble size", "range", 0.3, 2.5, 0.05, ""],
@@ -90,7 +85,7 @@
       ["--hover-w", "Width", "range", 220, 440, 5, "px"],
     ]],
   ];
-  const PLOT_TOKENS = new Set(["--c-voice", "--c-music", "--c-water", "--c-wind", "--c-ambient", "--bubble-k", "--dim-op", "--anim-ms", "--spin", "--filter-w", "--font", "--c-tool", "--c-engine", "--c-bomb", "--c-both", "--c-other", "--ink", "--mute", "--card", "--line", "--plot-h", "--dot-scale", "--dot-op", "--other-op", "--dot-rim", "--grid", "--note-a", "--side-w", "--maxw", "--page-pad", "--gap"]);
+  const PLOT_TOKENS = new Set(["--c-env", "--bubble-k", "--dim-op", "--anim-ms", "--spin", "--filter-w", "--font", "--c-tool", "--c-engine", "--c-bomb", "--c-both", "--c-other", "--ink", "--mute", "--card", "--line", "--plot-h", "--dot-scale", "--dot-op", "--other-op", "--dot-rim", "--grid", "--note-a", "--side-w", "--maxw", "--page-pad", "--gap"]);
 
   const base = {};             // stylesheet defaults
   const cs = getComputedStyle(root);

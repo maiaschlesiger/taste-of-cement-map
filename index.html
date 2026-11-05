@@ -17,7 +17,7 @@
     <svg class="mark" viewBox="0 0 32 32" aria-hidden="true">
       <circle cx="9" cy="9" r="4.2" fill="var(--c-tool)"/><circle cx="20" cy="8" r="3.2" fill="var(--c-engine)"/>
       <circle cx="24" cy="18" r="4.6" fill="var(--c-bomb)"/><circle cx="13" cy="20" r="5" fill="var(--c-both)"/>
-      <circle cx="6" cy="26" r="2.2" fill="var(--c-other)"/><circle cx="21" cy="28" r="2" fill="var(--c-tool)"/>
+      <circle cx="6" cy="26" r="2.2" fill="var(--c-env)"/><circle cx="21" cy="28" r="2" fill="var(--c-tool)"/>
     </svg>
     <span class="brand-text"><b>Taste of Cement</b><small>Sound map</small></span>
   </a>
@@ -74,14 +74,16 @@
         <div id="plot3d" class="plot"></div>
         <div id="hovercard" class="hovercard" role="status" aria-live="polite"></div>
         <div id="ghost" class="ghost" aria-hidden="true"></div>
+        <p class="plot-hint" id="plotHint">Drag to turn · Scroll to zoom · Click a dot to highlight its group · Hold a dot and drag it to compare</p>
+        <button class="iconbtn reset-view" id="resetView" aria-label="Reset view" title="Reset view"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10a6 6 0 1 0 2-4.5M4 3.5V7h3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         <div class="dd view-dd">
           <button class="iconbtn" id="viewBtn" aria-haspopup="true" aria-expanded="false" aria-label="View options"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 6h9M15 6h2M3 14h3M9 14h8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="13.5" cy="6" r="1.8" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="7.5" cy="14" r="1.8" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
           <div class="dd-menu view-menu" id="viewMenu" role="dialog" aria-label="View options">
             <label class="chk"><input type="checkbox" id="optCluster" checked> Group nearby dots</label>
             <label class="row rng"><span>Group size</span><input type="range" id="clusterN" min="4" max="40" step="1" value="14"><output id="clusterNo">14</output></label>
-            <label class="chk"><input type="checkbox" id="showNotes" checked> Key moments</label>
+            <label class="chk"><input type="checkbox" id="showNotes"> Key moments</label>
             <label class="chk"><input type="checkbox" id="showRhymes"> Echo lines</label>
-            <label class="chk"><input type="checkbox" id="optSpin" checked> Slow spin</label>
+            <label class="chk"><input type="checkbox" id="optSpin"> Slow spin</label>
             <label class="row">Left–right <select id="ax-x"></select></label>
             <label class="row">Front–back <select id="ax-y"></select></label>
             <label class="row">Up–down <select id="ax-z"></select></label>
