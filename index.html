@@ -27,14 +27,6 @@
       <button data-tab="strata">Timeline</button>
       <button data-tab="about">About</button>
     </nav>
-<div class="mini" id="mini">
-      <video id="media" playsinline preload="metadata"></video>
-      <button id="play" class="btn icon" disabled aria-label="Play or pause"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3.5v9l7-4.5Z" fill="currentColor"/></svg></button>
-      <span class="clock" id="clock">0:00</span>
-      <input type="range" id="scrub" min="0" max="5098" step="1" value="0" aria-label="Film time">
-      <span class="clock" id="dur">84:58</span>
-    </div>
-    <input type="file" id="file" hidden accept="video/*,audio/*">
     <div class="dd sfx-dd">
       <button class="iconbtn" id="sfxBtn" aria-haspopup="true" aria-expanded="false" aria-label="Sound settings"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 8h3l4-3.5v11L6 12H3Z" fill="currentColor"/><path id="sfxWaves" d="M13 7.5c1 .8 1.5 1.6 1.5 2.5s-.5 1.7-1.5 2.5M15 5.5c1.6 1.3 2.5 2.8 2.5 4.5s-.9 3.2-2.5 4.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></button>
       <div class="dd-menu sfx-menu" id="sfxMenu" role="dialog" aria-label="Sound settings"></div>
@@ -71,24 +63,14 @@
         <p class="finding" id="finding"></p>
       </div>
       <div class="inner plotbox" id="plotbox">
-        <div id="plot3d" class="plot"></div>
+        <canvas id="field" aria-label="Dot map of the film's sounds"></canvas>
         <div id="hovercard" class="hovercard" role="status" aria-live="polite"></div>
         <div id="ghost" class="ghost" aria-hidden="true"></div>
-        <p class="plot-hint" id="plotHint">Drag to turn · Scroll to zoom · Click a dot to highlight its group · Hold a dot and drag it to compare</p>
-        <button class="iconbtn reset-view" id="resetView" aria-label="Reset view" title="Reset view"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10a6 6 0 1 0 2-4.5M4 3.5V7h3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-        <div class="dd view-dd">
-          <button class="iconbtn" id="viewBtn" aria-haspopup="true" aria-expanded="false" aria-label="View options"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 6h9M15 6h2M3 14h3M9 14h8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="13.5" cy="6" r="1.8" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="7.5" cy="14" r="1.8" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
-          <div class="dd-menu view-menu" id="viewMenu" role="dialog" aria-label="View options">
-            <label class="chk"><input type="checkbox" id="optCluster" checked> Group nearby dots</label>
-            <label class="row rng"><span>Group size</span><input type="range" id="clusterN" min="4" max="40" step="1" value="14"><output id="clusterNo">14</output></label>
-            <label class="chk"><input type="checkbox" id="showNotes"> Key moments</label>
-            <label class="chk"><input type="checkbox" id="showRhymes"> Echo lines</label>
-            <label class="chk"><input type="checkbox" id="optSpin"> Slow spin</label>
-            <label class="row">Left–right <select id="ax-x"></select></label>
-            <label class="row">Front–back <select id="ax-y"></select></label>
-            <label class="row">Up–down <select id="ax-z"></select></label>
-          </div>
-        </div>
+      </div>
+      <div class="field-foot">
+        <span id="axLo"></span>
+        <p class="plot-hint" id="plotHint">Hover a dot · Click to highlight its group · Drag it into A or B</p>
+        <span id="axHi"></span>
       </div>
     </div>
   </section>
@@ -122,32 +104,14 @@
 
   <!-- TIMELINE -->
   <section class="pane" id="pane-strata">
-    <div class="card stage wide">
-      <div class="stage-head">
-        <div class="story-text">
-          <h2>The film from start to finish</h2>
-        </div>
+    <div class="card tl-card">
+      <h2>The film, minute by minute</h2>
+      <p class="mute">Each dot is one minute. Bigger is louder. Hover to read it, click to open it on the map.</p>
+      <div class="tl-wrap">
+        <div class="tline" id="tline"></div>
+        <div class="tticks" id="tticks"></div>
       </div>
       <div class="legend" id="legend"></div>
-      <div class="inner"><div id="plotStrata" class="plot tall"></div></div>
-      <details class="places">
-        <summary>Mark places on screen</summary>
-        <div class="placebar">
-          <select id="placeKind">
-            <option>Beirut: construction site</option>
-            <option>Beirut: barracks / underground</option>
-            <option>Beirut: city / sea</option>
-            <option>Syria: war footage</option>
-            <option>Black screen / title</option>
-            <option>Other</option>
-          </select>
-          <button id="markIn" class="btn">Mark start</button>
-          <button id="markOut" class="btn">Mark end</button>
-          <button id="exportPlaces" class="btn">Export places</button>
-          <label class="btn">Import <input type="file" id="importPlaces" accept=".json"></label>
-        </div>
-        <ul id="placeList"></ul>
-      </details>
     </div>
   </section>
 
@@ -187,7 +151,6 @@
 
 <!-- PAGE:END -->
 
-<script src="js/vendor/plotly.min.js"></script>
 <script src="js/sfx.js"></script>
 <script src="js/app.js"></script>
 <script src="js/compare.js"></script>

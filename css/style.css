@@ -452,3 +452,38 @@ body.has-film .mini { display: flex; }
 .plot-hint.gone { opacity: 0; }
 .reset-view { position: absolute; top: 12px; right: 60px; z-index: 6; box-shadow: none; background: var(--canvas); }
 .hovercard .hc-sub:first-of-type { color: var(--ink); }
+
+/* ---------- dot-grid map ---------- */
+#plotbox { position: relative; min-height: 460px; }
+@media (min-width: 901px) { #pane-space .plotbox { flex: 1; min-height: 0; } }
+#field { display: block; width: 100%; height: 100%; touch-action: none; }
+.field-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 4px var(--pad-card) 14px; font-size: 13px; font-weight: 500; color: var(--ink); }
+.field-foot .plot-hint { position: static; padding: 0; background: none; text-align: center; flex: 1; }
+.mini-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: 0; }
+
+/* ---------- timeline: a line with a dot per minute ---------- */
+.tl-card { padding: 22px var(--pad-card) 24px; }
+.tl-card h2 { margin: 0 0 4px; font-size: var(--fs-h2); font-weight: var(--fw-head); }
+.tl-card > p { margin: 0 0 8px; font-size: 13.5px; }
+.tl-wrap { overflow-x: auto; overflow-y: visible; padding: 120px 8px 8px; margin: 0 -8px; }
+.tline { position: relative; display: flex; justify-content: space-between; align-items: center; height: 40px; min-width: 760px; }
+.tl-line { position: absolute; left: 0; right: 0; top: 50%; height: 1.5px; background: var(--line); }
+.tl-dot { position: relative; flex: 0 0 auto; width: 18px; height: 40px; border: 0; padding: 0; background: none; cursor: pointer; display: grid; place-items: center; }
+.tl-dot i { width: var(--s); height: var(--s); border-radius: 50%; background: var(--c); transition: transform .2s cubic-bezier(.3, 1.6, .5, 1); box-shadow: 0 0 0 2px var(--card); }
+.tl-dot.key i { box-shadow: 0 0 0 2px var(--card), 0 0 0 3.5px var(--ink); }
+.tl-dot:hover i, .tl-dot:focus-visible i { transform: scale(1.7); }
+.tl-label { position: absolute; bottom: calc(100% + 4px); left: 50%; transform: translate(-50%, 6px) scale(.92); transform-origin: bottom center; opacity: 0; pointer-events: none;
+  background: var(--ink); color: var(--card); font-size: 12.5px; line-height: 1.4; text-align: left; padding: 7px 10px; border-radius: var(--r-inner); white-space: nowrap;
+  transition: opacity .16s, transform .2s cubic-bezier(.3, 1.4, .5, 1); z-index: 3; }
+.tl-label b { font-weight: 600; }
+.tl-label span { color: var(--line); white-space: normal; display: inline-block; width: 220px; margin-top: 2px; }
+.tl-dot:hover .tl-label, .tl-dot:focus-visible .tl-label { opacity: 1; transform: translate(-50%, 0) scale(1); }
+.tl-dot:first-child .tl-label, .tl-dot:nth-child(-n+5) .tl-label { left: 0; transform: translate(0, 6px) scale(.92); transform-origin: bottom left; }
+.tl-dot:nth-child(-n+5):hover .tl-label { transform: translate(0, 0) scale(1); }
+.tl-dot:nth-last-child(-n+4) .tl-label { left: auto; right: 0; transform: translate(0, 6px) scale(.92); transform-origin: bottom right; }
+.tl-dot:nth-last-child(-n+4):hover .tl-label { transform: translate(0, 0) scale(1); }
+.tticks { position: relative; height: 20px; min-width: 760px; font-size: 12px; color: var(--mute); }
+.tticks span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
+.tticks span:first-child { transform: none; }
+.tticks span:last-child { transform: translateX(-100%); }
+.tl-card .legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: var(--mute); margin-top: 14px; }

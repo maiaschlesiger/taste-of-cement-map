@@ -52,7 +52,7 @@ All tokens live on `:root` in `css/style.css`. The design tuner (`#tune`) edits 
 | `--mute` | `#7c7c85` | Secondary text, counts, hints |
 | `--line` | `#e4e4e7` | Hover fill on secondary controls, slider track |
 | `--accent` | `#ff6a1f` | Score ring, tour dots, links, "ready" pulse |
-| `--grid` | `#ececef` | 3D gridlines and timeline grid |
+| `--grid` | `#ececef` | Reserved for gridlines (the map's empty-cell dots use `--line`) |
 
 Rules:
 - Use only two text tones, `--ink` and `--mute`.
@@ -144,12 +144,12 @@ Floating layers use a stronger, fixed shadow:
 │ ●● Taste of Cement / Sound map      [Map|Timeline|About] [🔊] │
 └───────────────────────────────────────────────────────────────┘
 ┌ Filters (268px) ┐ ┌ Map card ────────────────────────────────┐
-│ Sounds   Reset  │ │ (Overlap)(In the body)(Rhythm)(Echoes)   │
+│ Sounds   Reset  │ │ (Building↔bombs)(Heaviness)(Sharpness)…  │
 │ ☑ ●● Construct… │ │ 47 seconds are heard as building and …   │
-│ ☑ ●  Bombs      │ │                               [↺] [⚙]    │
-│ ☑ ●  Both       │ │            3D map (fills card)           │
-│ ☐ ●  Environment│ │                                          │
-│ Film time ○──○  │ │ Drag to turn · Scroll to zoom · …        │
+│ ☑ ●  Bombs      │ │ 0 min  ● ● ◉ ●  ·  ·    ·  ●   ·         │
+│ ☑ ●  Both       │ │ 13 min ● ◉ ● ●  ·  ·    ● ●  ●           │
+│ ☐ ●  Environment│ │        dot grid (fills card)             │
+│ Film time ○──○  │ │ ← Sounds like building · hint · bombs →  │
 │                 │ └──────────────────────────────────────────┘
 │ Compare         │
 │    ( A )        │
@@ -177,7 +177,6 @@ At 900px and below: one column, with the map card first, then the filters. The h
 
 ### 4.3 Icon button
 - 40×40 square, `--r-nav`, white fill, `--shadow`, 20px icon in ink. Hover fill is `--canvas`.
-- Inside the map card (reset, view menu), it uses a `--canvas` fill with no shadow.
 
 ### 4.4 Buttons
 
@@ -192,14 +191,9 @@ At 900px and below: one column, with the map card first, then the filters. The h
 - Disabled buttons use mute text and no hover.
 - Ready state (`.btn.ready`): a soft accent ring pulses every 1.6 seconds once both compare circles are filled.
 
-### 4.5 Dropdown menus (sound settings, view options)
-- White, `--r-card`, menu shadow, 12–14px padding, opening 10px below the trigger.
-- Close on outside click or Esc. Only one menu is open at a time.
-- **View menu** (on the map, top right):
-  - group nearby dots, and group size slider (4–40, default 14)
-  - key moments (off by default), echo lines (off), slow spin (off)
-  - three axis selects
-- **Sound menu:**
+### 4.5 Sound settings menu
+- White, `--r-card`, menu shadow, 12–14px padding, opening 10px below the speaker button. Closes on outside click or Esc.
+- Contents:
   - Sound on toggle and volume slider
   - Sound pack select, with a preview button
   - 14 event rows (label, cue select, preview button)
@@ -223,54 +217,46 @@ At 900px and below: one column, with the map card first, then the filters. The h
 - **Compare dock** is pinned to the bottom of the sidebar (§4.10).
 
 ### 4.7 Question pills and finding line
-- Pills: Overlap, In the body, Rhythm, Echoes. Fully rounded, `--canvas` fill, 13px / 500.
+- Pills: Building ↔ bombs, Heaviness, Sharpness, Pace. Fully rounded, `--canvas` fill, 13px / 500.
   - Hover fill `--line`, press scales to 0.96. The active pill is ink with white text.
-- Each pill sets all three axes:
+- Each pill sets what runs left to right on the map. Rows are always film time.
 
-| Pill | Left–right | Front–back | Up–down | Extra |
-|---|---|---|---|---|
-| Overlap | More like building | More like bombs | Later in the film | |
-| In the body | Heavier | Sharper | Louder | |
-| Rhythm | Faster hits | More percussive | Harder jolt | |
-| Echoes | Later in the film | Closer to bombs | Heavier | Echo lines on |
+| Pill | Left end | Right end | Measure |
+|---|---|---|---|
+| Building ↔ bombs | Sounds like building | Sounds like bombs | bomb confidence − building confidence (−1 to 1) |
+| Heaviness | Light | Heavy, felt in the chest | share of deep bass |
+| Sharpness | Muffled | Sharp, metallic | spectral centroid (log scale) |
+| Pace | Sparse | Rapid hits | hits per second |
 
 - The finding line under the pills is one sentence, 13.5px, in mute, with key numbers bold in ink. Numbers are computed live from the data.
+- The end labels sit in the map's footer, ink, 13px / 500, with arrows: "← Sounds like building" on the left and "Sounds like bombs →" on the right.
 
-### 4.8 The 3D map
-- Plotly `scatter3d` with `dragmode: turntable`, no mode bar, manual aspect ratio 1 : 1 : 0.95.
-- Camera: eye (1.5, 1.5, 0.68) when the vertical axis is time, otherwise (1.55, −1.5, 0.76).
-- Axes:
-  - no tick labels or tick marks, no zero line, no axis line, no wall fills
-  - faint `--grid` lines
-  - 13px ink titles that state a direction ("More like building →")
-- **Dots:**
-  - One trace per group, drawn back to front: environment, engine, tool, bomb, both.
-  - A single dot's size is `dot-scale × base × (1 + max(0, (loudness + 65) / 45))`, where base is 2.6 for construction and bombs and 2.2 for environment.
-  - A thin white rim (`--dot-rim`, 0.6) separates overlapping dots.
-- **Bubbles (population grouping):**
-  - Visible seconds are binned per group into an N×N×N grid in the current axis space (N = group size, default 14).
-  - Each occupied bin becomes one bubble at the bin's average position. Its size is `dot-scale × (3 + bubble-k × 2.6 × √count)`.
-  - Turning off "Group nearby dots" shows every second as its own dot.
-- **Key moments** (optional): leader-line labels, 11px, solid white background:
-  - 1:50, hammer heard as gunfire
-  - 12:56, engine rumble
-  - 30:06, after total silence
-  - 54:52, loudest stretch
-  - 70:23, thunder
-- **Playhead:** an 8px ink diamond at the current second.
-- **Hollow markers:** a dot or bubble sitting in compare circle A or B leaves the map. An open circle in its colour, labelled A or B, marks where it was (minimum 30px).
-- **Hint:** bottom-left, 12.5px mute text on white. It fades out over 0.6s, 4 seconds after the first press on the map.
-- **Reset view:** top right, next to the view menu. Restores the default camera.
+### 4.8 The dot-grid map
+A flat, axis-free grid drawn on a `<canvas>`, in the style of a population dot map. There is no charting library.
+
+- **Grid:**
+  - Rows are equal stretches of the selected film time, top to bottom: 12–34 rows, about 20px each, fitted to the card height.
+  - Columns are equal steps of the selected measure, left to right: 10–60 columns, kept square.
+  - Every grid point shows a faint 1.6px `--line` dot, so the empty map reads as a field.
+- **Minute marks:** about six labels down the left edge, such as "0 min", "13 min", "27 min", in 12px mute.
+- **Circles:**
+  - One circle per occupied cell, in the colour of the group with the most seconds in that cell.
+  - Radius = `cell × 0.47 × (0.3 + 0.7 × √(count ÷ largest count))`, with a minimum of 2.6px. Multiplied by `--dot-scale ÷ 1.2`.
+  - **Mixed cells:** if a second group is also present, an inner dot in its colour sits inside a 1.4px white ring. Its size reflects that group's share.
+  - Hovering a circle grows it by 18%.
+- **Hollow markers:** seconds sitting in A or B leave the grid. An open ring in their colour, labelled A or B, marks the cell they came from.
+- **Footer:** the left and right end labels, with the hint "Hover a dot · Click to highlight its group · Drag it into A or B" between them. The hint fades 4 seconds after the first press.
 
 ### 4.9 Hover card
 - White (`--hover-a` = 1), `--r-inner`, floating shadow, 280px wide, 12×14 padding, 13px.
 - It follows the cursor 18px right and 14px down, and flips left or up near the edges. It is not clickable unless pinned.
 - Content, top to bottom:
   1. Colour dot, then a bold label (sub-type such as "Metal and clatter", or the group name)
-  2. Time ("82:14"), or for a bubble, "N seconds · start–end", in ink
-  3. "Heard as …", the computer's top labels in lower case, in mute. Environment dots skip this line.
-  4. Optional key-moment note
-  5. Hint "Hold and drag to compare". When pinned on touch, this becomes "Put in A" and "Put in B" buttons.
+  2. "N seconds · start–end", or a single time, in ink
+  3. "Heard as …", the computer's top labels in lower case, in mute. Environment cells skip this line.
+  4. For a mixed cell, a small coloured dot and "N s of {other group} here too"
+  5. Optional key-moment note
+  6. When pinned on touch: "Put in A" and "Put in B" buttons
 
 ### 4.10 Compare dock (sidebar, vertical)
 - Layout: "Compare" heading, circle A, "vs" (13px, mute), circle B, then a full-width big primary button.
@@ -310,14 +296,19 @@ Full-width card that slides in (pageIn: up 18px, from 0.985 scale and transparen
 5. **Description:** 15px / 1.6, max 70ch, two or three sentences (§8.3).
 
 ### 4.13 Timeline tab
-- Card titled "The film from start to finish", with a legend row and one Plotly chart.
-- The chart has four bands, top to bottom:
-  - the dominant sound-world band (machines and tools, bombs, or environment)
-  - loudness
-  - building ↔ bombing resemblance (orange above zero, blue below)
-  - hits, placed by how long they ring
-- Solid ink vertical lines mark scene cuts. Clicking anywhere jumps the playhead.
-- "Mark places on screen" is a collapsed details section holding: a place select, Mark start, Mark end, Export places and Import.
+- A card titled "The film, minute by minute", with one mute sentence: "Each dot is one minute. Bigger is louder. Hover to read it, click to open it on the map."
+- **The line:** a 1.5px `--line` rule across the card, with 85 evenly spaced dots, one per minute. It scrolls sideways below 760px.
+- **Dot colour:**
+  - the minute's strongest building or bomb group, if it holds at least 12 seconds of that minute
+  - otherwise the environment grey
+- **Dot size:** 6–18px from the minute's average loudness. Each dot has a 2px white ring.
+- **Key moments** have an extra 1.5px ink ring.
+- **Hover or keyboard focus:**
+  - The dot scales by 1.7 with a spring.
+  - An ink label with white 12.5px text expands above it ("30:00 · Environment", plus the key-moment note when there is one).
+  - Labels near the ends anchor left or right so they stay on screen.
+- **Click:** opens the map with film time set to that minute, from 4 minutes before to 5 minutes after.
+- **Below the line:** minute ticks at 0, 15, 30, 45, 60, 75 and 85, and a legend of the five groups.
 
 ### 4.14 About tab
 A centred letter card (620px) with:
@@ -328,7 +319,7 @@ A centred letter card (620px) with:
 
 ### 4.15 Design tuner (`#tune`, and always on in the preview)
 - A fixed right panel (330px; a bottom sheet at 58vh on phones) with collapsible groups:
-  - Typography, Colour, Sound colours, Interaction, Shape, Shadow, Spacing, 3D map, Hover card
+  - Typography, Colour, Sound colours, Interaction, Shape, Shadow, Spacing, Map, Hover card
 - Sliders and colour inputs write `:root` tokens live. Changed rows show an accent dot.
 - Buttons: "Save for Claude" (preview only), "Copy values" (copies CSS) and "Reset all".
 
@@ -337,30 +328,31 @@ A centred letter card (620px) with:
 ## 5. Interaction model
 
 ### 5.1 Hover
-- Plotly hover finds the nearest dot. The card appears and the hover sound plays (rate-limited by UI SFX).
-- **Sticky hover:** a dot counts as hovered for 600 ms and within 18 px after Plotly drops it. The card hides 140 ms after unhover, so presses on small dots aren't lost.
+- The cell under the cursor is found by grid position, and counts if the cursor is within the circle's radius plus 2px (at least 7px).
+- The circle grows, the card appears, and the hover sound plays (rate-limited by UI SFX). The cursor becomes a grab hand over circles.
 
-### 5.2 Click a dot
-- Press and release without moving 4 px or holding 170 ms.
-- The click sound plays, the dot's group is highlighted (or un-highlighted if it already was), and the playhead moves to that dot.
+### 5.2 Click a circle
+- Press and release without moving 4px or holding 170ms.
+- The click sound plays, and the circle's group is highlighted (or un-highlighted if it already was).
 
 ### 5.3 Highlight
-- Click a dot or a sidebar swatch to highlight that group.
-- The highlighted group goes to opacity 1. Every other group fades to the same `--dim-op` (0.12), eased over `0.7 × --anim-ms`.
+- Click a circle or a sidebar swatch to highlight that group.
+- The highlighted group stays at opacity 1, and every other group fades to the same `--dim-op` (0.12). The fade is eased over `--anim-ms`.
 - **Clear it by:**
-  - clicking empty space on the map (a press-release under 5 px; a rotate drag keeps the highlight)
-  - clicking anywhere on the page that isn't a dot, swatch, menu, compare circle or filter control
+  - clicking empty space on the map
+  - clicking anywhere on the page that isn't a circle, swatch, menu, compare circle or filter control
   - pressing Esc
-  - clicking the same dot or swatch again
+  - clicking the same circle or swatch again
 
 ### 5.4 Drag to compare
-1. Press on a hovered dot. The camera's rotation is blocked for that press.
-2. Moving 4 px, or holding 170 ms, starts the drag: the ghost appears, the pick-up sound plays, and the dot leaves the map at once, leaving a hollow marker.
-3. While dragging, a circle within 24 px of the cursor grows and highlights.
-4. **Drop on a circle:** the ghost flies in, the circle fills, the drop sound plays, and the map redraws with that dot removed. A dot already in the other circle is moved out of it.
-5. **Drop elsewhere:** the ghost fades, the dot returns, and the miss sound plays.
-6. Pressing × on a filled circle empties it and returns the dot (clear sound).
-7. **Touch:** tap a dot to pin the hover card, then use "Put in A" or "Put in B". Plotly's own click event is used only for touch, which avoids a re-entrant loop.
+1. Press on a circle.
+2. Moving 4px, or holding 170ms, starts the drag: the ghost appears, the pick-up sound plays, and the circle's seconds leave the grid at once.
+3. While dragging, a compare circle within 24px of the cursor grows and highlights.
+4. **Drop on a compare circle:** the ghost flies in, the circle fills, the drop sound plays, and the grid redraws without those seconds. A hollow ring marks where they were. If the same seconds are in the other circle, they move out of it.
+5. **Drop elsewhere:** the ghost fades, the seconds return, and the miss sound plays.
+6. Pressing × on a filled compare circle empties it and returns the seconds (clear sound).
+7. **Touch:** tap a circle to pin the hover card, then use "Put in A" or "Put in B".
+8. What is dragged is the cell's main group only. A mixed cell's inner dot stays behind.
 
 ### 5.5 Compare
 - Opens only when both circles are filled.
@@ -384,7 +376,7 @@ A centred letter card (620px) with:
 
 | Moment | Effect | Duration / easing |
 |---|---|---|
-| View or filter change | Dots grow in (from 5% on axis change, from 60% on a filter change) | `--anim-ms` (320 ms), ease-out cubic |
+| Measure, time or filter change | Each circle grows or shrinks from its old size; new circles grow from zero | `--anim-ms` (320 ms), ease-out cubic |
 | Highlight | Opacity cross-fade | 0.7 × `--anim-ms`, ease-out quad |
 | Pick up | Ghost lift | 180 ms |
 | Drop | Ghost flies in and shrinks; circle fill spring | 180 ms; 450 ms `cubic-bezier(.2,1.4,.4,1)` |
@@ -394,9 +386,9 @@ A centred letter card (620px) with:
 | Score | Count-up and ring fill | 900 ms, ease-out cubic |
 | Waves | Draw left to right, then B aligns | 800 ms + 600 ms |
 | Region labels | Rise 6 px and fade in, staggered | Tied to the wave draw |
-| Slow spin (optional) | Camera orbit | Continuous, stops on any press or scroll |
+| Timeline dot hover | Dot scales by 1.7; label rises 6px and scales up from 0.92 | 200 ms `cubic-bezier(.3,1.4,.5,1)` |
 
-With `prefers-reduced-motion`, every duration becomes 0, and the spin and grow-in are skipped.
+With `prefers-reduced-motion`, every duration becomes 0.
 
 ---
 
@@ -516,11 +508,11 @@ All side gutters use `max(token, env(safe-area-inset-*))`.
 | File | Holds |
 |---|---|
 | `css/style.css` | All tokens (`:root`) and component styles |
-| `index.html` | Structure: header, map pane, compare page, timeline, about |
-| `js/app.js` | Map, filters, grouping, highlight, drag, dock, timeline, player |
+| `index.html` | Structure: header, map pane, compare page, timeline, About |
+| `js/app.js` | Dot-grid map (canvas), filters, highlight, drag, dock, line timeline |
 | `js/compare.js` | Comparison page: alignment, scoring, regions, drawing, description, playback sketch |
 | `js/sfx.js` | Sound settings and event mapping (wraps UI SFX) and the data voice |
 | `js/tuner.js` | Design tuner panel |
-| `js/vendor/` | Plotly 2.35.2 and UI SFX 0.4.0, with their licences |
+| `js/vendor/` | UI SFX 0.4.0, with its licences (no charting library) |
 | `fonts/` | Figtree (OFL) |
 | `data/` | Per-second points, the fine envelope and bands, impacts, cuts, places |

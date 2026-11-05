@@ -40,10 +40,8 @@
       ["--c-env", "Environment", "color"],
     ]],
     ["Interaction", [
-      ["--bubble-k", "Group bubble size", "range", 0.3, 2.5, 0.05, ""],
       ["--dim-op", "Faded groups opacity", "range", 0, 0.6, 0.01, ""],
       ["--anim-ms", "Animation length", "range", 0, 1200, 10, ""],
-      ["--spin", "Spin speed", "range", 0, 3, 0.05, ""],
       ["--vs-size", "Compare circle size", "range", 60, 160, 2, "px"],
       ["--filter-w", "Filter sidebar width", "range", 220, 380, 2, "px"],
     ]],
@@ -71,14 +69,8 @@
       ["--nav-py", "Nav item top padding", "range", 2, 16, 1, "px"],
       ["--row-pad", "Menu row padding", "range", 2, 18, 1, "px"],
     ]],
-    ["3D map", [
-      ["--plot-h", "Plot height", "range", 360, 1100, 10, "px"],
-      ["--dot-scale", "Dot size", "range", 0.4, 2.5, 0.05, ""],
-      ["--dot-op", "Dot opacity", "range", 0.2, 1, 0.01, ""],
-      ["--other-op", "Environment opacity", "range", 0, 1, 0.01, ""],
-      ["--dot-rim", "Dot white rim", "range", 0, 2, 0.1, ""],
-      ["--grid", "Grid lines", "color"],
-      ["--note-a", "Note label opacity", "range", 0.2, 1, 0.01, ""],
+    ["Map", [
+      ["--dot-scale", "Circle size", "range", 0.6, 2, 0.05, ""],
     ]],
     ["Hover card", [
       ["--hover-a", "Opacity", "range", 0.3, 1, 0.01, ""],
