@@ -226,7 +226,7 @@
     $("#ax-x").onchange = e => { state.x = e.target.value; onAx(); };
     $("#ax-y").onchange = e => { state.y = e.target.value; onAx(); };
     $("#ax-z").onchange = e => { state.z = e.target.value; onAx(); };
-    const chk = (id, key) => { $(id).onchange = e => { state[key] = e.target.checked; sfx("toggle"); draw3d(); }; };
+    const chk = (id, key) => { $(id).onchange = e => { state[key] = e.target.checked; sfx("toggle", e.target.checked); draw3d(); }; };
     chk("#showRhymes", "rh"); chk("#showNotes", "notes"); chk("#optCluster", "cluster");
     $("#optSpin").onchange = e => { state.spin = e.target.checked; sfx("toggle"); if (state.spin) startSpin(); };
     $("#clusterN").oninput = e => { $("#clusterNo").value = e.target.value; state.clusterN = +e.target.value; draw3d(true); };
@@ -235,7 +235,7 @@
     document.querySelectorAll("[data-tab]").forEach(b => b.addEventListener("click", e => { e.preventDefault(); closeMenus(); showTab(b.dataset.tab); }));
     const menu = (btnId, menuId, onOpen) => {
       const bt = $(btnId), m = $(menuId);
-      bt.onclick = e => { e.stopPropagation(); const open = !m.classList.contains("open"); closeMenus(); if (open && onOpen) onOpen(m); m.classList.toggle("open", open); bt.setAttribute("aria-expanded", open); };
+      bt.onclick = e => { e.stopPropagation(); const open = !m.classList.contains("open"); closeMenus(); if (open && onOpen) onOpen(m); if (open) sfx("menu"); m.classList.toggle("open", open); bt.setAttribute("aria-expanded", open); };
       m.addEventListener("click", e => e.stopPropagation());
       m.addEventListener("mousedown", e => e.stopPropagation(), true);
     };
@@ -310,8 +310,8 @@
     }).join("");
     const G2K = { build: FACETS.build.kinds, bomb: FACETS.bomb.kinds, both: ["both"], env: FACETS.env.kinds };
     document.querySelectorAll("#facets [data-ind]").forEach(i => { i.indeterminate = true; });
-    document.querySelectorAll("#facets input[data-k]").forEach(i => i.onchange = () => { i.checked ? state.on.add(i.dataset.k) : state.on.delete(i.dataset.k); sfx("toggle"); renderFacets(); draw3d(); });
-    document.querySelectorAll("#facets input[data-master]").forEach(i => i.onchange = () => { G2K[i.dataset.master].forEach(k => i.checked ? state.on.add(k) : state.on.delete(k)); sfx("toggle"); renderFacets(); draw3d(); });
+    document.querySelectorAll("#facets input[data-k]").forEach(i => i.onchange = () => { i.checked ? state.on.add(i.dataset.k) : state.on.delete(i.dataset.k); sfx("toggle", i.checked); renderFacets(); draw3d(); });
+    document.querySelectorAll("#facets input[data-master]").forEach(i => i.onchange = () => { G2K[i.dataset.master].forEach(k => i.checked ? state.on.add(k) : state.on.delete(k)); sfx("toggle", i.checked); renderFacets(); draw3d(); });
     document.querySelectorAll("#facets [data-open]").forEach(bt => bt.onclick = e => { e.preventDefault(); e.stopPropagation(); const id = bt.dataset.open; openFacets.has(id) ? openFacets.delete(id) : openFacets.add(id); sfx("toggle"); renderFacets(); });
     document.querySelectorAll("#facets [data-hl]").forEach(sw => {
       sw.onclick = e => { e.preventDefault(); e.stopPropagation(); setHighlight(state.hl === sw.dataset.hl ? null : sw.dataset.hl); };
@@ -442,7 +442,7 @@
   }
   let hlAnim = 0;
   function setHighlight(g) {
-    state.hl = g; sfx(g ? "highlight" : "toggle");
+    state.hl = g; sfx(g ? "highlight" : "toggle", !!g);
     document.querySelectorAll("#pane-space .filters [data-hl]").forEach(s => s.classList.toggle("hl", !!g && s.dataset.hl === g));
     const div = $("#plot3d"), ids = Object.values(groupTrace), groups = Object.keys(groupTrace);
     const start = groups.map(k => div.data[groupTrace[k]].marker.opacity), end = groups.map(opFor);
@@ -597,7 +597,7 @@
     } else {
       g.style.transition = "opacity .2s"; g.style.opacity = "0";
       setTimeout(() => { g.classList.remove("on"); g.style.transition = ""; g.style.opacity = ""; }, 200);
-      draw3d(true);   // dropped outside: the dot goes back
+      draw3d(true); sfx("miss");   // dropped outside: the dot goes back
     }
   }
 

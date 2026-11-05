@@ -13,7 +13,7 @@ Made for a creative mapping assignment on film and migration.
 | **Timeline** | The film in order: dominant sound-world, loudness, building-vs-bombing resemblance, hits and hard cuts. Includes a tool to mark what is on screen. |
 | **About** | The film, the method and the limits. |
 
-The speaker button sets the interface sounds: every event (click, hover, pick up, drop, highlight, compare…) has several synthesized options.
+The speaker button sets the interface sounds, which come from [UI SFX](https://github.com/romainsimon/uisfx) (MIT code, CC0 audio; vendored in `js/vendor/uisfx.js`). Pick one of its 12 sound packs, then a cue for each event (click, hover, pick up, drop, highlight, compare…). "Data voice" is this site's own sound for a clicked dot, shaped by that dot's measurements.
 
 ## Running it
 
@@ -36,7 +36,8 @@ Then open http://localhost:8000.
 ```
 index.html, css/, js/app.js    the map (no build step; Plotly is vendored in js/vendor/)
 js/tuner.js                    design tuner (opens with #tune)
-js/sfx.js                      synthesized interface sounds
+js/sfx.js                      interface sounds (wraps UI SFX)
+js/vendor/uisfx.js             UI SFX 0.4.0 runtime (MIT; audio CC0)
 js/compare.js                  comparison page: alignment, overlap scoring, playback
 fonts/                         Figtree (SIL Open Font License)
 data/data.json                 5,098 per-second points + 400 rhymes + 57 sound-world regions

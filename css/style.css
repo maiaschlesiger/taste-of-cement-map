@@ -442,3 +442,7 @@ body.has-film .mini { display: flex; animation: pageIn .35s ease-out; }
 .dock.vertical { flex-direction: column; gap: 8px; padding: 6px 0 0; align-items: center; }
 .dock.vertical .vs-word { font-size: 13px; line-height: 1; }
 .dock.vertical .btn.big { margin: 8px 0 0; width: 100%; justify-content: center; }
+.sfx-row.pack { grid-template-columns: 1fr 128px 30px; padding-bottom: 8px; font-weight: 500; }
+.sfx-credit { margin: 8px 0 0; font-size: 12px; color: var(--mute); }
+.sfx-credit a { color: var(--mute); }
+.sfx-dd .dd-menu { max-height: min(80vh, 640px); overflow-y: auto; }

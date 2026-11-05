@@ -257,7 +257,9 @@
     $("#cmpTitle").textContent = `${A.label} vs ${B.label}`;
     $("#cmpSay").textContent = "Lining them up…"; $("#cmpPct").textContent = "0%";
     srcLabel();
+    if (window.SFX) window.SFX.startLoop("working");
     load().then(() => {
+      if (window.SFX) { window.SFX.stopLoop("working"); setTimeout(() => window.SFX.play("done"), 380); }
       const a0 = Math.round((A.rep - PRE) * BF), b0 = Math.round((B.rep - PRE) * BF);
       const lag = align(a0, b0);
       const res = analyse(a0, b0, lag);
@@ -272,10 +274,11 @@
   }
 
   function setup() {
-    $("#cmpBack").onclick = () => { stop(); window.TOC.showTab("space"); };
-    $("#cmpPlayBoth").onclick = () => play("both");
-    $("#cmpPlayA").onclick = () => play("A");
-    $("#cmpPlayB").onclick = () => play("B");
+    const sfx = e => { if (window.SFX) window.SFX.play(e); };
+    $("#cmpBack").onclick = () => { stop(); sfx("back"); window.TOC.showTab("space"); };
+    $("#cmpPlayBoth").onclick = () => { sfx("play"); setTimeout(() => play("both"), 120); };
+    $("#cmpPlayA").onclick = () => { sfx("play"); setTimeout(() => play("A"), 120); };
+    $("#cmpPlayB").onclick = () => { sfx("play"); setTimeout(() => play("B"), 120); };
     $("#cmpMix").oninput = () => { const [ga, gb] = mixGains(); if (players[0]) players[0].volume = ga; if (players[1]) players[1].volume = gb; };
     $("#cmpAlign").onchange = e => {
       if (!cur) return; const from = cur.shift, to = e.target.checked ? 1 : 0;
