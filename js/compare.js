@@ -119,7 +119,7 @@
 
   // ---------- drawing ----------
   const dpr = () => Math.min(2, window.devicePixelRatio || 1);
-  function sizeCanvas(c) { const w = c.clientWidth, h = +c.getAttribute("height"); c.width = w * dpr(); c.height = h * dpr(); c.style.height = h + "px"; const g = c.getContext("2d"); g.setTransform(dpr(), 0, 0, dpr(), 0, 0); return { g, w, h }; }
+  function sizeCanvas(c) { if (!c.dataset.h) c.dataset.h = c.getAttribute("height"); const w = c.parentElement.clientWidth, h = +c.dataset.h; if (!w) return { g: c.getContext("2d"), w: 1, h }; c.width = w * dpr(); c.height = h * dpr(); c.style.height = h + "px"; const g = c.getContext("2d"); g.setTransform(dpr(), 0, 0, dpr(), 0, 0); return { g, w, h }; }
   const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
   function drawWave(progress, shift, playT) {
     const c = $("#cmpWave"), { g, w, h } = sizeCanvas(c);
