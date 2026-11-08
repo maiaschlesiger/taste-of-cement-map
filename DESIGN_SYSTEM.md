@@ -10,7 +10,7 @@ The site is one page. On the left, a list of seven relationships, each a sound o
 
 1. **Selected moments, not every sound.** The page shows only the pairs picked by watching the film. It does not map every second of the soundtrack, and it does not show the sound classifier's labels, which were unreliable.
 2. **Compare in context.** The sound comparison and the explanation of why it matters sit side by side, on the same card.
-3. **Facts, not prose.** Every written part is a bullet list of checkable facts: what is on screen, the background behind each sound, and measurements of the sound itself. Each outside fact has a source listed in About.
+3. **Human facts, not prose.** Every written part is a bullet list. After one line on what is on screen, each bullet is a sourced fact about what that sound means for the people who live with it: trauma and PTSD, children's fear of aircraft and shouting, life underground, the workers' pay, safety, curfews and silence. Each has a source listed in About.
 4. **Two worlds, two colours.** War is orange, building is blue. Everything else is ink, grey or white.
 5. **Quiet chrome.** White cards on a pale grey canvas, separated by space. No borders, no dividers, almost no shadow.
 6. **Nearly one screen.** At 1440×900 the page fits with no scroll; at 1280×800 it scrolls about 30px.
@@ -134,8 +134,8 @@ Brand mark: an orange dot joined to a blue dot by an ink curve, echoing the list
 ### 4.3 Detail card: head and facts
 - Title: "War sound vs building sound".
 - Chips: coloured dot, label, time in `--mute`. Then how it was paired, muted: "Paired by watching the film" or "Building moment picked by measurement".
-- **War sound facts:** a heading with an orange dot and the sound's name, then bullets: what is on screen and when, then background facts about that kind of sound in Syria's war.
-- **Building sound facts:** a heading with a blue dot, then bullets: what is on screen and when (or how the moment was picked), then background about the site and its workers.
+- **War sound facts:** a heading with an orange dot and the sound's name, then bullets: what is on screen and when, then the human cost of that sound in Syria (fear, trauma, rescue, life underground).
+- **Building sound facts:** a heading with a blue dot, then bullets: what is on screen and when (or how the moment was picked), then the workers' side (PTSD, pay, contracts, safety, curfew, silence, poverty).
 - Bullets are 13.5px (13px at 1366px and below), 1.5 line height, with grey markers.
 
 ### 4.4 Detail card: sound and "What they share"
@@ -143,12 +143,12 @@ Brand mark: an orange dot joined to a blue dot by an ink curve, echoing the list
 - **Key:** War (orange dot), Building (blue dot), Most alike (grey bar).
 - **Waveform** (`canvas#wave`, 140px tall): six seconds starting two seconds before each moment; two loudness lines, war orange over building blue, smoothed and scaled to the pair; the single most-alike stretch shaded `--canvas` and labelled; an ink playhead while playing.
 - **Play row:** "Play both" (primary), "War", "Building". These play the film's real sound. A button pulses while its clip loads and turns ink while playing; clicking it again stops. "Line them up" on the right, with the shift in seconds.
-- **What they share:** bullets. First, facts about how the two relate in the film (cut together, minutes apart). Then four measurements, each showing the war value after an orange dot and the building value after a blue dot:
-  - louder than this much of the film (% of non-silent seconds)
-  - energy below 250 Hz (bass)
+- **Measurements:** four small `--canvas` tiles under the play row (two per row on phones), each with a muted label and two values, war after an orange dot and building after a blue dot:
+  - louder than (% of the film's non-silent seconds)
+  - bass (% of energy below 250 Hz)
   - tone centre (spectral centroid, Hz)
-  - sharp hits per second (onsets)
-- Last, the most-alike stretch: "Most alike from 2.5 to 3.0 seconds: same sharp edge, the same metallic crack".
+  - hits a second (sharp onsets)
+- **What they share:** bullets: how the two relate in the film (cut together, minutes apart), then the most-alike stretch ("Most alike from 2.5 to 3.0 seconds: same sharp edge, the same metallic crack").
 
 ### 4.5 Footer: other moments that sound like this
 - A `--canvas` panel at the bottom of the detail card. Heading, plus muted hint "Closest first. Click one to hear it".
@@ -250,7 +250,7 @@ Every event can be set to Off.
 
 ### 8.4 Fact bullets
 - Each relationship in `PAIRS` (top of `js/app.js`) has `warFacts`, `buildFacts` and `linkFacts`. The measurements come from `M`, in the same file.
-- "On screen" bullets come only from moments identified by watching the film. Background bullets come only from the sources listed in About.
+- "On screen" bullets come only from moments identified by watching the film. Every other bullet comes from a source listed in About, and is chosen for its human impact rather than for history or engineering.
 - The names on footer chips come from `SEEN`, the list of moments identified by watching.
 
 ---

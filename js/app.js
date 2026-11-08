@@ -26,90 +26,92 @@
 
   // ---------- the relationships ----------
   // war / build: [seconds, label]. watched: paired by watching the film (else: building moment picked by
-  // measurement). warFacts / buildFacts / linkFacts: bullet points shown on the page. Sources are listed in About.
+  // measurement). warFacts / buildFacts: what is on screen, then what this sound means for the people who
+  // live with it. linkFacts: how the two relate in the film. Sources are listed in About.
   const PAIRS = [
     { war: [1733, "Bombs"], build: [4780, "Site machinery"], watched: false,
       warFacts: [
         "On screen at 28:53: bombs falling in Syria",
-        "Human Rights Watch identified nearly 1,500 sites hit by indiscriminate Syrian government air attacks in a single year (2014–15)",
-        "Its attacks included improvised “barrel bombs” dropped on populated areas of Aleppo and Daraa",
+        "In a 2017 Save the Children study, 84% of adults and almost all children named bombing and shelling as the main cause of children's stress",
+        "71% said children were increasingly wetting the bed, a sign of toxic stress",
       ],
       buildFacts: [
-        "From the long machinery stretch near the end of the film (about 1:16–1:20), which also contains the construction lift at 1:16:24",
-        "Picked by searching the film for the building moment whose loudness, bass and tone come closest to the bombs",
+        "1:19:40: machinery on the Beirut site, picked by measurement as the closest sound",
+        "In a camp study of Syrian refugees in Lebanon, 27% had PTSD at the time and 35% had had it at some point",
+        "Being easily startled by sudden noise is one of the core symptoms of PTSD",
       ],
-      linkFacts: ["51 minutes apart: the film never cuts between them, so the match is in the soundtrack itself"] },
+      linkFacts: ["51 minutes apart: the film never cuts between them, so the likeness is in the sound itself"] },
     { war: [3098, "A tank moving"], build: [3197, "Machinery moving"], watched: true,
       warFacts: [
-        "On screen at 51:38: a tank moving in Syria; the film returns to it at 52:42, 53:30 and 55:11",
-        "On 25 April 2011, Syrian army tanks entered Daraa, the city where the uprising began",
-        "Syria's army fought the war with Soviet- and Russian-made tanks, including the T-72",
+        "On screen at 51:38: a tank moving in Syria; it returns at 52:42, 53:30 and 55:11",
+        "In April 2011, troops backed by tanks stormed Daraa, where the uprising began; at least 20 people were killed on the first day",
       ],
       buildFacts: [
-        "On screen at 53:17: construction machinery moving on the Beirut site, between the tank shots",
-        "Most of the workers on the site are Syrian, and they may not leave it after 7 pm",
+        "On screen at 53:17: machinery moving on the Beirut site, between the tank shots",
+        "Syrians on Lebanese sites work without safety rules, health insurance or union protection, often on thin scaffolding in plastic slippers",
+        "92% of Syrian refugee workers in Lebanon have no formal contract",
       ],
-      linkFacts: [
-        "Cut together: 99 seconds apart in the same sequence",
-        "The film's loudest stretch: 209 of its 300 loudest seconds fall between 51 and 56 minutes",
-      ] },
+      linkFacts: ["Cut together, 99 seconds apart, in the loudest stretch of the film"] },
     { war: [3254, "A tank firing"], build: [3267, "Drilling a wall"], watched: true,
       warFacts: [
         "On screen at 54:14: a tank firing; it fires again at 54:29",
-        "Part of the same tank sequence as pair 2, inside the film's loudest stretch",
+        "Aid workers describe Syrian children who flinch at ordinary sounds, a chair moving or a door banging, because they fear planes and rockets",
+        "In one study, 45% of Syrian refugee children showed signs of PTSD, about ten times the rate for children elsewhere",
       ],
       buildFacts: [
-        "On screen at 54:27: a worker drilling into a concrete wall on the Beirut site",
-        "Concrete is drilled with a hammer drill, which spins and hammers the bit at the same time",
+        "On screen at 54:27: a worker drilling into a concrete wall in Beirut",
+        "Half of Syrian refugee workers in an ILO survey had back or joint pain, severe fatigue, or worked in extreme heat or cold",
+        "Almost two-thirds breathed dust and fumes at work",
       ],
-      linkFacts: [
-        "Cut together: 13 seconds apart",
-        "The tank's second shot at 54:29 comes 2 seconds after the drill",
-      ] },
+      linkFacts: ["Cut together, 13 seconds apart; the tank fires again 2 seconds after the drill"] },
     { war: [3736, "Footsteps in tunnels"], build: [866, "Site rumble"], watched: false,
       warFacts: [
         "On screen at 1:02:16: people walking through tunnels in Syria",
-        "In besieged areas such as Eastern Ghouta, near Damascus, tunnels carried food, fuel and medicine for years, and residents sheltered underground from air strikes",
+        "In besieged Eastern Ghouta in 2018, families slept in basements for months; some shelters held 200 people",
+        "Save the Children counted 4,100 families living underground there, more than half without water, sanitation or ventilation",
       ],
       buildFacts: [
-        "From early in the film, 14:26, during its first long stretch on the building site",
-        "Picked by searching the film for the building moment that sounds closest",
+        "14:26: a low rumble on the Beirut site, picked by measurement as the closest sound",
+        "The workers may not leave the site after 7 pm; Syrian workers in Lebanon often live on the sites where they work",
+        "By 2014, at least 45 Lebanese towns had put Syrian refugees under curfew",
       ],
-      linkFacts: ["Both are low and quiet: neither has a single sharp hit in six seconds"] },
+      linkFacts: ["Both are low and quiet, without a single sharp hit"] },
     { war: [3808, "Panicked voices"], build: [2636, "Site noise"], watched: false,
       warFacts: [
-        "On screen at 1:03:28: people shouting and calling out after a bombing",
-        "The shouting continues through the rescue that follows, to 1:07:44",
-        "A review contrasts this “frantic clamour of voices” with “the numb silence of the Syrian workers in Beirut”",
+        "On screen at 1:03:28: people shouting after a bombing",
+        "Save the Children found that even without bombing, the sound of people shouting and aircraft overhead triggered extreme fear in children",
+        "A review sets this \u201cfrantic clamour of voices\u201d against \u201cthe numb silence of the Syrian workers in Beirut\u201d",
       ],
       buildFacts: [
-        "From the building site at 43:56",
-        "Picked by searching the film for the building moment that sounds closest",
-        "A review notes the Syrian workers are forbidden from speaking about their working conditions",
+        "43:56: the Beirut site, picked by measurement as the closest sound",
+        "The workers are forbidden from speaking about their working conditions",
+        "In 2017 Syrian builders asked for a raise from $20 to $22 a day, but did not ask for better living conditions for fear of losing their jobs",
       ],
-      linkFacts: ["Both are bright and busy, with more than five sharp onsets a second; the voices carry words, the site does not"] },
+      linkFacts: ["Both are bright and busy; only one of them has voices in it"] },
     { war: [3875, "Digging out survivors"], build: [638, "Site machinery"], watched: false,
       warFacts: [
-        "On screen from 1:04:35 to 1:07:44: people shovelling gravel by hand to dig survivors out of rubble, while others shout",
-        "In opposition-held Syria, volunteer rescuers of the Syria Civil Defence (the “White Helmets”), founded in 2013, dug survivors out after air strikes",
-        "By 2015 they numbered more than 2,700 volunteers",
+        "On screen from 1:04:35 to 1:07:44: people digging survivors out of rubble with shovels",
+        "Strikes were often followed by a second strike on the same spot up to 30 minutes later, putting anyone digging at risk",
+        "At least 191 Syria Civil Defence (\u201cWhite Helmets\u201d) volunteers were killed rescuing others; mental health support for them is scarce",
       ],
       buildFacts: [
-        "From the building site at 10:38, in the film's first long stretch on the site",
-        "Picked by searching the film for the building moment that sounds closest",
-        "Before 2011, an estimated 300,000 Syrians worked in Lebanon, many of them in construction",
+        "10:38: machinery on the Beirut site, picked by measurement as the closest sound",
+        "In a 2019 study in Lebanon's Bekaa Valley, only 13% of construction workers had a written contract",
+        "More than 58% of the workers in that study were paid below the minimum wage",
       ],
       linkFacts: ["Both are scraping, high sounds with almost no bass"] },
     { war: [4067, "A helicopter"], build: [4641, "The construction lift"], watched: true,
       warFacts: [
-        "On screen at 1:07:47: a helicopter approaching, straight after the rescue",
-        "Human Rights Watch documented Syrian government Mi-17 helicopters dropping barrel bombs and conventional bombs on populated areas",
+        "On screen at 1:07:47: a helicopter approaching",
+        "Aleppo residents feared barrel bombs most: they could hear the helicopter, then a hiss as the bomb fell, and had about two minutes to run",
+        "\u201cIt became routine for the helicopter to be there above us, so I finally stopped looking up. I smelled death everywhere.\u201d Aleppo resident, 2015",
       ],
       buildFacts: [
-        "On screen from 1:16:24 to 1:17:21: the construction lift climbing the tower in Beirut",
-        "A construction lift carries workers and materials up the outside of a building as it rises",
+        "On screen from 1:16:24 to 1:17:21: the construction lift climbing the tower",
+        "Nine in ten Syrian refugee families in Lebanon live in extreme poverty",
+        "Men who owned land or ran businesses in Syria became low-paid labourers in Lebanon, a loss they describe as damaging their mental health",
       ],
-      linkFacts: ["Nine minutes apart", "Both are steady, low engine drones with almost no sharp hits"] },
+      linkFacts: ["Nine minutes apart; both are steady, low engine drones"] },
   ];
   PAIRS.forEach((p, i) => { p.n = i + 1; });
   // moments identified by watching the film, used to name matches in the footer
@@ -142,17 +144,11 @@
   // ---------- the selected relationship ----------
   const li = arr => arr.map(f => `<li>${esc(f)}</li>`).join("");
   const num = n => n.toLocaleString("en-GB");
-  function measured(p, c) {
-    const a = M[p.war[0]], b = M[p.build[0]]; if (!a || !b) return [];
-    const two = (x, y, unit) => `<span class="v w">${x}${unit}</span> <span class="v b">${y}${unit}</span>`;
-    const out = [
-      `Louder than this much of the film: ${two(a.louder, b.louder, "%")}`,
-      `Energy below 250 Hz (bass): ${two(a.bass, b.bass, "%")}`,
-      `Tone centre: ${two(num(a.hz), num(b.hz), " Hz")}`,
-      `Sharp hits per second: ${two(a.hits, b.hits, "")}`,
-    ];
-    if (c.regs.length) out.push(esc(window.COMPARE.hear(c)).replace(/\.$/, ""));
-    return out;
+  function renderStats(p) {
+    const a = M[p.war[0]], b = M[p.build[0]]; if (!a || !b) { $("#stats").innerHTML = ""; return; }
+    const cell = (label, x, y, unit) => `<div class="stat"><span>${label}</span><b><i class="w"></i>${x}${unit}</b><b><i class="b"></i>${y}${unit}</b></div>`;
+    $("#stats").innerHTML = cell("Louder than", a.louder, b.louder, "% of film") + cell("Bass", a.bass, b.bass, "%")
+      + cell("Tone centre", num(a.hz), num(b.hz), " Hz") + cell("Hits a second", a.hits, b.hits, "");
   }
   function select(i, quiet) {
     if (i < 0 || i >= PAIRS.length) return;
@@ -169,13 +165,14 @@
     $("#warFacts").innerHTML = li(p.warFacts);
     $("#buildFacts").innerHTML = li(p.buildFacts);
     $("#linkFacts").innerHTML = li(p.linkFacts);
+    renderStats(p);
     const card = $("#detail"); card.classList.remove("enter"); void card.offsetWidth; card.classList.add("enter");
     renderFoot(null, p);
     window.COMPARE.preload([p.war[0], p.build[0]]);
     window.COMPARE.compare(p.war[0], p.build[0]).then(c => {
       if (my !== token) return;
       res = c; shift = 0;
-      $("#linkFacts").innerHTML = li(p.linkFacts) + measured(p, c).map(f => `<li>${f}</li>`).join("");
+      $("#linkFacts").innerHTML = li(p.linkFacts) + (c.regs.length ? li([window.COMPARE.hear(c).replace(/\.$/, "")]) : "");
       $("#pShift").textContent = c.lag ? `(${Math.abs(c.lagSec).toFixed(1)} s)` : "";
       $("#pAlign").checked = true;
       countUp(c.score);
