@@ -91,7 +91,7 @@ War sounds identified on screen, paired with a building sound. Overlap uses the 
 
 | # | War sound (seen) | Building sound | Partner found by | Overlap |
 |---|---|---|---|---|
-| 1 | Bombs 28:53 | 10:01 (engines) | closest building sound by measurement | 100% |
+| 1 | Bombs 28:53 | 1:19:40 (site machinery) | closest building sound by measurement | 95% |
 | 2 | Tank moving 51:38 | Construction moving 53:17 | watching | 97% |
 | 3 | Tank firing 54:14 | Drilling a wall 54:27 | watching | 98% |
 | 4 | Footsteps in tunnels 62:16 | 14:26 (rumble) | closest building sound by measurement | 94% |
@@ -102,6 +102,7 @@ War sounds identified on screen, paired with a building sound. Overlap uses the 
 **Notes**
 - Pairs 2, 3 and 7 were paired by eye. Their high overlap shows that the film puts sounds that match acoustically side by side.
 - For 1, 4, 5 and 6, every construction second was searched for the closest sound. That excluded anything within 90 s and the war stretches (51–56 and 59–71 min). Many matches hit the top of the scale, so I ranked them on the uncapped score.
+- Pair 1 was first matched to 10:01, which scored 100%, but that moment has 9% of its energy below 250 Hz against the bombs' 82%, and a tone centre four times higher. It was replaced with 1:19:40, which matches on loudness, bass (80%) and tone centre (910 Hz vs 990 Hz).
 - **Caution:** the score saturates for loud, dense sounds, so 100% means "as close as this measure can tell", not "identical". It does not prove the audience hears them as the same.
 - The pairing at 54:27 and 54:29 (drill vs tank fire, 2 seconds apart) was not scored. Their 6-second windows overlap, so the score would compare the audio with itself.
 

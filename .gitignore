@@ -1,4 +1,4 @@
-# never commit the film or its audio
+# never commit the film or its full audio
 *.mp4
 *.mov
 *.mkv
@@ -11,6 +11,10 @@
 *.mp3
 *.aac
 *.flac
+
+# except the short study clips the page plays
+!audio/clips/
+!audio/clips/*.mp3
 
 # analysis intermediates
 *.npy

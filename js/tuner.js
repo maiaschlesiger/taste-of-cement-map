@@ -37,8 +37,8 @@
       ["--c-tool", "Building", "color"],
     ]],
     ["Interaction", [
-      ["--strip-h", "Film strip height", "range", 110, 220, 2, "px"],
-      ["--info-w", "Text column width", "range", 280, 520, 2, "px"],
+      ["--list-w", "Pair list width", "range", 260, 440, 2, "px"],
+      ["--text-w", "Text column width", "range", 260, 520, 2, "px"],
     ]],
     ["Shape", [
       ["--r-card", "Card corners", "range", 0, 32, 1, "px"],
@@ -63,7 +63,7 @@
       ["--row-pad", "Menu row padding", "range", 2, 18, 1, "px"],
     ]],
   ];
-  const PLOT_TOKENS = new Set(["--strip-h", "--info-w", "--c-env", "--bubble-k", "--dim-op", "--anim-ms", "--spin", "--filter-w", "--font", "--c-tool", "--c-engine", "--c-bomb", "--c-both", "--c-other", "--ink", "--mute", "--card", "--line", "--plot-h", "--dot-scale", "--dot-op", "--other-op", "--dot-rim", "--grid", "--note-a", "--side-w", "--maxw", "--page-pad", "--gap"]);
+  const PLOT_TOKENS = new Set(["--list-w", "--text-w", "--c-env", "--bubble-k", "--dim-op", "--anim-ms", "--spin", "--filter-w", "--font", "--c-tool", "--c-engine", "--c-bomb", "--c-both", "--c-other", "--ink", "--mute", "--card", "--line", "--plot-h", "--dot-scale", "--dot-op", "--other-op", "--dot-rim", "--grid", "--note-a", "--side-w", "--maxw", "--page-pad", "--gap"]);
 
   const base = {};             // stylesheet defaults
   const cs = getComputedStyle(root);

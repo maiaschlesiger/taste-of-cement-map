@@ -6,11 +6,11 @@ Made for a creative mapping assignment on film and migration.
 
 ## The page
 
-- **Film strip:** where each sound of war (top lane) and its building sound (bottom lane) fall in the film, joined in pairs. Click a pair to open it.
-- **Pair card:** the two sounds' loudness drawn on top of each other and lined up, an overlap score, the stretches where they are most alike, playback, and a few sentences on why the pair matters.
+- **Relationship list:** the seven pairs, each a sound of war joined to a building sound, with their times and overlap. Click one to open it.
+- **Detail:** fact bullets for each sound (what is on screen, and the background behind it); the two sounds' loudness drawn on top of each other and lined up, with an overlap score, measurements and playback of the real sound; and a footer of other moments in the film that sound like each side, which you can click to hear.
 - **About:** the film, how the map was made, and its limits.
 
-Three pairs are cut together in the film itself. For the other four, the building sound is the construction moment that measures closest. The pairs and their texts are at the top of `js/app.js`.
+Three pairs are cut together in the film itself. For the other four, the building sound is the construction moment that measures closest. The pairs, their fact bullets and their measurements are at the top of `js/app.js`. Sources are listed in the About box.
 
 The speaker button sets the interface sounds, which come from [UI SFX](https://github.com/romainsimon/uisfx) (MIT code, CC0 audio; vendored in `js/vendor/uisfx.js`).
 
@@ -28,7 +28,7 @@ Then open http://localhost:8000.
 
 **Design tuner:** add `#tune` to the address (e.g. `…/taste-of-cement-map/#tune`) and reload to open a slider panel for every colour, size, radius and spacing value. *Copy values* gives you the CSS to paste into `:root` in `css/style.css`.
 
-**Listening:** the site stores no film audio. Playback is a rough sketch rebuilt from the measurements.
+**Listening:** the page plays short clips of the film's soundtrack from `audio/clips/` (87 clips, about 9.6 minutes in all), one per moment on the page.
 
 ## What's in the repo
 
@@ -37,7 +37,9 @@ index.html, css/, js/app.js    the page, pair data and texts (no build step)
 js/tuner.js                    design tuner (opens with #tune)
 js/sfx.js                      interface sounds (wraps UI SFX)
 js/vendor/uisfx.js             UI SFX 0.4.0 runtime (MIT; audio CC0)
-js/compare.js                  alignment, overlap score, waveform drawing, playback
+js/compare.js                  alignment, overlap score, similar-moment search, waveform drawing, clip playback
+audio/clips/                   short excerpts of the soundtrack, one per moment on the page
+data/clips.json                each clip's start and length in film time
 fonts/                         Figtree (SIL Open Font License)
 data/data.json                 5,098 per-second measurements (analysis output; not used by the page)
 data/impacts.json              75 impact events
@@ -49,7 +51,7 @@ FINDINGS.md                    what the analysis found, with timestamps to verif
 WRITEUP_DRAFT.md               draft of the 2-page explanation
 ```
 
-**The repo contains no audio or video from the film**, only numbers derived from it. `.gitignore` blocks media files so they can't be committed by accident.
+**The repo contains no video and no full audio from the film.** It holds only the short study clips in `audio/clips/`, about 9.6 minutes in all, which the page plays. All rights belong to the film's makers. `.gitignore` blocks every other media file so the film can't be committed by accident.
 
 ## Reproducing the analysis
 

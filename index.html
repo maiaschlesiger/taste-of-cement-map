@@ -30,61 +30,91 @@
 </header>
 
 <main>
-  <section class="card strip-card" aria-label="Where the pairs fall in the film">
-    <p class="lede">Syrian workers build a tower in Beirut while the war goes on at home. The film ties the two together through sound. Pick a pair to hear how close they are.</p>
-    <div class="strip-box">
-      <svg id="strip" role="group" aria-label="Film strip: sounds of war above, building sounds below, joined in pairs"></svg>
-      <div class="tip" id="tip" hidden></div>
-    </div>
+  <section class="card list-card" aria-label="The seven relationships">
+    <div class="rels" id="rels"></div>
   </section>
 
-  <section class="card pair-card" id="pairCard" aria-live="polite">
-    <div class="pair-info">
-      <div class="pair-nav">
-        <button class="btn icon" id="prev" aria-label="Previous pair"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3 5 8l5 5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-        <span class="pdots" id="pNum" role="group" aria-label="Pairs"></span>
-        <button class="btn icon" id="next" aria-label="Next pair"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m6 3 5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-      </div>
+  <section class="card detail" id="detail" aria-live="polite">
+    <div class="d-head">
       <h2 id="pTitle"></h2>
       <div class="chips">
         <span class="chip war" id="pWar"></span>
         <span class="chip build" id="pBuild"></span>
         <span class="tag" id="pHow"></span>
       </div>
-      <p class="why" id="pWhy"></p>
-      <p class="hear mute" id="pHear"></p>
     </div>
 
-    <div class="pair-sound">
-      <div class="sound-head">
-        <div class="score"><svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="52" class="ring-bg"/><circle cx="60" cy="60" r="52" class="ring" id="ring"/></svg><div><b id="pct">0%</b></div></div>
-        <div class="key">
-          <span><i class="k-war"></i>War</span><span><i class="k-build"></i>Building</span><span><i class="k-both"></i>Most alike</span>
-        </div>
+    <div class="d-body">
+      <div class="d-text">
+        <h3 class="side war"><i></i><span id="warHead"></span></h3>
+        <ul class="facts" id="warFacts"></ul>
+        <h3 class="side build"><i></i><span id="buildHead"></span></h3>
+        <ul class="facts" id="buildFacts"></ul>
       </div>
-      <div class="wave-box"><canvas id="wave" height="230" aria-label="The two sounds overlapped"></canvas></div>
-      <div class="playrow">
-        <button class="btn primary" id="playBoth"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3.5v9l7-4.5Z" fill="currentColor"/></svg>Play both</button>
-        <button class="btn" id="playWar">War</button>
-        <button class="btn" id="playBuild">Building</button>
-        <label class="chk"><input type="checkbox" id="pAlign" checked> Line them up <span class="mute" id="pShift"></span></label>
+      <div class="d-sound">
+        <div class="sound-head">
+          <div class="score"><svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="52" class="ring-bg"/><circle cx="60" cy="60" r="52" class="ring" id="ring"/></svg><div><b id="pct">0%</b></div></div>
+          <div class="key">
+            <span><i class="k-war"></i>War</span><span><i class="k-build"></i>Building</span><span><i class="k-both"></i>Most alike</span>
+          </div>
+        </div>
+        <div class="wave-box"><canvas id="wave" height="140" aria-label="The two sounds overlapped"></canvas></div>
+        <div class="playrow">
+          <button class="btn primary" id="playBoth"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3.5v9l7-4.5Z" fill="currentColor"/></svg>Play both</button>
+          <button class="btn" id="playWar">War</button>
+          <button class="btn" id="playBuild">Building</button>
+          <label class="chk"><input type="checkbox" id="pAlign" checked> Line them up <span class="mute" id="pShift"></span></label>
+        </div>
+        <h3 class="share">What they share</h3>
+        <ul class="facts" id="linkFacts"></ul>
       </div>
     </div>
+
+    <footer class="d-foot">
+      <h3>Other moments in the film that sound like this <span class="mute">Closest first. Click one to hear it</span></h3>
+      <div id="moments"></div>
+    </footer>
   </section>
 </main>
 
 <dialog class="card about" id="about" aria-labelledby="aboutTitle">
   <button class="btn icon close" id="aboutClose" aria-label="Close">×</button>
   <h2 id="aboutTitle">About this map</h2>
-  <p>Taste of Cement (Ziad Kalthoum, 2017) follows Syrian men building a high-rise in Beirut while their own cities are bombed. A curfew keeps them in the building's foundations after dark, and the film barely lets them speak. Its sound tells the story instead: drills and engines on the site keep turning into tanks, shells and helicopters.</p>
-  <h3>How it was made</h3>
-  <p>Each sound of war was picked out by watching the film. Three are paired with the building sound the film cuts to. The other four are paired with the construction moment that measures closest in tone, loudness and rhythm. The percentage compares those measurements after lining the two sounds up.</p>
-  <h3>Limits</h3>
+  <h3>The film</h3>
   <ul>
-    <li>The page holds no audio from the film, only measurements of it. Playback is a rough sketch rebuilt from those numbers.</li>
-    <li>A high percentage means the measurements are close, not that the sounds are identical.</li>
+    <li>Taste of Cement: documentary, 2017, 85 minutes, directed by Ziad Kalthoum</li>
+    <li>Kalthoum defected from the Syrian army in 2013 and moved to Beirut, where he made the film</li>
+    <li>Syrian workers build a skyscraper in Beirut while their homes in Syria are shelled; they may not leave the site after 7 pm</li>
+    <li>The narrator's father was also a builder who worked in Beirut</li>
+    <li>The narration ends: “Since the end of the war Beirut keeps building” (Lebanon's civil war ran from 1975 to 1990)</li>
+    <li>Sound design: Sebastien Tesch and Ansgar Frerich</li>
   </ul>
-  <p class="mute small">Taste of Cement is directed by Ziad Kalthoum; all rights belong to its makers.</p>
+  <h3>Syrians in Lebanon</h3>
+  <ul>
+    <li>On 3 April 2014, registered Syrian refugees in Lebanon passed one million, about a quarter of the country's population</li>
+    <li>By October 2014, at least 45 Lebanese municipalities had imposed curfews on Syrian refugees</li>
+    <li>Before 2011, an estimated 300,000 Syrians already worked in Lebanon, many in construction</li>
+  </ul>
+  <h3>How it was made</h3>
+  <ul>
+    <li>Every sound of war was picked out by watching the film</li>
+    <li>Pairs 2, 3 and 7: the building sound was also picked by watching. Pairs 1, 4, 5 and 6: by searching the soundtrack for the closest-sounding building moment</li>
+    <li>Overlap compares tone, loudness shape and level after lining the two sounds up. A random pair of moments from the film scores about 40–55%</li>
+    <li>“Other moments” are found by searching every second of the soundtrack for similar tone and rhythm</li>
+    <li>The clips are short excerpts of the film's soundtrack, used for study; all rights belong to the film's makers</li>
+  </ul>
+  <h3>Sources</h3>
+  <ul class="src">
+    <li><a href="https://www.hrw.org/news/2014/10/03/lebanon-least-45-local-curfews-imposed-syrian-refugees" target="_blank" rel="noopener">Human Rights Watch, curfews on Syrian refugees in Lebanon (2014)</a></li>
+    <li><a href="https://www.rferl.org/a/syria-million-refugees-lebanon/25319499.html" target="_blank" rel="noopener">UNHCR milestone of one million refugees, via RFE/RL (2014)</a></li>
+    <li><a href="https://www.ecoi.net/en/document/297248" target="_blank" rel="noopener">Human Rights Watch, barrel bombs and air attacks in Syria</a></li>
+    <li><a href="https://www.globalsecurity.org/wmd/library/news/syria/2011/syria-110425-voa02.htm" target="_blank" rel="noopener">VOA, tanks enter Daraa (25 April 2011)</a></li>
+    <li><a href="https://www.defenseone.com/ideas/2016/07/weapons-syrian-war-tanks/129621/" target="_blank" rel="noopener">Defense One, tanks of the Syrian war</a></li>
+    <li><a href="https://newarab.com/opinion/digging-survival-inside-eastern-ghoutas-underground-shelters" target="_blank" rel="noopener">The New Arab, Eastern Ghouta's underground shelters</a></li>
+    <li><a href="https://www.aljazeera.com/news/2015/8/21/qa-syrias-white-helmets" target="_blank" rel="noopener">Al Jazeera, Syria's White Helmets (2015)</a></li>
+    <li><a href="https://www.arab-reform.net/publication/the-syrian-diaspora-in-lebanon-between-a-lack-of-policy-and-a-policy-of-alienation/" target="_blank" rel="noopener">Arab Reform Initiative, Syrian workers in Lebanon</a></li>
+    <li><a href="https://www.eyeforfilm.co.uk/search/title/Taste Of Cement" target="_blank" rel="noopener">Eye for Film review (the 7 pm curfew)</a> · <a href="https://reverseshot.org/features/2408/taste_of_cement" target="_blank" rel="noopener">Reverse Shot review (the narrator's father)</a></li>
+  </ul>
 </dialog>
 <!-- PAGE:END -->
 

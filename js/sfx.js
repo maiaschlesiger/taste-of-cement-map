@@ -19,7 +19,7 @@
   if (!PACKS.some(p => p[0] === cfg.pack)) cfg.pack = "soft";
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(cfg)); } catch (e) { /* ignore */ } };
 
-  // one shared AudioContext for UI SFX, the data voice, and the comparison sketch
+  // one shared AudioContext for UI SFX and the film clips
   let ctx = null, master = null, ui = null, uiLoading = null;
   function ac() {
     if (!ctx) {

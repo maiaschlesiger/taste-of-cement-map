@@ -1,6 +1,6 @@
 /* Comparison engine: two six-second windows of the soundtrack, lined up where they are most alike.
-   Uses data/fine.json (50 fps loudness envelope, 20 fps 12-band spectrum). No film audio is stored;
-   playback is a rough sketch rebuilt from those measurements. */
+   Measures from data/fine.json (50 fps loudness envelope, 20 fps 12-band spectrum).
+   Plays short clips of the film's soundtrack from audio/clips/. */
 (() => {
   "use strict";
   const W = 6, PRE = 2, LAGMAX = 2;           // window length, seconds before the chosen moment, max shift (s)
@@ -49,7 +49,9 @@
     const z = a => { const m = a.reduce((p, q) => p + q, 0) / a.length, sd = Math.sqrt(a.reduce((p, q) => p + (q - m) ** 2, 0) / a.length) || 1; return [a.map(v => (v - m) / sd), m]; };
     const [za, ma] = z(ea), [zb, mb] = z(eb); let corr = 0; for (let i = 0; i < n; i++) corr += za[i] * zb[i]; corr /= n;
     let dot = 0, na = 0, nn = 0; for (let b = 0; b < F.nb; b++) { const x = pa[b] / (k || 1) - meanBand[b], y = pb[b] / (k || 1) - meanBand[b]; dot += x * y; na += x * x; nn += y * y; }
-    return { corr, tim: dot / (Math.sqrt(na * nn) || 1), lvl: 1 - Math.min(1, Math.abs(ma - mb) / 60) };
+    // spectral centre of each window, in bands (energy-weighted)
+    const cen = p => { let a = 0, e = 0; for (let b = 0; b < F.nb; b++) { const x = Math.pow(10, (p[b] / (k || 1)) / 255 * 104 / 10); a += b * x; e += x; } return a / (e || 1); };
+    return { corr, tim: dot / (Math.sqrt(na * nn) || 1), lvl: 1 - Math.min(1, Math.abs(ma - mb) / 60), dcen: Math.abs(cen(pa) - cen(pb)) };
   }
   function align(a0, b0) {
     const L = LAGMAX * BF; let best = { lag: 0, v: -9 };
@@ -86,7 +88,9 @@
       if (!on && st >= 0) { if (i - st >= 6) regs.push({ a: st, b: i, m: sm.slice(st, i).reduce((x, y) => x + y, 0) / (i - st) }); st = -1; }
     }
     regs.sort((x, y) => (y.b - y.a) * y.m - (x.b - x.a) * x.m);
-    const top = regs.slice(0, 2).map(r => ({ ...r, kind: regionKind(a0, b0 + lag, r) })).sort((x, y) => x.a - y.a);
+    const top = regs.slice(0, 1).map(r => ({ ...r, kind: regionKind(a0, b0 + lag, r) })).sort((x, y) => x.a - y.a);
+    // join neighbouring stretches of the same kind
+    for (let i = top.length - 1; i > 0; i--) if (top[i].kind === top[i - 1].kind && top[i].a - top[i - 1].b <= 12) { top[i - 1].b = top[i].b; top.splice(i, 1); }
     return { score, regs: score >= 30 ? top : [] };
   }
 
@@ -96,6 +100,33 @@
       const a0 = Math.round((ta - PRE) * BF), b0 = Math.round((tb - PRE) * BF), lag = align(a0, b0);
       const res = analyse(a0, b0, lag);
       return { a0, b0, lag, lagSec: lag / BF, score: res.score, regs: res.regs };
+    });
+  }
+  // other moments in the film that sound like the moment at t (seconds).
+  // Scans every second of the soundtrack with the same six-second window. Ranks by tone (spectral profile)
+  // and loudness shape, keeps only windows of similar loudness and brightness, skips quiet windows and the ranges in
+  // `avoid` ([from, to] seconds, with a 20 s margin), and keeps the best n at least `gap` seconds apart
+  // so the matches spread across the film.
+  const simCache = {};
+  function similar(t, avoid, n, gap) {
+    n = n || 6; gap = gap || 90;
+    const key = [t, n, gap].concat(avoid.map(r => r.join("-"))).join("|");
+    if (simCache[key]) return Promise.resolve(simCache[key]);
+    return load().then(() => {
+      const a0 = Math.round((t - PRE) * BF), end = Math.floor(F.nf / BF) - W + PRE, cand = [];
+      for (let s = PRE; s <= end; s++) {
+        if (avoid.some(([lo, hi]) => s > lo - 20 && s < hi + 20)) continue;
+        const b0 = Math.round((s - PRE) * BF);
+        let m = 0; for (let i = 0; i < W * BF; i += 4) m += env20(b0 + i); m /= W * BF / 4;
+        if (m < 130) continue;
+        const ws = windowStats(a0, b0);
+        if (ws.lvl < 0.6 || ws.dcen > 1.5) continue;
+        cand.push({ t: s, v: 0.6 * ws.tim + 0.4 * ws.corr - 0.2 * ws.dcen });
+      }
+      cand.sort((x, y) => y.v - x.v);
+      const pick = [];
+      for (const c of cand) { if (pick.every(p => Math.abs(p.t - c.t) >= gap)) pick.push(c); if (pick.length >= n) break; }
+      simCache[key] = pick; return pick;
     });
   }
   function hear(c) {
@@ -127,10 +158,13 @@
     const Y = v => base - Math.max(0, Math.min(1, (v - lo) / ((hi - lo) || 1))) * H * 0.92;
     g.clearRect(0, 0, w, h);
     g.textBaseline = "middle"; g.textAlign = "left";
+    let lastEnd = -99;
     c.regs.forEach((r, i) => {
       const x0 = X(r.a / BF), x1 = X(r.b / BF), k = Math.min(1, Math.max(0, o.progress * 3 - i * 0.4));
       g.globalAlpha = k; g.fillStyle = css("--canvas"); g.fillRect(x0, top - 8, x1 - x0, H + 8);
-      g.fillStyle = css("--ink"); g.font = `600 12.5px ${css("--font")}`; g.fillText(LABEL[r.kind][0], x0 + 4, 14 + (1 - k) * 6);
+      g.fillStyle = css("--ink"); g.font = `600 12.5px ${css("--font")}`;
+      const txt = LABEL[r.kind][0], tw = g.measureText(txt).width, tx = Math.min(x0 + 4, w - padR - tw);
+      if (tx > lastEnd + 10) { g.fillText(txt, tx, 14 + (1 - k) * 6); lastEnd = tx + tw; }
       g.globalAlpha = 1;
     });
     g.strokeStyle = css("--line"); g.lineWidth = 1; g.beginPath(); g.moveTo(padL, base); g.lineTo(w - padR, base); g.stroke();
@@ -142,28 +176,34 @@
     if (o.playT != null) { g.strokeStyle = css("--ink"); g.lineWidth = 1.5; g.beginPath(); g.moveTo(X(o.playT), top - 8); g.lineTo(X(o.playT), base + 4); g.stroke(); }
   }
 
-  // ---------- playback: 12 band-limited noise voices following the measured band levels ----------
-  let nodes = [];
-  function stop() { nodes.forEach(n => { try { n.stop(); } catch (e) { /* already stopped */ } }); nodes = []; }
-  function play(starts) {
-    stop();
-    const ctx = window.SFX && window.SFX.ctx; if (!ctx || !F) return false;
-    const out = window.SFX.out, t0 = ctx.currentTime + 0.05, gain = starts.length > 1 ? 0.75 : 1;
-    const len = ctx.sampleRate * (W + 0.5), buf = ctx.createBuffer(1, len, ctx.sampleRate), d = buf.getChannelData(0);
-    for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
-    starts.forEach(st => {
-      const f0 = Math.round(st * BF);
-      for (let b = 0; b < F.nb; b++) {
-        const src = ctx.createBufferSource(), bp = ctx.createBiquadFilter(), g = ctx.createGain();
-        src.buffer = buf; bp.type = "bandpass"; bp.frequency.value = F.hz[b]; bp.Q.value = 2.2;
-        g.gain.setValueAtTime(0, t0);
-        for (let i = 0; i < W * BF; i++) { const v = band(f0 + i, b); const a = Math.pow(10, ((v / 255) * 104 - 104) / 20) * 6 * gain; g.gain.linearRampToValueAtTime(Math.min(0.5, a), t0 + i / BF); }
-        g.gain.linearRampToValueAtTime(0, t0 + W + 0.05);
-        src.connect(bp).connect(g).connect(out); src.start(t0); src.stop(t0 + W + 0.1); nodes.push(src);
-      }
-    });
-    return true;
+  // ---------- playback: short clips of the film's soundtrack (audio/clips/<seconds>.mp3) ----------
+  // data/clips.json maps each moment (seconds) to [clip start, clip length] in film time.
+  let clipMap = null, nodes = [];
+  const bufs = {};
+  const clips = () => clipMap ? Promise.resolve(clipMap) : fetch("data/clips.json").then(r => r.json()).then(m => (clipMap = m));
+  const ctx = () => window.SFX && window.SFX.ctx;
+  function buffer(t) {
+    if (!bufs[t]) bufs[t] = fetch(`audio/clips/${t}.mp3`).then(r => r.arrayBuffer()).then(a => new Promise((ok, no) => ctx().decodeAudioData(a, ok, no)));
+    return bufs[t];
   }
+  function stop() { nodes.forEach(n => { try { n.stop(); } catch (e) { /* already stopped */ } }); nodes = []; }
+  // items: [{ t: moment (key in clips.json), from: film second to start at }]; plays W seconds of each, together
+  function play(items) {
+    stop();
+    const c = ctx(); if (!c) return Promise.resolve(false);
+    return clips().then(m => Promise.all(items.map(it => buffer(it.t).then(buf => ({ it, buf, clip: m[it.t] }))))).then(list => {
+      stop();
+      const t0 = c.currentTime + 0.03, gain = list.length > 1 ? 0.75 : 1;
+      list.forEach(({ it, buf, clip }) => {
+        const src = c.createBufferSource(), g = c.createGain();
+        src.buffer = buf; g.gain.value = gain;
+        const off = Math.max(0, Math.min(buf.duration - 0.1, it.from - clip[0]));
+        src.connect(g).connect(c.destination); src.start(t0, off, Math.min(W, buf.duration - off)); nodes.push(src);
+      });
+      return true;
+    }).catch(() => false);
+  }
+  function preload(ts) { clips().then(() => { if (ctx()) ts.forEach(buffer); }); }
 
-  window.COMPARE = { W, PRE, BF, load, compare, hear, draw, play, stop };
+  window.COMPARE = { W, PRE, BF, load, compare, similar, hear, draw, play, stop, preload };
 })();

@@ -2,7 +2,7 @@
 
 Every visual, interaction, motion, sound and copy rule used in the site. Values come from `css/style.css` (`:root`), `js/app.js`, `js/compare.js` and `js/sfx.js`. When this document and the code disagree, the code wins: update this file.
 
-The site is one page. A film strip shows where seven sounds of war fall in the film and links each one to a building sound. Under it, the chosen pair is compared and explained. There are no tabs, no filters and no separate comparison page.
+The site is one page. On the left, a list of seven relationships, each a sound of war joined to a building sound. On the right, the chosen relationship: fact bullets for each sound, the two sounds compared and played from the film, and a footer of other moments in the film that sound like each side. There are no tabs, no filters and no separate comparison page.
 
 ---
 
@@ -10,10 +10,10 @@ The site is one page. A film strip shows where seven sounds of war fall in the f
 
 1. **Selected moments, not every sound.** The page shows only the pairs picked by watching the film. It does not map every second of the soundtrack, and it does not show the sound classifier's labels, which were unreliable.
 2. **Compare in context.** The sound comparison and the explanation of why it matters sit side by side, on the same card.
-3. **For a visitor with no context.** One opening sentence sets the scene. Each pair gets two or three sentences, not more.
+3. **Facts, not prose.** Every written part is a bullet list of checkable facts: what is on screen, the background behind each sound, and measurements of the sound itself. Each outside fact has a source listed in About.
 4. **Two worlds, two colours.** War is orange, building is blue. Everything else is ink, grey or white.
 5. **Quiet chrome.** White cards on a pale grey canvas, separated by space. No borders, no dividers, almost no shadow.
-6. **One screen.** On a laptop (1280×800 and up) the whole page fits with no scroll.
+6. **Nearly one screen.** At 1440×900 the page fits with no scroll; at 1280×800 it scrolls about 30px.
 
 ### Banned patterns
 
@@ -51,7 +51,7 @@ All tokens live on `:root` in `css/style.css`. The design tuner (`#tune`) edits 
 |---|---|---|
 | `--canvas` | `#f4f4f5` | Page background; secondary buttons, chips, the "most alike" shading |
 | `--card` | `#ffffff` | Cards, menus, the About dialog |
-| `--ink` | `#1f1f23` | Text, primary button, selected link on the strip, score ring, playhead |
+| `--ink` | `#1f1f23` | Text, primary button, selected row number and connector, score ring, playhead |
 | `--mute` | `#7c7c85` | Secondary text, lane labels, minute labels, times in chips |
 | `--line` | `#e4e4e7` | Strip lanes, unselected links, hover fill on secondary controls |
 | `--c-bomb` | `#ff6a1f` | War: dots, chip dot, waveform line |
@@ -89,8 +89,8 @@ Use only two text tones, `--ink` and `--mute`.
 | `--gap` | 16px | Between cards |
 | `--pad-card` | 24px (18px small screens) | Card padding |
 | `--maxw` | 1320px | Max content width |
-| `--strip-h` | 150px (170px small screens) | Film strip height |
-| `--info-w` | 380px | Text column of the pair card |
+| `--list-w` | 330px | Relationship list column |
+| `--text-w` | 360px | Text column inside the detail card |
 
 No borders anywhere. Menus use `0 12px 32px rgb(20 20 30 / .12)`.
 
@@ -99,68 +99,78 @@ No borders anywhere. Menus use `0 12px 32px rgb(20 20 30 / .12)`.
 ## 3. Layout
 
 ```
-Header      Brand (mark, "Taste of Cement", "War and work, side by side")      [About] [sound]
-Strip card  Opening sentence
-            War, Syria        ──●1────────────●2●3──●4●5●6●7──────
-                                 ╲             │ │   ╲ ╲ ╲  ╲
-            Building, Beirut  ──●●─●──────●────●─●────────────●──
-                              0   10 min  20 min …            80 min
-Pair card   [‹] ○○●○○○○ [›]                | (98%)  ● War  ● Building  ▭ Most alike
-            Title                          | waveform canvas, 6 seconds
-            [● war, time] [● building, time] | [Play both] [War] [Building]   ☑ Line them up
-            How the pair was found         |
-            Why it matters (16px)          |
-            What you hear (muted)          |
+Header   Brand (mark, "Taste of Cement", "War and work, side by side")              [About] [sound]
+
+List card (sticky)            Detail card
+ ① ● A tank moving   51:38     Title: "A tank moving vs machinery moving"
+   │                  97%      [● war, time] [● building, time]  How it was paired
+   ● Machinery moving 53:17
+ ② …                           ● A tank moving          | (97%) ● War ● Building ▭ Most alike
+ …                               • fact                 | waveform, 6 seconds
+ ⑦ …                             • fact                 | [Play both] [War] [Building]  ☑ Line them up
+                               ● Machinery moving       | What they share
+                                 • fact                 |   • fact  • measurements (● war ● building)
+                               Footer: Other moments in the film that sound like this
+                                ● Like the tank moving      [28:51 bombs] [53:45] …
+                                ● Like the machinery moving [46:39] [1:19:20] …
 ```
 
-At 900px and below the pair card stacks into one column, text first.
+- Above 1100px the detail card has two columns (facts, sound). From 1100px down to 900px they stack inside the card.
+- At 900px and below the list sits above the detail card.
 
 ---
 
 ## 4. Components
 
 ### 4.1 Header
-Brand mark: an orange dot joined to a blue dot by an ink curve, echoing the strip. "About" is a white button with the card shadow. The speaker icon button opens the sound menu.
+Brand mark: an orange dot joined to a blue dot by an ink curve, echoing the list's connector. "About" is a white button with the card shadow. The speaker icon button opens the sound menu.
 
-### 4.2 Film strip (`svg#strip`)
-- Drawn in SVG by `drawStrip()`; redrawn on resize and when the selection changes.
-- Two lanes (2px `--line`): "War, Syria" on top, "Building, Beirut" below. Lane labels sit in a 112px left gutter; on screens under 600px they sit above the top lane and below the bottom lane.
-- Time runs left to right over the whole film (84:58). Minute labels every 10 minutes (every 20 under 600px), no gridlines.
-- **War dot:** orange, radius 10 (12 when selected), white pair number inside.
-- **Building dot:** blue, radius 7 (9 when selected).
-- **Link:** an S-curve from war dot to building dot. Unselected 2px `--line`; hover `--mute`; selected 2.5px `--ink`, drawn on top.
-- Dots that would overlap on a lane are nudged apart (gap = 2r + 3) and kept inside the lane.
-- Each pair is one focusable group (`role="button"`) with a 14px invisible hit stroke along the link.
-- **Tooltip:** a dark pill on hover: "3 A tank firing 54:14 · Drilling a wall 54:27".
+### 4.2 Relationship list (`#rels`)
+- Seven rows, no intro text. The list card sticks to the top of the viewport while the page scrolls.
+- **Row:** number in a 22px circle; the war sound (orange dot, label, time) above the building sound (blue dot, label, time), joined by a 2px vertical connector; the overlap percentage on the right.
+- Hover fills the row with `--canvas`. The selected row keeps that fill, its number circle turns ink and its connector turns ink.
+- Labels truncate with an ellipsis rather than wrap.
 
-### 4.3 Pair card: text column
-- Prev/next icon buttons around seven progress dots (6px; current `--ink`, others `--line`, hover `--mute`). Each dot opens its pair. The buttons are disabled at the ends.
-- Title: "War sound vs building sound", e.g. "A tank firing vs drilling a wall".
-- Two chips: coloured dot, label, time in `--mute`.
-- How it was found, muted: "Cut together in the film" or "Closest-sounding building moment".
-- Why it matters: the curated text for the pair (16px).
-- What you hear: generated, muted, one sentence (see 8.3).
+### 4.3 Detail card: head and facts
+- Title: "War sound vs building sound".
+- Chips: coloured dot, label, time in `--mute`. Then how it was paired, muted: "Paired by watching the film" or "Building moment picked by measurement".
+- **War sound facts:** a heading with an orange dot and the sound's name, then bullets: what is on screen and when, then background facts about that kind of sound in Syria's war.
+- **Building sound facts:** a heading with a blue dot, then bullets: what is on screen and when (or how the moment was picked), then background about the site and its workers.
+- Bullets are 13.5px (13px at 1366px and below), 1.5 line height, with grey markers.
 
-### 4.4 Pair card: sound column
-- **Score ring:** 72px, 11px stroke, `--ink` on `--canvas`, percentage in the middle (18px / 700). No label under it.
+### 4.4 Detail card: sound and "What they share"
+- **Score ring:** 64px, 11px stroke, `--ink` on `--canvas`, percentage in the middle (16px / 700).
 - **Key:** War (orange dot), Building (blue dot), Most alike (grey bar).
-- **Waveform** (`canvas#wave`, 230px tall):
-  - six seconds, starting two seconds before each moment
-  - two loudness lines (2.25px), war orange on top of building blue, smoothed over 140 ms
-  - scaled to this pair: from the 2nd percentile to the maximum of both windows
-  - "Most alike" stretches shaded `--canvas`, each labelled above in 12.5px / 600, at most two
-  - seconds 0–6 along the bottom; a 1px baseline in `--line`
-  - an ink playhead while playing
-- **Play row:** "Play both" (primary, with play icon), "War", "Building". The playing button turns ink. "Line them up" checkbox on the right, with the shift in seconds in `--mute`.
+- **Waveform** (`canvas#wave`, 140px tall): six seconds starting two seconds before each moment; two loudness lines, war orange over building blue, smoothed and scaled to the pair; the single most-alike stretch shaded `--canvas` and labelled; an ink playhead while playing.
+- **Play row:** "Play both" (primary), "War", "Building". These play the film's real sound. A button pulses while its clip loads and turns ink while playing; clicking it again stops. "Line them up" on the right, with the shift in seconds.
+- **What they share:** bullets. First, facts about how the two relate in the film (cut together, minutes apart). Then four measurements, each showing the war value after an orange dot and the building value after a blue dot:
+  - louder than this much of the film (% of non-silent seconds)
+  - energy below 250 Hz (bass)
+  - tone centre (spectral centroid, Hz)
+  - sharp hits per second (onsets)
+- Last, the most-alike stretch: "Most alike from 2.5 to 3.0 seconds: same sharp edge, the same metallic crack".
 
-### 4.5 About dialog
-A native `<dialog>` card, 560px max. Sections: the film, How it was made, Limits, credit line. Closes with ×, Escape or a click on the backdrop (`rgb(20 20 30 / .25)`).
+### 4.5 Footer: other moments that sound like this
+- A `--canvas` panel at the bottom of the detail card. Heading, plus muted hint "Closest first. Click one to hear it".
+- Two rows, one per side: a coloured dot with "Like the tank moving" / "Like the machinery moving", then up to six time chips.
+- **Chip:** white pill with the time in 600 weight. If the time falls on a moment identified by watching the film, its name follows ("28:51 bombs"). Clicking plays six seconds of the film's real sound, from two seconds before that time; the chip pulses while loading, turns ink while playing, and stops on a second click.
+- While the search runs, the row reads "Listening through the film…".
+- **How matches are found** (`COMPARE.similar()`):
+  - every second of the soundtrack is tried with the same six-second window
+  - quiet windows (mean envelope under 130 of 255), windows of very different loudness (level match under 0.6) and windows whose tone centre is more than 1.5 bands away are skipped
+  - anything within 20 s of the pair's own moments, or of the scene they belong to, is skipped
+  - ranked by 0.6 × tone similarity + 0.4 × loudness-shape correlation − 0.2 × tone-centre distance
+  - the best six that are at least 90 s apart are kept, so matches spread across the film instead of bunching in one scene
+- No percentages on the chips: almost every match scores near 100% on the pair measure, so the number would say nothing. Order alone shows closeness.
 
-### 4.6 Sound menu
-Opens under the speaker button. Rows: Sound on and volume, Sound pack with a try button, then one cue select per event with a try button. Credit line for UI SFX.
+### 4.6 About dialog
+A native `<dialog>` card, 560px max, scrolling inside if taller than the window. All bullets: The film, Syrians in Lebanon, How it was made, Sources (links). Closes with ×, Escape or a click on the backdrop.
 
-### 4.7 Design tuner (`#tune`)
-Slider panel for every token in section 2, including the two sound colours, strip height and text column width. "Copy values" gives CSS for `:root`.
+### 4.7 Sound menu
+Opens under the speaker button: Sound on and volume, Sound pack with a try button, one cue select per event with a try button, UI SFX credit.
+
+### 4.8 Design tuner (`#tune`)
+Slider panel for every token in section 2, including the two sound colours, list width and text column width. "Copy values" gives CSS for `:root`.
 
 ---
 
@@ -168,15 +178,14 @@ Slider panel for every token in section 2, including the two sound colours, stri
 
 | Action | Result |
 |---|---|
-| Click or tap a pair on the strip (dot or link) | Selects it; strip redraws; pair card fills |
-| Enter or Space on a focused pair | Same as click |
-| ← / → keys, the ‹ › buttons, or a progress dot | Previous / next pair, or that pair |
-| Hover a pair | Tooltip; link turns grey |
-| Play both / War / Building | Plays six seconds; playhead moves; button turns ink. Starting another stops the first |
-| Untick "Line them up" | The building line slides back to its original timing; tick to align again |
+| Click a relationship row | Selects it; the detail card fills; the footer search runs |
+| ↑ ↓ (or ← →) keys | Previous / next relationship |
+| Play both / War / Building | Plays six seconds; playhead moves; button turns ink. Starting anything else stops it |
+| Click a footer chip | Plays that moment; click again to stop |
+| Untick "Line them up" | The building line slides back to its original timing |
 | About | Opens the dialog |
 
-The first pair is selected on load. Selecting a pair stops any playback.
+The first relationship is selected on load. Selecting another stops any playback.
 
 ---
 
@@ -184,12 +193,12 @@ The first pair is selected on load. Selecting a pair stops any playback.
 
 | Moment | Effect | Duration / easing |
 |---|---|---|
-| Pair selected | Text column items rise 6px and fade in, staggered 30 ms | 400 ms `cubic-bezier(.2,.8,.2,1)` |
+| Relationship selected | Head and text rise 6px and fade in, text 50 ms later | 400 ms `cubic-bezier(.2,.8,.2,1)` |
 | Score | Count up and ring fill | 800 ms, ease-out cubic |
 | Waveform | Lines draw left to right, then the building line slides into alignment | 700 ms + 500 ms, ease-out cubic |
 | "Most alike" labels | Fade in and rise, tied to the line draw | — |
 | Line them up toggle | Building line slides | 450 ms |
-| Strip dot selected | Radius grows | 200 ms |
+| Footer chip press | Scale 0.96 | 120 ms |
 | Button press | Scale 0.97 | 120 ms |
 
 With `prefers-reduced-motion`, all of these are instant.
@@ -203,40 +212,46 @@ With `prefers-reduced-motion`, all of these are instant.
 | Event | Default cue | Alternatives |
 |---|---|---|
 | Choose a pair | select | press, check |
-| Hover a pair | hover | focus |
+| Hover a pair in the list | hover | focus |
 | Play a sound | play | start |
 | Open a menu | expand | open |
 
 Every event can be set to Off.
 
-- **Playback of the film's sounds:** no film audio is stored. `COMPARE.play()` rebuilds a rough sketch: 12 band-pass noise voices (40 Hz to 10 kHz) whose levels follow the measured spectrum at 20 frames a second. "Play both" mixes the two at 0.75 each.
+- **Playback of the film's sounds:** real excerpts of the soundtrack in `audio/clips/<seconds>.mp3` (MP3, 96 kbps, 44.1 kHz stereo, 50 ms fade in, 80 ms fade out). `data/clips.json` maps each moment to its clip's start and length in film time.
+  - Pair moments: 10 s clips from 4 s before the moment, so the lined-up building sound (shifted by up to ±2 s) still has six seconds.
+  - Footer moments: 6 s clips from 2 s before.
+  - 87 clips, 578 s in all (about 9.6 minutes), 6.8 MB. Cut from the 48 kHz AAC track of the film; checked against the measurements to within 0.04 s.
+  - Played through the Web Audio API, straight to the speakers (not through the interface-sound volume). "Play both" mixes the two at 0.75 each.
 
 ---
 
 ## 8. Copy
 
 ### 8.1 Voice
-- Plain, short, active. Written for a museum visitor who has not seen the film.
+- Bullets of facts only, no free prose. Each bullet is one checkable statement, with no full stop at the end.
+- Written for a museum visitor who has not seen the film.
 - Sentence case. No periods in titles, labels or buttons.
 - Places are named only where the film shows them: war footage is from Syria, the building site is in Beirut.
 
 ### 8.2 Fixed strings
-- Opening: "Syrian workers build a tower in Beirut while the war goes on at home. The film ties the two together through sound. Pick a pair to hear how close they are."
-- Lanes: "War, Syria" / "Building, Beirut".
-- How found: "Cut together in the film" / "Closest-sounding building moment".
+- No intro text above the list.
+- How paired: "Paired by watching the film" / "Building moment picked by measurement".
+- Detail headings: the war sound's name, the building sound's name, "What they share". Footer: "Other moments in the film that sound like this", hint "Closest first. Click one to hear it", rows "Like the …".
 - Key: "War", "Building", "Most alike". Buttons: "Play both", "War", "Building", "Line them up", "About".
 
 ### 8.3 Generated text
-- What you hear: "Most alike from 2.2 to 4.6 seconds: same sharp edge, the same metallic crack." The kind of match is one of:
+- "What they share" ends with the most-alike stretch: "Most alike from 2.2 to 4.6 seconds: same sharp edge, the same metallic crack". The kind of match is one of:
   - same deep thud: the low end you feel in your chest
   - same body: the same weight and grain
   - same sharp edge: the same metallic crack
   - hits land together: the same attack, hard to tell apart
-- If nothing lines up: "Little of the two sounds lines up."
-- Stretches are only named when the score is 30% or more.
+- It is only shown when the overlap is 30% or more.
 
-### 8.4 Curated text
-The seven "why it matters" texts live in `PAIRS` at the top of `js/app.js`, next to each pair's times and labels. Edit them there.
+### 8.4 Fact bullets
+- Each relationship in `PAIRS` (top of `js/app.js`) has `warFacts`, `buildFacts` and `linkFacts`. The measurements come from `M`, in the same file.
+- "On screen" bullets come only from moments identified by watching the film. Background bullets come only from the sources listed in About.
+- The names on footer chips come from `SEEN`, the list of moments identified by watching.
 
 ---
 
@@ -244,13 +259,13 @@ The seven "why it matters" texts live in `PAIRS` at the top of `js/app.js`, next
 
 | Pair | War sound | Building sound | Found by | Overlap |
 |---|---|---|---|---|
-| 1 | Bombs 28:53 | Building site 10:01 | measurement | 100% |
-| 2 | A tank moving 51:38 | Machinery moving 53:17 | the film's cut | 97% |
-| 3 | A tank firing 54:14 | Drilling a wall 54:27 | the film's cut | 98% |
-| 4 | Footsteps in tunnels 1:02:16 | Building site 14:26 | measurement | 94% |
-| 5 | Panicked voices 1:03:28 | Building site 43:56 | measurement | 100% |
-| 6 | Digging out survivors 1:04:35 | Building site 10:38 | measurement | 99% |
-| 7 | A helicopter 1:07:47 | The construction lift 1:17:21 | the film's cut | 93% |
+| 1 | Bombs 28:53 | Site machinery 1:19:40 | measurement | 95% |
+| 2 | A tank moving 51:38 | Machinery moving 53:17 | watching | 97% |
+| 3 | A tank firing 54:14 | Drilling a wall 54:27 | watching | 98% |
+| 4 | Footsteps in tunnels 1:02:16 | Site rumble 14:26 | measurement | 94% |
+| 5 | Panicked voices 1:03:28 | Site noise 43:56 | measurement | 100% |
+| 6 | Digging out survivors 1:04:35 | Site machinery 10:38 | measurement | 99% |
+| 7 | A helicopter 1:07:47 | The construction lift 1:17:21 | watching | 93% |
 
 **Overlap score** (`js/compare.js`):
 - Windows are 6 seconds, starting 2 seconds before each moment.
@@ -265,18 +280,18 @@ The seven "why it matters" texts live in `PAIRS` at the top of `js/app.js`, next
 
 ## 10. Responsive
 
-- Above 900px: two-column pair card; the whole page fits 1280×800 and 1440×900 with no scroll.
-- 900px and below: the pair card stacks; the strip grows to 170px.
-- Under 600px: the strip moves its lane labels off the left gutter, smaller dots, minute labels every 20.
-- Side gutter is 16px on phones; no horizontal scroll at 390px.
+- Above 1100px: list column plus a two-column detail card. Fits 1440×900 with no scroll; about 30px of scroll at 1280×800. At 1366px and below the facts column narrows to 320px and bullets drop to 13px.
+- 1100px to 901px: the detail card stacks text above sound.
+- 900px and below: one column, list first. Footer rows stack their label above the chips. Side gutter 16px; no horizontal scroll at 390px.
 
 ---
 
 ## 11. Accessibility
 
-- Each pair on the strip is focusable with a full spoken label (pair number, both sounds, both times).
-- Arrow keys move between pairs; Enter and Space select.
-- The pair card is an `aria-live="polite"` region, so a new selection is announced.
+- Relationship rows are buttons with `aria-pressed`; their text reads both sounds and times.
+- Arrow keys move between relationships.
+- Footer chips are buttons labelled "Play 52:42, tank moving".
+- The detail card is an `aria-live="polite"` region, so a new selection is announced.
 - Focus ring: 2px `--c-tool`, 2px offset.
 - Colour is never the only cue: lanes are labelled, and chips carry text.
 - Reduced motion is respected.
@@ -289,8 +304,10 @@ The seven "why it matters" texts live in `PAIRS` at the top of `js/app.js`, next
 |---|---|
 | `index.html` | The page and the About dialog |
 | `css/style.css` | All tokens and styles |
-| `js/app.js` | Pair data and texts, film strip, pair card, playback controls |
-| `js/compare.js` | Alignment, overlap score, waveform drawing, sketch playback |
+| `js/app.js` | Relationship data, fact bullets and measurements, list, detail card, footer, playback controls |
+| `js/compare.js` | Alignment, overlap score, similar-moment search, waveform drawing, clip playback |
+| `audio/clips/` | Short excerpts of the soundtrack, one per moment on the page |
+| `data/clips.json` | Each clip's start and length in film time |
 | `js/sfx.js` | Interface sounds and the sound menu |
 | `js/tuner.js` | Design tuner |
 | `data/fine.json` | Measurements used by the comparison |
