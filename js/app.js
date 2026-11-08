@@ -27,7 +27,8 @@
   // ---------- the relationships ----------
   // war / build: [seconds, label]. watched: paired by watching the film (else: building moment picked by
   // measurement). warFacts / buildFacts: what is on screen, then what this sound means for the people who
-  // live with it. linkFacts: how the two relate in the film. Sources are listed in About.
+  // live with it. linkFacts: how the two relate in the film. whyFacts: why the filmmakers may have joined
+  // them, from reviews, interviews and the film's history. Sources are listed in About.
   const PAIRS = [
     { war: [1733, "Bombs"], build: [4780, "Site machinery"], watched: false,
       warFacts: [
@@ -40,6 +41,11 @@
         "In a camp study of Syrian refugees in Lebanon, 27% had PTSD at the time and 35% had had it at some point",
         "Being easily startled by sudden noise is one of the core symptoms of PTSD",
       ],
+      whyFacts: [
+        "Critics call construction and destruction the film's \u201ctwin poles\u201d: buildings go up in one place and come down in another",
+        "One review reads the film as following \u201cthe logic of trauma\u201d, repeating itself and linking things that seem unrelated",
+        "51 minutes apart, the bomb returns inside a machine the way a traumatic memory returns: without warning, in the middle of ordinary life",
+      ],
       linkFacts: ["51 minutes apart: the film never cuts between them, so the likeness is in the sound itself"] },
     { war: [3098, "A tank moving"], build: [3197, "Machinery moving"], watched: true,
       warFacts: [
@@ -50,6 +56,11 @@
         "On screen at 53:17: machinery moving on the Beirut site, between the tank shots",
         "Syrians on Lebanese sites work without safety rules, health insurance or union protection, often on thin scaffolding in plastic slippers",
         "92% of Syrian refugee workers in Lebanon have no formal contract",
+      ],
+      whyFacts: [
+        "The Hollywood Reporter notes the bombing footage is cut into the Beirut construction and grows more dissonant as the film goes on",
+        "One festival note sees the crane's arm as a cannon barrel aimed at the city, and hears tanks in the bulldozers' roar",
+        "Some of the film's tank footage is shot from inside the tank, moving through the ruins of Aleppo: both machines are driven by men, one clearing a city and one building it",
       ],
       linkFacts: ["Cut together, 99 seconds apart, in the loudest stretch of the film"] },
     { war: [3254, "A tank firing"], build: [3267, "Drilling a wall"], watched: true,
@@ -63,6 +74,11 @@
         "Half of Syrian refugee workers in an ILO survey had back or joint pain, severe fatigue, or worked in extreme heat or cold",
         "Almost two-thirds breathed dust and fumes at work",
       ],
+      whyFacts: [
+        "Beirut Today headlined its review \u201cWe build, and then we destroy\u201d, noting that the sound of construction becomes tied to the sound of bombs",
+        "Eye for Film describes the war sounds as \u201can attack on the senses\u201d after long stretches of quiet",
+        "Thirteen seconds apart, the drill may make the audience flinch the way a survivor does, which is the point: the work never lets the war go quiet",
+      ],
       linkFacts: ["Cut together, 13 seconds apart; the tank fires again 2 seconds after the drill"] },
     { war: [3736, "Footsteps in tunnels"], build: [866, "Site rumble"], watched: false,
       warFacts: [
@@ -74,6 +90,11 @@
         "14:26: a low rumble on the Beirut site, picked by measurement as the closest sound",
         "The workers may not leave the site after 7 pm; Syrian workers in Lebanon often live on the sites where they work",
         "By 2014, at least 45 Lebanese towns had put Syrian refugees under curfew",
+      ],
+      whyFacts: [
+        "A review notes the workers climb ever higher to pour concrete, then return \u201cto the bowels of the Earth\u201d when the day is done",
+        "Under the 7 pm curfew they live below the tower they build, as people under siege in Syria lived below the bombs",
+        "The same low, muffled rumble in both places suggests one trapped, underground life on both sides of the border",
       ],
       linkFacts: ["Both are low and quiet, without a single sharp hit"] },
     { war: [3808, "Panicked voices"], build: [2636, "Site noise"], watched: false,
@@ -87,6 +108,11 @@
         "The workers are forbidden from speaking about their working conditions",
         "In 2017 Syrian builders asked for a raise from $20 to $22 a day, but did not ask for better living conditions for fear of losing their jobs",
       ],
+      whyFacts: [
+        "Reviews note the soundtrack moves between rhythmic construction noise and empty silence, and the workers barely speak",
+        "The workers are not allowed to talk about their conditions: the film gives the voices to Syria and the silence to Beirut",
+        "Matching the shouting to machinery suggests grief that has nowhere to go except into the noise of the work",
+      ],
       linkFacts: ["Both are bright and busy; only one of them has voices in it"] },
     { war: [3875, "Digging out survivors"], build: [638, "Site machinery"], watched: false,
       warFacts: [
@@ -99,6 +125,11 @@
         "In a 2019 study in Lebanon's Bekaa Valley, only 13% of construction workers had a written contract",
         "More than 58% of the workers in that study were paid below the minimum wage",
       ],
+      whyFacts: [
+        "The Hollywood Reporter notes that cement becomes both a force for building and a sign of destruction",
+        "One reviewer describes a living head emerging from the rubble, \u201ccaked in cement\u201d: the material the men build with is the material that buries their people",
+        "The film asks \u201cWho will rebuild Syria? And when?\u201d The men digging foundations in Beirut cannot dig out their own cities",
+      ],
       linkFacts: ["Both are scraping, high sounds with almost no bass"] },
     { war: [4067, "A helicopter"], build: [4641, "The construction lift"], watched: true,
       warFacts: [
@@ -110,6 +141,11 @@
         "On screen from 1:16:24 to 1:17:21: the construction lift climbing the tower",
         "Nine in ten Syrian refugee families in Lebanon live in extreme poverty",
         "Men who owned land or ran businesses in Syria became low-paid labourers in Lebanon, a loss they describe as damaging their mental health",
+      ],
+      whyFacts: [
+        "Beirut's new towers rise on the ruins of Lebanon's own civil war, built largely by Syrians while their towns are destroyed",
+        "The narrator's father did the same work in Beirut, and the narration ends: \u201cSince the end of the war Beirut keeps building\u201d",
+        "Both engines climb above a city; one carries the men to work, the other carried the bombs that sent them there",
       ],
       linkFacts: ["Nine minutes apart; both are steady, low engine drones"] },
   ];
@@ -165,6 +201,7 @@
     $("#warFacts").innerHTML = li(p.warFacts);
     $("#buildFacts").innerHTML = li(p.buildFacts);
     $("#linkFacts").innerHTML = li(p.linkFacts);
+    $("#whyFacts").innerHTML = li(p.whyFacts);
     renderStats(p);
     const card = $("#detail"); card.classList.remove("enter"); void card.offsetWidth; card.classList.add("enter");
     renderFoot(null, p);

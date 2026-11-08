@@ -13,7 +13,7 @@ The site is one page. On the left, a list of seven relationships, each a sound o
 3. **Human facts, not prose.** Every written part is a bullet list. After one line on what is on screen, each bullet is a sourced fact about what that sound means for the people who live with it: trauma and PTSD, children's fear of aircraft and shouting, life underground, the workers' pay, safety, curfews and silence. Each has a source listed in About.
 4. **Two worlds, two colours.** War is orange, building is blue. Everything else is ink, grey or white.
 5. **Quiet chrome.** White cards on a pale grey canvas, separated by space. No borders, no dividers, almost no shadow.
-6. **Nearly one screen.** At 1440×900 the page fits with no scroll; at 1280×800 it scrolls about 30px.
+6. **The list stays put.** The relationship list is sticky; the detail card scrolls about 100px at 1440×900 and 190px at 1280×800.
 
 ### Banned patterns
 
@@ -149,6 +149,7 @@ Brand mark: an orange dot joined to a blue dot by an ink curve, echoing the list
   - tone centre (spectral centroid, Hz)
   - hits a second (sharp onsets)
 - **What they share:** bullets: how the two relate in the film (cut together, minutes apart), then the most-alike stretch ("Most alike from 2.5 to 3.0 seconds: same sharp edge, the same metallic crack").
+- **Why is their similarity significant?** Three bullets with ink markers under "What they share": what critics, programme notes and the film's own history say about why the filmmakers set these sounds side by side, followed by one reading of what it means for the workers. Readings use "may" or "suggests"; quotes and claims come from the sources in About.
 
 ### 4.5 Footer: other moments that sound like this
 - A `--canvas` panel at the bottom of the detail card. Heading, plus muted hint "Closest first. Click one to hear it".
@@ -249,7 +250,7 @@ Every event can be set to Off.
 - It is only shown when the overlap is 30% or more.
 
 ### 8.4 Fact bullets
-- Each relationship in `PAIRS` (top of `js/app.js`) has `warFacts`, `buildFacts` and `linkFacts`. The measurements come from `M`, in the same file.
+- Each relationship in `PAIRS` (top of `js/app.js`) has `warFacts`, `buildFacts`, `linkFacts` and `whyFacts`. The measurements come from `M`, in the same file.
 - "On screen" bullets come only from moments identified by watching the film. Every other bullet comes from a source listed in About, and is chosen for its human impact rather than for history or engineering.
 - The names on footer chips come from `SEEN`, the list of moments identified by watching.
 
@@ -280,7 +281,7 @@ Every event can be set to Off.
 
 ## 10. Responsive
 
-- Above 1100px: list column plus a two-column detail card. Fits 1440×900 with no scroll; about 30px of scroll at 1280×800. At 1366px and below the facts column narrows to 320px and bullets drop to 13px.
+- Above 1100px: list column plus a two-column detail card. The list is sticky; the page scrolls about 100px at 1440×900 and 190px at 1280×800. At 1366px and below the facts column narrows to 320px and bullets drop to 13px.
 - 1100px to 901px: the detail card stacks text above sound.
 - 900px and below: one column, list first. Footer rows stack their label above the chips. Side gutter 16px; no horizontal scroll at 390px.
 
