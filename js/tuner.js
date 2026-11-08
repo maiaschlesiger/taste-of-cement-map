@@ -17,7 +17,7 @@
       ["--font", "Typeface", "font"],
       ["--fs", "Body size", "range", 11, 18, 0.5, "px"],
       ["--fs-small", "Small text", "range", 10, 15, 0.5, "px"],
-      ["--fs-h2", "Card title", "range", 14, 30, 0.5, "px"],
+      ["--fs-h2", "Title (same as body by default)", "range", 12, 30, 0.5, "px"],
       ["--fs-h1", "Site name", "range", 12, 24, 0.5, "px"],
       ["--fs-h3", "Section title", "range", 11, 22, 0.5, "px"],
       ["--fw-body", "Body weight", "range", 300, 500, 10, ""],
@@ -29,7 +29,8 @@
       ["--card", "Cards", "color"],
       ["--ink", "Text", "color"],
       ["--mute", "Secondary text", "color"],
-      ["--line", "Hover fill", "color"],
+      ["--line", "Selected row and most-alike shading", "color"],
+      ["--fill", "Button fill", "color"],
       ["--accent", "Accent", "color"],
     ]],
     ["Sound colours", [

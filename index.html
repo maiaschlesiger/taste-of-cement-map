@@ -13,75 +13,64 @@
 <body>
 <!-- PAGE:START -->
 <header class="site">
-  <div class="brand">
-    <svg class="mark" viewBox="0 0 32 32" aria-hidden="true">
-      <circle cx="10" cy="9" r="5" fill="var(--c-bomb)"/><circle cx="22" cy="23" r="4" fill="var(--c-tool)"/>
-      <path d="M10 14C10 19 22 14 22 19" fill="none" stroke="var(--ink)" stroke-width="1.6" stroke-linecap="round"/>
-    </svg>
-    <span class="brand-text"><b>Taste of Cement</b><small>War and work, side by side</small></span>
-  </div>
-  <div class="hdr-right">
-    <button class="btn" id="aboutBtn">About</button>
+  <div class="brand"><b>Taste of Cement</b><span>War and work, side by side</span></div>
+  <nav class="hdr-right" aria-label="Page">
+    <button class="tlink" id="aboutBtn">About</button>
     <div class="dd sfx-dd">
-      <button class="iconbtn" id="sfxBtn" aria-haspopup="true" aria-expanded="false" aria-label="Sound settings"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 8h3l4-3.5v11L6 12H3Z" fill="currentColor"/><path id="sfxWaves" d="M13 7.5c1 .8 1.5 1.6 1.5 2.5s-.5 1.7-1.5 2.5M15 5.5c1.6 1.3 2.5 2.8 2.5 4.5s-.9 3.2-2.5 4.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></button>
+      <button class="tlink" id="sfxBtn" aria-haspopup="true" aria-expanded="false">Sound</button>
       <div class="dd-menu sfx-menu" id="sfxMenu" role="dialog" aria-label="Sound settings"></div>
     </div>
-  </div>
+  </nav>
 </header>
 
 <main>
   <section class="card list-card" aria-label="The seven relationships">
+    <p class="list-head">Seven pairs</p>
     <div class="rels" id="rels"></div>
   </section>
 
   <section class="card detail" id="detail" aria-live="polite">
     <div class="d-head">
       <h2 id="pTitle"></h2>
-      <div class="chips">
-        <span class="chip war" id="pWar"></span>
-        <span class="chip build" id="pBuild"></span>
-        <span class="tag" id="pHow"></span>
-      </div>
+      <p class="meta" id="pMeta"></p>
     </div>
 
     <div class="d-body">
       <div class="d-text">
-        <h3 class="side war"><i></i><span id="warHead"></span></h3>
+        <h3><span class="lab">War</span><span id="warHead"></span></h3>
         <ul class="facts" id="warFacts"></ul>
-        <h3 class="side build"><i></i><span id="buildHead"></span></h3>
+        <h3><span class="lab">Building</span><span id="buildHead"></span></h3>
         <ul class="facts" id="buildFacts"></ul>
       </div>
       <div class="d-sound">
         <div class="sound-head">
-          <div class="score"><svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="52" class="ring-bg"/><circle cx="60" cy="60" r="52" class="ring" id="ring"/></svg><div><b id="pct">0%</b></div></div>
-          <div class="key">
-            <span><i class="k-war"></i>War</span><span><i class="k-build"></i>Building</span><span><i class="k-both"></i>Most alike</span>
-          </div>
+          <span class="pct" id="pct"></span>
+          <span class="key"><span><i class="k-war"></i>War</span><span><i class="k-build"></i>Building</span><span><i class="k-both"></i>Most alike</span></span>
         </div>
-        <div class="wave-box"><canvas id="wave" height="140" aria-label="The two sounds overlapped"></canvas></div>
+        <div class="wave-box"><canvas id="wave" height="200" aria-label="The two sounds overlapped"></canvas></div>
         <div class="playrow">
-          <button class="btn primary" id="playBoth"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3.5v9l7-4.5Z" fill="currentColor"/></svg>Play both</button>
-          <button class="btn" id="playWar">War</button>
-          <button class="btn" id="playBuild">Building</button>
-          <label class="chk"><input type="checkbox" id="pAlign" checked> Line them up <span class="mute" id="pShift"></span></label>
+          <button class="tlink strong" id="playBoth"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3.5v9l7-4.5Z" fill="currentColor"/></svg>Play both</button>
+          <button class="tlink" id="playWar">War only</button>
+          <button class="tlink" id="playBuild">Building only</button>
+          <label class="tlink toggle"><input type="checkbox" id="pAlign" checked><span id="pAlignText">Lined up</span> <span id="pShift"></span></label>
         </div>
         <div class="stats" id="stats" aria-label="Measurements: war, then building"></div>
-        <h3 class="share">What they share</h3>
+        <h3>What they share</h3>
         <ul class="facts" id="linkFacts"></ul>
-        <h3 class="share">Why is their similarity significant?</h3>
-        <ul class="facts why" id="whyFacts"></ul>
+        <h3>Why is their similarity significant?</h3>
+        <ul class="facts" id="whyFacts"></ul>
       </div>
     </div>
 
     <footer class="d-foot">
-      <h3>Other moments in the film that sound like this <span class="mute">Closest first. Click one to hear it</span></h3>
+      <h3>Other moments in the film that sound like this <span class="lab">Closest first. Click one to hear it</span></h3>
       <div id="moments"></div>
     </footer>
   </section>
 </main>
 
 <dialog class="card about" id="about" aria-labelledby="aboutTitle">
-  <button class="btn icon close" id="aboutClose" aria-label="Close">×</button>
+  <button class="tlink close" id="aboutClose">Close</button>
   <h2 id="aboutTitle">About this map</h2>
   <h3>The film</h3>
   <ul>

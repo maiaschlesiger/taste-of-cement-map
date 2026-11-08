@@ -164,17 +164,11 @@
     $("#rels").innerHTML = PAIRS.map((p, i) => `
       <button class="rel" data-i="${i}" aria-pressed="false">
         <span class="rel-n">${p.n}</span>
-        <span class="rel-pair">
-          <span class="rel-s war"><i></i><b>${esc(p.war[1])}</b><em>${fmt(p.war[0])}</em></span>
-          <span class="rel-s build"><i></i><b>${esc(p.build[1])}</b><em>${fmt(p.build[0])}</em></span>
-        </span>
-        <span class="rel-pct" data-pct></span>
+        <span class="rel-s">${esc(p.war[1])}</span><span class="rel-t">${fmt(p.war[0])}</span>
+        <span class="rel-s">${esc(p.build[1])}</span><span class="rel-t">${fmt(p.build[0])}</span>
       </button>`).join("");
     $("#rels").addEventListener("click", e => { const b = e.target.closest(".rel"); if (b) select(+b.dataset.i); });
     $("#rels").addEventListener("pointerover", e => { const b = e.target.closest(".rel"); if (b && !b.contains(e.relatedTarget) && +b.dataset.i !== cur) sfx("hover"); });
-    Promise.all(PAIRS.map(p => window.COMPARE.compare(p.war[0], p.build[0]))).then(rs => {
-      rs.forEach((r, i) => { $(`.rel[data-i="${i}"] [data-pct]`).textContent = r.score + "%"; });
-    });
   }
 
   // ---------- the selected relationship ----------
@@ -182,9 +176,10 @@
   const num = n => n.toLocaleString("en-GB");
   function renderStats(p) {
     const a = M[p.war[0]], b = M[p.build[0]]; if (!a || !b) { $("#stats").innerHTML = ""; return; }
-    const cell = (label, x, y, unit) => `<div class="stat"><span>${label}</span><b><i class="w"></i>${x}${unit}</b><b><i class="b"></i>${y}${unit}</b></div>`;
-    $("#stats").innerHTML = cell("Louder than", a.louder, b.louder, "% of film") + cell("Bass", a.bass, b.bass, "%")
-      + cell("Tone centre", num(a.hz), num(b.hz), " Hz") + cell("Hits a second", a.hits, b.hits, "");
+    const row = (label, x, y) => `<span>${label}</span><b>${x}</b><b>${y}</b>`;
+    $("#stats").innerHTML = `<span></span><span>War</span><span>Building</span>`
+      + row("Louder than", a.louder + "% of the film", b.louder + "% of the film") + row("Bass", a.bass + "%", b.bass + "%")
+      + row("Tone centre", num(a.hz) + " Hz", num(b.hz) + " Hz") + row("Hits a second", a.hits, b.hits);
   }
   function select(i, quiet) {
     if (i < 0 || i >= PAIRS.length) return;
@@ -193,9 +188,8 @@
     document.querySelectorAll(".rel").forEach(b => { const on = +b.dataset.i === i; b.classList.toggle("on", on); b.setAttribute("aria-pressed", on); });
     const p = PAIRS[i], my = ++token;
     $("#pTitle").textContent = `${p.war[1]} vs ${p.build[1].replace(/^./, ch => ch.toLowerCase())}`;
-    $("#pWar").innerHTML = `<i></i>${esc(p.war[1])} <span>${fmt(p.war[0])}</span>`;
-    $("#pBuild").innerHTML = `<i></i>${esc(p.build[1])} <span>${fmt(p.build[0])}</span>`;
-    $("#pHow").textContent = p.watched ? "Paired by watching the film" : "Building moment picked by measurement";
+    $("#pMeta").textContent = `War at ${fmt(p.war[0])}, building at ${fmt(p.build[0])}. ${p.watched ? "Paired by watching the film" : "Building moment picked by measurement"}`;
+    $("#pct").textContent = "";
     $("#warHead").textContent = p.war[1];
     $("#buildHead").textContent = p.build[1];
     $("#warFacts").innerHTML = li(p.warFacts);
@@ -211,7 +205,7 @@
       res = c; shift = 0;
       $("#linkFacts").innerHTML = li(p.linkFacts) + (c.regs.length ? li([window.COMPARE.hear(c).replace(/\.$/, "")]) : "");
       $("#pShift").textContent = c.lag ? `(${Math.abs(c.lagSec).toFixed(1)} s)` : "";
-      $("#pAlign").checked = true;
+      $("#pAlign").checked = true; $("#pAlignText").textContent = "Lined up";
       countUp(c.score);
       tween(700, k => paint(k, 0, null), () => tween(500, k => { shift = k; paint(1, k, null); }));
       setTimeout(() => {
@@ -222,9 +216,9 @@
     });
   }
   function renderFoot(lists, p) {
-    const row = (side, label, items) => `<div class="mrow ${side}"><span class="mlab"><i></i>Like the ${esc(label.replace(/^(The|A) /, "").toLowerCase())}</span><div class="mchips">${
-      items ? items.map(m => { const s = seenAt(m.t); return `<button class="mchip" data-t="${m.t}" aria-label="Play ${fmt(m.t)}${s ? ", " + s : ""}"><b>${fmt(m.t)}</b>${s ? `<span>${s}</span>` : ""}</button>`; }).join("")
-        : `<span class="mute">Listening through the film…</span>`}</div></div>`;
+    const row = (side, label, items) => `<div class="mrow ${side}"><span class="mlab">Like the ${esc(label.replace(/^(The|A) /, "").toLowerCase())}</span><div class="mchips">${
+      items ? items.map(m => { const s = seenAt(m.t); return `<button class="mchip" data-t="${m.t}" aria-label="Play ${fmt(m.t)}${s ? ", " + s : ""}">${fmt(m.t)}${s ? ` <span>${s}</span>` : ""}</button>`; }).join("")
+        : `<span class="lab">Listening through the film…</span>`}</div></div>`;
     $("#moments").innerHTML = row("war", p.war[1], lists && lists[0]) + row("build", p.build[1], lists && lists[1]);
   }
   function paint(progress, sh, playT) {
@@ -239,10 +233,9 @@
     raf = requestAnimationFrame(step);
   }
   function countUp(to) {
-    const ring = $("#ring"), C = 2 * Math.PI * 52; ring.style.strokeDasharray = C;
-    const t0 = performance.now(), dur = reduce ? 0 : 800;
+    const t0 = performance.now(), dur = reduce ? 0 : 700;
     const step = now => { const k = dur ? Math.min(1, (now - t0) / dur) : 1, e = 1 - Math.pow(1 - k, 3);
-      $("#pct").textContent = Math.round(to * e) + "%"; ring.style.strokeDashoffset = C * (1 - to / 100 * e); if (k < 1) requestAnimationFrame(step); };
+      $("#pct").textContent = `${Math.round(to * e)}% alike once lined up`; if (k < 1) requestAnimationFrame(step); };
     requestAnimationFrame(step);
   }
 
@@ -288,7 +281,7 @@
     $("#playBoth").onclick = e => play("both", e.currentTarget);
     $("#playWar").onclick = e => play("war", e.currentTarget);
     $("#playBuild").onclick = e => play("build", e.currentTarget);
-    $("#pAlign").onchange = e => { if (!res) return; stopPlay(); const from = shift, to = e.target.checked ? 1 : 0; tween(450, k => { shift = from + (to - from) * k; paint(1, shift, null); }); };
+    $("#pAlign").onchange = e => { $("#pAlignText").textContent = e.target.checked ? "Lined up" : "Original timing"; $("#pShift").hidden = !e.target.checked; if (!res) return; stopPlay(); const from = shift, to = e.target.checked ? 1 : 0; tween(450, k => { shift = from + (to - from) * k; paint(1, shift, null); }); };
     $("#moments").addEventListener("click", e => { const b = e.target.closest(".mchip"); if (b) playMoment(+b.dataset.t, b); });
     document.addEventListener("keydown", e => {
       if (e.key === "Escape") closeMenus();

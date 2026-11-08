@@ -8,12 +8,12 @@ The site is one page. On the left, a list of seven relationships, each a sound o
 
 ## 1. Principles
 
-1. **Selected moments, not every sound.** The page shows only the pairs picked by watching the film. It does not map every second of the soundtrack, and it does not show the sound classifier's labels, which were unreliable.
-2. **Compare in context.** The sound comparison and the explanation of why it matters sit side by side, on the same card.
-3. **Human facts, not prose.** Every written part is a bullet list. After one line on what is on screen, each bullet is a sourced fact about what that sound means for the people who live with it: trauma and PTSD, children's fear of aircraft and shouting, life underground, the workers' pay, safety, curfews and silence. Each has a source listed in About.
-4. **Two worlds, two colours.** War is orange, building is blue. Everything else is ink, grey or white.
-5. **Quiet chrome.** White cards on a pale grey canvas, separated by space. No borders, no dividers, almost no shadow.
-6. **The list stays put.** The relationship list is sticky; the detail card scrolls about 100px at 1440×900 and 190px at 1280×800.
+1. **Selected moments, not every sound.** Only the seven pairs picked by watching the film.
+2. **A quiet frame around the work.** The interface is greyscale. Colour appears only in the sound itself: the orange and blue waveform lines and their key. (Visual style after Naheel Jawaid's portfolio: flat page, white cards that fill the window, one type size in two greys, the work as the only colour.)
+3. **Hierarchy by tone, not size.** One type size (13.5px). Headings, selected items, values and actions are `--ink`; everything else is `--mute`.
+4. **Buttons still look like buttons.** Quiet grey fills, one dark primary action (Play both), no icons except a play glyph.
+5. **Human facts, not prose.** Every written part is a bullet list of sourced facts about the people who live with each sound, plus a short "why" section.
+6. **Fits the window.** Both cards fill the viewport height; the detail card scrolls inside itself, the page does not scroll on a laptop.
 
 ### Banned patterns
 
@@ -49,123 +49,99 @@ All tokens live on `:root` in `css/style.css`. The design tuner (`#tune`) edits 
 
 | Token | Value | Use |
 |---|---|---|
-| `--canvas` | `#f4f4f5` | Page background; secondary buttons, chips, the "most alike" shading |
-| `--card` | `#ffffff` | Cards, menus, the About dialog |
-| `--ink` | `#1f1f23` | Text, primary button, selected row number and connector, score ring, playhead |
-| `--mute` | `#7c7c85` | Secondary text, lane labels, minute labels, times in chips |
-| `--line` | `#e4e4e7` | Strip lanes, unselected links, hover fill on secondary controls |
-| `--c-bomb` | `#ff6a1f` | War: dots, chip dot, waveform line |
-| `--c-tool` | `#1f63ad` | Building: dots, chip dot, waveform line |
+| `--canvas` | `#e9e9eb` | Page background (flat; no gradient) |
+| `--card` | `#ffffff` | Cards, menus, dialog, header buttons |
+| `--ink` | `#2f2f34` | Headings, selected row, values, primary button, playing state |
+| `--mute` | `#74747c` | All other text (4.6:1 on white) |
+| `--line` | `#ededef` | Selected row fill, "most alike" shading in the waveform |
+| `--fill` | `#f1f1f3` | Secondary buttons, footer moment pills, row hover (hover darkens to `#e6e6e9`) |
+| `--c-bomb` | `#e8642c` | War: waveform line and key only |
+| `--c-tool` | `#3a6ea8` | Building: waveform line and key only |
 
-Use only two text tones, `--ink` and `--mute`.
+No other colour anywhere in the interface: no coloured dots in the list, headings, chips or stats.
 
 ### 2.2 Typography
 
 | Token | Value | Use |
 |---|---|---|
-| `--font` | Figtree, then bundled Figtree (`fonts/Figtree-Variable.woff2`), Helvetica Neue, Arial | The only typeface |
-| `--fs` | 14px | Body |
-| `--fs-small` | 12.5px | Small print |
-| `--fs-h1` | 15px | Site name |
-| `--fs-h2` | 22px | Pair title, About title |
-| `--fs-h3` | 14px | About subheadings |
-| `--fw-body` / `--fw-head` | 400 / 600 | Body / headings |
-| `--lh` | 1.55 | Line height |
+| `--font` | Figtree, then bundled Figtree, Helvetica Neue, Arial | The only typeface |
+| `--fs` (and `--fs-h1/h2/h3/small`) | 13.5px | Every piece of text |
+| `--fw-body` / `--fw-head` | 400 / 500 | Body / headings and primary button |
+| `--lh` | 1.6 | Line height |
 
-- The opening sentence is 15px. The "why it matters" text is 16px with 1.6 line height: it is the main reading text.
-- Use sentence case everywhere, with no uppercase transforms and no letter-spacing. Numbers are tabular.
+Hierarchy comes from tone (`--ink` vs `--mute`) and weight 500, never from size. Exceptions: the waveform's canvas labels (12–13px) and the sound menu (13px).
 
 ### 2.3 Shape, shadow, spacing
 
 | Token | Value | Use |
 |---|---|---|
 | `--r-card` | 7px | Cards, menus, dialog |
-| `--r-btn` | 5px | Buttons, selects |
-| `--r-pill` | 4px | Strip tooltip |
-| `--r-nav` | 7px | Header icon button |
-| — | 999px | Chips |
-| `--shadow` | `0 18px 6px rgb(20 20 30 / .01)` | Cards: near-flat |
-| `--page-pad` | 24px (16px at 900px and below) | Side gutter |
-| `--gap` | 16px | Between cards |
-| `--pad-card` | 24px (18px small screens) | Card padding |
-| `--maxw` | 1320px | Max content width |
-| `--list-w` | 330px | Relationship list column |
-| `--text-w` | 360px | Text column inside the detail card |
+| `--r-inner` / `--r-btn` | 5px | List rows, buttons, moment pills |
+| `--shadow` | `0 16px 40px rgb(20 20 30 / .06)` | Cards and header buttons: soft, wide |
+| `--page-pad` | 32px (16px at 900px and below) | Outer margin |
+| `--gap` | 18px | Between the two cards |
+| `--pad-card` | 32px (22px small screens) | Detail card padding |
+| `--hdr-h` | 64px | Header height; the cards fill `100dvh − 64px` |
+| `--list-w` | 300px | List card |
+| `--text-w` | 340px | Facts column inside the detail card |
 
-No borders anywhere. Menus use `0 12px 32px rgb(20 20 30 / .12)`.
+No borders. Separation comes from white space (36px between detail sections, 26–30px between groups, 8px between bullets).
 
 ---
 
 ## 3. Layout
 
 ```
-Header   Brand (mark, "Taste of Cement", "War and work, side by side")              [About] [sound]
+Taste of Cement                                                        [About] [Sound]
+War and work, side by side
 
-List card (sticky)            Detail card
- ① ● A tank moving   51:38     Title: "A tank moving vs machinery moving"
-   │                  97%      [● war, time] [● building, time]  How it was paired
-   ● Machinery moving 53:17
- ② …                           ● A tank moving          | (97%) ● War ● Building ▭ Most alike
- …                               • fact                 | waveform, 6 seconds
- ⑦ …                             • fact                 | [Play both] [War] [Building]  ☑ Line them up
-                               ● Machinery moving       | What they share
-                                 • fact                 |   • fact  • measurements (● war ● building)
-                               Footer: Other moments in the film that sound like this
-                                ● Like the tank moving      [28:51 bombs] [53:45] …
-                                ● Like the machinery moving [46:39] [1:19:20] …
+┌ List card ─────────────┐ ┌ Detail card (scrolls inside) ───────────────────────────────┐
+│ Seven pairs            │ │ A tank moving vs machinery moving                            │
+│ 1  Bombs         28:53 │ │ War at 51:38, building at 53:17. Paired by watching the film │
+│    Site machinery 1:19 │ │                                                              │
+│ 2  A tank moving 51:38 │ │ War  A tank moving            97% alike once lined up  key   │
+│    Machinery…    53:17 │ │ facts                         waveform                       │
+│ …                      │ │ Building  Machinery moving    [▶ Play both] [War only] [Building only] [☑ Lined up] │
+│                        │ │ facts                         War / Building measurements    │
+│                        │ │                               What they share                │
+│                        │ │                               Why is their similarity significant? │
+│                        │ │ Other moments in the film that sound like this               │
+└────────────────────────┘ └──────────────────────────────────────────────────────────────┘
 ```
 
-- Above 1100px the detail card has two columns (facts, sound). From 1100px down to 900px they stack inside the card.
-- At 900px and below the list sits above the detail card.
+- Above 1180px the detail card has two columns. At 1180px and below they stack.
+- At 900px and below the cards stack and the page scrolls normally.
 
 ---
 
 ## 4. Components
 
 ### 4.1 Header
-Brand mark: an orange dot joined to a blue dot by an ink curve, echoing the list's connector. "About" is a white button with the card shadow. The speaker icon button opens the sound menu.
+Two lines of text on the page background: "Taste of Cement" in `--ink`, "War and work, side by side" in `--mute`. On the right, two white buttons with the card shadow: About and Sound.
 
 ### 4.2 Relationship list (`#rels`)
-- Seven rows, no intro text. The list card sticks to the top of the viewport while the page scrolls.
-- **Row:** number in a 22px circle; the war sound (orange dot, label, time) above the building sound (blue dot, label, time), joined by a 2px vertical connector; the overlap percentage on the right.
-- Hover fills the row with `--canvas`. The selected row keeps that fill, its number circle turns ink and its connector turns ink.
-- Labels truncate with an ellipsis rather than wrap.
+- "Seven pairs" in `--ink`, then seven rows.
+- **Row:** number, war sound and time on the first line, building sound and time on the second, all in `--mute`. Hover: `--fill` and `--ink` text. Selected: `--line` fill and `--ink` text.
+- No dots, connectors or percentages. Labels truncate with an ellipsis.
 
 ### 4.3 Detail card: head and facts
-- Title: "War sound vs building sound".
-- Chips: coloured dot, label, time in `--mute`. Then how it was paired, muted: "Paired by watching the film" or "Building moment picked by measurement".
-- **War sound facts:** a heading with an orange dot and the sound's name, then bullets: what is on screen and when, then the human cost of that sound in Syria (fear, trauma, rescue, life underground).
-- **Building sound facts:** a heading with a blue dot, then bullets: what is on screen and when (or how the moment was picked), then the workers' side (PTSD, pay, contracts, safety, curfew, silence, poverty).
-- Bullets are 13.5px (13px at 1366px and below), 1.5 line height, with grey markers.
+- Title in `--ink`, then one muted line: "War at 51:38, building at 53:17. Paired by watching the film" (or "Building moment picked by measurement").
+- Each side: a heading with a muted label and the sound's name in `--ink` ("War  A tank moving"), then plain bullets with no markers, 8px apart.
 
-### 4.4 Detail card: sound and "What they share"
-- **Score ring:** 64px, 11px stroke, `--ink` on `--canvas`, percentage in the middle (16px / 700).
-- **Key:** War (orange dot), Building (blue dot), Most alike (grey bar).
-- **Waveform** (`canvas#wave`, 140px tall): six seconds starting two seconds before each moment; two loudness lines, war orange over building blue, smoothed and scaled to the pair; the single most-alike stretch shaded `--canvas` and labelled; an ink playhead while playing.
-- **Play row:** "Play both" (primary), "War", "Building". These play the film's real sound. A button pulses while its clip loads and turns ink while playing; clicking it again stops. "Line them up" on the right, with the shift in seconds.
-- **Measurements:** four small `--canvas` tiles under the play row (two per row on phones), each with a muted label and two values, war after an orange dot and building after a blue dot:
-  - louder than (% of the film's non-silent seconds)
-  - bass (% of energy below 250 Hz)
-  - tone centre (spectral centroid, Hz)
-  - hits a second (sharp onsets)
-- **What they share:** bullets: how the two relate in the film (cut together, minutes apart), then the most-alike stretch ("Most alike from 2.5 to 3.0 seconds: same sharp edge, the same metallic crack").
-- **Why is their similarity significant?** Three bullets with ink markers under "What they share": what critics, programme notes and the film's own history say about why the filmmakers set these sounds side by side, followed by one reading of what it means for the workers. Readings use "may" or "suggests"; quotes and claims come from the sources in About.
+### 4.4 Detail card: the sound
+- "97% alike once lined up" in `--ink` (counts up), with the key on the right: short orange and blue lines and a grey "Most alike" swatch.
+- **Waveform** (`canvas#wave`, 200px): six seconds; war orange over building blue; the most-alike stretch shaded `--line` and labelled; an ink playhead while playing.
+- **Buttons:** "Play both" is the primary (ink fill, white text, play glyph). "War only", "Building only" and the "Lined up" toggle (a small checkbox inside the button) are `--fill` buttons. Playing turns the button ink with a pulsing dot; loading pulses the button.
+- **Measurements:** a plain three-column text table (label, War, Building): louder than, bass, tone centre, hits a second. Labels muted, values in `--ink`.
+- **What they share** and **Why is their similarity significant?**: headings in `--ink`, plain bullets.
 
 ### 4.5 Footer: other moments that sound like this
-- A `--canvas` panel at the bottom of the detail card. Heading, plus muted hint "Closest first. Click one to hear it".
-- Two rows, one per side: a coloured dot with "Like the tank moving" / "Like the machinery moving", then up to six time chips.
-- **Chip:** white pill with the time in 600 weight. If the time falls on a moment identified by watching the film, its name follows ("28:51 bombs"). Clicking plays six seconds of the film's real sound, from two seconds before that time; the chip pulses while loading, turns ink while playing, and stops on a second click.
-- While the search runs, the row reads "Listening through the film…".
-- **How matches are found** (`COMPARE.similar()`):
-  - every second of the soundtrack is tried with the same six-second window
-  - quiet windows (mean envelope under 130 of 255), windows of very different loudness (level match under 0.6) and windows whose tone centre is more than 1.5 bands away are skipped
-  - anything within 20 s of the pair's own moments, or of the scene they belong to, is skipped
-  - ranked by 0.6 × tone similarity + 0.4 × loudness-shape correlation − 0.2 × tone-centre distance
-  - the best six that are at least 90 s apart are kept, so matches spread across the film instead of bunching in one scene
-- No percentages on the chips: almost every match scores near 100% on the pair measure, so the number would say nothing. Order alone shows closeness.
+- Heading in `--ink` with the muted hint "Closest first. Click one to hear it".
+- Two rows: a muted label ("Like the tank moving"), then up to six small `--fill` pills, each with a play glyph, the time in `--ink` and, if the moment was identified by watching, its name in `--mute` ("28:51 bombs"). Playing turns the pill ink.
+- **How matches are found** (`COMPARE.similar()`): every second is tried with the same six-second window; quiet windows, windows of very different loudness and windows whose tone centre is more than 1.5 bands away are skipped, as is anything within 20 s of the pair's own scenes; ranked by 0.6 × tone similarity + 0.4 × loudness-shape correlation − 0.2 × tone-centre distance; the best six at least 90 s apart are kept.
 
 ### 4.6 About dialog
-A native `<dialog>` card, 560px max, scrolling inside if taller than the window. All bullets: The film, Syrians in Lebanon, How it was made, Sources (links). Closes with ×, Escape or a click on the backdrop.
+A native `<dialog>` card, 560px max, scrolling inside if taller than the window. Same single type size; headings in `--ink`, bullets without markers. Sections: The film, Syrians in Lebanon, How it was made, Sources (links). Closes with the Close button, Escape or a click on the backdrop.
 
 ### 4.7 Sound menu
 Opens under the speaker button: Sound on and volume, Sound pack with a try button, one cue select per event with a try button, UI SFX credit.
@@ -281,9 +257,9 @@ Every event can be set to Off.
 
 ## 10. Responsive
 
-- Above 1100px: list column plus a two-column detail card. The list is sticky; the page scrolls about 100px at 1440×900 and 190px at 1280×800. At 1366px and below the facts column narrows to 320px and bullets drop to 13px.
-- 1100px to 901px: the detail card stacks text above sound.
-- 900px and below: one column, list first. Footer rows stack their label above the chips. Side gutter 16px; no horizontal scroll at 390px.
+- Above 1180px: list card plus a two-column detail card, both filling the window; the detail card scrolls inside.
+- 1180px to 901px: the detail card stacks facts above the sound.
+- 900px and below: cards stack, the page scrolls, footer rows put their label above the pills, the playback toggle drops to its own line.
 
 ---
 
@@ -293,7 +269,7 @@ Every event can be set to Off.
 - Arrow keys move between relationships.
 - Footer chips are buttons labelled "Play 52:42, tank moving".
 - The detail card is an `aria-live="polite"` region, so a new selection is announced.
-- Focus ring: 2px `--c-tool`, 2px offset.
+- Focus ring: 1.5px `--ink`, 3px offset.
 - Colour is never the only cue: lanes are labelled, and chips carry text.
 - Reduced motion is respected.
 

@@ -161,8 +161,8 @@
     let lastEnd = -99;
     c.regs.forEach((r, i) => {
       const x0 = X(r.a / BF), x1 = X(r.b / BF), k = Math.min(1, Math.max(0, o.progress * 3 - i * 0.4));
-      g.globalAlpha = k; g.fillStyle = css("--canvas"); g.fillRect(x0, top - 8, x1 - x0, H + 8);
-      g.fillStyle = css("--ink"); g.font = `600 12.5px ${css("--font")}`;
+      g.globalAlpha = k; g.fillStyle = css("--line"); g.fillRect(x0, top - 8, x1 - x0, H + 8);
+      g.fillStyle = css("--ink"); g.font = `500 13px ${css("--font")}`;
       const txt = LABEL[r.kind][0], tw = g.measureText(txt).width, tx = Math.min(x0 + 4, w - padR - tw);
       if (tx > lastEnd + 10) { g.fillText(txt, tx, 14 + (1 - k) * 6); lastEnd = tx + tw; }
       g.globalAlpha = 1;
