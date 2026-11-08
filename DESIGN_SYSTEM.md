@@ -247,6 +247,28 @@ A flat, axis-free grid drawn on a `<canvas>`, in the style of a population dot m
 - **Hollow markers:** seconds sitting in A or B leave the grid. An open ring in their colour, labelled A or B, marks the cell they came from.
 - **Footer:** the left and right end labels, with the hint "Hover a dot · Click to highlight its group · Drag it into A or B" between them. The hint fades 4 seconds after the first press.
 
+### 4.8b Pairs from the film
+Seven war sounds identified by watching the film, each joined to a building sound.
+
+| # | War sound (seen) | Building sound | How the partner was found |
+|---|---|---|---|
+| 1 | Bombs 28:53 | 10:01 | closest building sound by measurement |
+| 2 | Tank moving 51:38 | Construction moving 53:17 | seen in the film |
+| 3 | Tank firing 54:14 | Drilling a wall 54:27 | seen in the film |
+| 4 | Footsteps in tunnels 62:16 | 14:26 | closest building sound by measurement |
+| 5 | Panicked clamour 63:28 | 43:56 | closest building sound by measurement |
+| 6 | Shovelling rubble 64:35 | 10:38 | closest building sound by measurement |
+| 7 | Helicopter 67:47 | Construction lift 77:21 | seen in the film |
+
+- **Closest by measurement:** every construction second was searched, excluding anything within 90 s of the war moment and the war stretches (51–56 min, 59–71 min). Ranking uses the comparison page's measure (timbre, loudness shape, level). Where two partners were nearly tied, the one clearly away from war footage was chosen.
+- **On the map:**
+  - Each end is a 9px white disc with a 2.5px ring (bomb orange for the war side, tool blue for the building side) and its number.
+  - A 1.2px ink curve joins the two ends.
+  - Hovering a marker or a sidebar row thickens that pair to 2.2px, grows its discs to 11px, fades the other pairs to 0.25, and shows the overlap % in an ink pill.
+  - Clicking loads the pair into A and B.
+- **In the sidebar:** a numbered list ("Bombs ↔ Engines   100%") between Film time and the compare circles.
+- Overlap % is computed live with the comparison page's own measure.
+
 ### 4.9 Hover card
 - White (`--hover-a` = 1), `--r-inner`, floating shadow, 280px wide, 12×14 padding, 13px.
 - It follows the cursor 18px right and 14px down, and flips left or up near the edges. It is not clickable unless pinned.
@@ -259,8 +281,8 @@ A flat, axis-free grid drawn on a `<canvas>`, in the style of a population dot m
   6. When pinned on touch: "Put in A" and "Put in B" buttons
 
 ### 4.10 Compare dock (sidebar, vertical)
-- Layout: "Compare" heading, circle A, "vs" (13px, mute), circle B, then a full-width big primary button.
-- **Circle:** 84px (`--vs-size`), `--canvas` fill.
+- Layout, pinned to the bottom of the sidebar: circle A, "vs" (13px, mute), circle B, then a full-width big primary button.
+- **Circle:** 72px (`--vs-size`), `--canvas` fill.
   - Empty: a bold letter (ink) over "Drop a dot" (11px, mute).
   - Over (dragging nearby): scales to 1.14 with a `--line` fill.
   - Filled: the group colour grows from the centre (scale 0→1, 0.45s spring). It then shows white text: time or "N s", over the label.

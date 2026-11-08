@@ -278,6 +278,10 @@
     };
     window.addEventListener("resize", () => { if (cur && $("#pane-compare").classList.contains("on")) drawWave(1, cur.shift, null); });
   }
-  window.COMPARE = { open, _test: { load, align, analyse, get F() { return F; } } };
+  // overlap % for a list of [tA, tB] pairs (seconds), same measure as the comparison page
+  function overlap(list) {
+    return load().then(() => list.map(([a, b]) => { const a0 = Math.round((a - PRE) * BF), b0 = Math.round((b - PRE) * BF); return analyse(a0, b0, align(a0, b0)).score; }));
+  }
+  window.COMPARE = { open, overlap, _test: { load, align, analyse, get F() { return F; } } };
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", setup); else setup();
 })();

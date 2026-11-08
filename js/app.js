@@ -37,12 +37,35 @@
     both:  { kinds: ["both"] },
     env:   { kinds: ["env"] },
   };
+  // moments identified by watching the film (times in seconds; t2 = end of a stretch)
   const NOTES = [
-    { t: 110, text: "Between hammer blows, the model hears one second as gunfire" },
-    { t: 776, text: "An engine rumble whose closest bomb match is thunder 57 minutes later" },
-    { t: 1806, text: "A blast right after the film's only two seconds of total silence" },
-    { t: 3292, text: "The loudest stretch: engine noise on a 2-second beat, heard as booms" },
-    { t: 4223, text: "The thunder that the 12:56 engine rumble most resembles" },
+    { t: 1733, text: "Seen in the film: bombs" },
+    { t: 3098, text: "Seen in the film: a tank moving" },
+    { t: 3162, text: "Seen in the film: a tank moving" },
+    { t: 3197, text: "Seen in the film: construction machinery moving" },
+    { t: 3210, text: "Seen in the film: a tank moving" },
+    { t: 3254, text: "Seen in the film: a tank firing" },
+    { t: 3267, text: "Seen in the film: drilling into a wall on the site" },
+    { t: 3269, text: "Seen in the film: a tank firing" },
+    { t: 3311, text: "Seen in the film: a tank moving" },
+    { t: 3736, text: "Seen in the film: footsteps through tunnels" },
+    { t: 3808, text: "Seen in the film: panicked clamour" },
+    { t: 3875, t2: 4064, text: "Seen in the film: shovelling gravel to dig people out of the rubble" },
+    { t: 4067, text: "Seen in the film: a helicopter approaching" },
+    { t: 4584, t2: 4641, text: "Seen in the film: the construction lift rising" },
+  ];
+  const noteAt = t => NOTES.find(n => t >= n.t - 1 && t <= (n.t2 || n.t + 1));
+  // war sounds seen in the film, each paired with a building sound. Pairs 2, 3 and 7 were matched by watching;
+  // 1, 4, 5 and 6 by searching every construction second (outside the war stretches) for the closest sound
+  // in timbre, loudness shape and level.
+  const PAIRS = [
+    { a: [1733, "Bombs"], b: [601, null] },
+    { a: [3098, "Tank moving"], b: [3197, "Construction moving"] },
+    { a: [3254, "Tank firing"], b: [3267, "Drilling a wall"] },
+    { a: [3736, "Footsteps in tunnels"], b: [866, null] },
+    { a: [3808, "Panicked clamour"], b: [2636, null] },
+    { a: [3875, "Shovelling rubble"], b: [638, null] },
+    { a: [4067, "Helicopter"], b: [4641, "Construction lift"] },
   ];
 
   const pct = v => Math.round(v * 100) + "%";
@@ -126,6 +149,7 @@
 
     setupField();
     setupDock();
+    setupPairs();
     setMetric(0, true);
     buildTimeline();
     window.addEventListener("resize", () => { layout(); draw(); });
@@ -288,6 +312,7 @@
       }
     }
     g.globalAlpha = 1;
+    drawPairs(g);
     // where dots in A and B came from
     for (const [s, it] of [["A", slots.A], ["B", slots.B]]) {
       if (!it) continue;
@@ -319,14 +344,19 @@
     const local = ev => { const b = c.getBoundingClientRect(); return [ev.clientX - b.left, ev.clientY - b.top]; };
     c.addEventListener("pointermove", ev => {
       if (drag.active) return;
-      const [x, y] = local(ev), e = hit(x, y);
+      const [x0, y0] = local(ev), pi = pairHit(x0, y0);
+      if (pi >= 0) { if (pairHover !== pi) { pairHover = pi; hoverKey = null; sfx("hover"); draw(); syncPairList(); } c.style.cursor = "pointer"; showPairCard(pi, x0, y0); return; }
+      if (pairHover >= 0 && !pairListHover) { pairHover = -1; draw(); syncPairList(); }
+      const [x, y] = [x0, y0], e = hit(x, y);
       if ((e && e.key) !== hoverKey) { hoverKey = e ? e.key : null; if (e) sfx("hover"); draw(); }
       c.style.cursor = e ? "grab" : "default";
       if (e && !pinned) showCard(e, x, y); else if (!e && !pinned) card.classList.remove("on");
     });
     c.addEventListener("pointerleave", () => { if (!drag.active) { hoverKey = null; draw(); if (!pinned) card.classList.remove("on"); } });
     c.addEventListener("pointerdown", ev => {
-      const [x, y] = local(ev), e = hit(x, y);
+      const [x, y] = local(ev);
+      const pi = pairHit(x, y); if (pi >= 0) { loadPair(pi); return; }
+      const e = hit(x, y);
       if (pinned) { pinned = false; card.classList.remove("on"); }
       if (!e) { if (state.hl) setHighlight(null); return; }
       if (ev.pointerType === "touch") { hoverKey = e.key; draw(); click(e); pinned = true; showCard(e, x, y, true); return; }
@@ -358,7 +388,7 @@
     const p = P[it.rep];
     const heard = e.g === "env" ? "" : [p.p_tool > 0.1 && p.lab.tool, p.p_engine > 0.1 && p.lab.engine, p.p_bomb > 0.1 && p.lab.bomb].filter(Boolean).join(" · ");
     const also = e.g2 ? `<p class="hc-sub"><i class="mini-dot" style="background:${G[e.g2].c}"></i>${e.n2} s of ${G[e.g2].label.toLowerCase()} here too</p>` : "";
-    const note = NOTES.find(n => it.ts.includes(n.t));
+    const note = it.ts.map(noteAt).find(Boolean);
     card.innerHTML = `<div class="hc-head"><i style="background:${it.color}"></i><b>${it.label}</b></div>
       <p class="hc-sub">${it.n > 1 ? `${it.n} seconds · ${first}–${last}` : first}</p>
       ${heard ? `<p class="hc-sub">Heard as ${heard.toLowerCase()}</p>` : ""}${also}
@@ -407,6 +437,78 @@
     } else { gh.style.transition = "opacity .2s"; gh.style.opacity = "0"; setTimeout(finish, 200); rebuild(); sfx("miss"); }
   }
 
+  // ---------------- film pairs: drawn on the map and listed in the sidebar ----------------
+  let pairHover = -1, pairListHover = false;
+  const pairEnd = (pr, side) => {
+    const [t, label] = pr[side], war = side === "a";
+    return { t, label: label || `Closest building sound (${P[t].kind === "env" ? "ambience" : P[t].kind.toLowerCase()})`, g: war ? "bomb" : "engine", war };
+  };
+  function pairXY(t) { const M = METRICS[state.metric], [c, r] = cellOf(M.f(P[t]), t); return [cx(c), cy(r)]; }
+  function drawPairs(g) {
+    if (!P.length) return;
+    PAIRS.forEach((pr, i) => {
+      if ([pr.a[0], pr.b[0]].some(t => t < state.t0 * 60 || t > state.t1 * 60)) return;
+      const [x1, y1] = pairXY(pr.a[0]), [x2, y2] = pairXY(pr.b[0]);
+      const on = pairHover === i, faded = pairHover >= 0 && !on;
+      const mx = (x1 + x2) / 2, my = (y1 + y2) / 2, dx = x2 - x1, dy = y2 - y1, bow = 0.18;
+      g.globalAlpha = faded ? 0.25 : 1;
+      g.strokeStyle = TH.ink; g.lineWidth = on ? 2.2 : 1.2;
+      g.beginPath(); g.moveTo(x1, y1); g.quadraticCurveTo(mx - dy * bow, my + dx * bow, x2, y2); g.stroke();
+      for (const [x, y, col] of [[x1, y1, G.bomb.c], [x2, y2, G.engine.c === "#8fb8e3" ? G.tool.c : G.tool.c]]) {
+        g.fillStyle = TH.card; g.beginPath(); g.arc(x, y, on ? 11 : 9, 0, 7); g.fill();
+        g.strokeStyle = col; g.lineWidth = 2.5; g.stroke();
+        g.fillStyle = TH.ink; g.font = `600 ${on ? 11 : 10}px ${TH.font}`; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(String(i + 1), x, y + 0.5);
+      }
+      if (on && pr.score != null) {
+        const tx = mx - dy * bow * 0.5, ty = my + dx * bow * 0.5 - 14, txt = `${pr.score}%`;
+        g.font = `600 12px ${TH.font}`; const w = g.measureText(txt).width + 12;
+        g.fillStyle = TH.ink; g.beginPath(); g.roundRect ? g.roundRect(tx - w / 2, ty - 10, w, 20, 10) : g.rect(tx - w / 2, ty - 10, w, 20); g.fill();
+        g.fillStyle = TH.card; g.fillText(txt, tx, ty + 0.5);
+      }
+      g.globalAlpha = 1;
+    });
+  }
+  function pairHit(x, y) {
+    for (let i = 0; i < PAIRS.length; i++) {
+      const pr = PAIRS[i]; if ([pr.a[0], pr.b[0]].some(t => t < state.t0 * 60 || t > state.t1 * 60)) continue;
+      for (const t of [pr.a[0], pr.b[0]]) { const [px, py] = pairXY(t); if (Math.hypot(x - px, y - py) <= 11) return i; }
+    }
+    return -1;
+  }
+  function showPairCard(i, x, y) {
+    const pr = PAIRS[i], A = pairEnd(pr, "a"), B = pairEnd(pr, "b"), card = $("#hovercard");
+    card.innerHTML = `<div class="hc-head"><i style="background:${G.bomb.c}"></i><b>${A.label}</b> <span class="mute">${fmt(A.t)}</span></div>
+      <div class="hc-head"><i style="background:${G.tool.c}"></i><b>${B.label}</b> <span class="mute">${fmt(B.t)}</span></div>
+      ${pr.score != null ? `<p class="hc-sub">${pr.score}% overlap once lined up</p>` : ""}
+      <p class="hc-hint">Click to compare</p>`;
+    card.classList.remove("pinned"); card.classList.add("on");
+    const cw = card.offsetWidth, ch = card.offsetHeight;
+    let px = x + 18, py = y + 14; if (px + cw > W - 8) px = x - cw - 18; if (py + ch > H - 8) py = Math.max(8, H - ch - 8);
+    card.style.transform = `translate(${Math.max(8, px)}px, ${Math.max(8, py)}px)`;
+  }
+  function loadPair(i) {
+    const pr = PAIRS[i], mk = side => { const e = pairEnd(pr, side); return { g: e.g, n: 1, ts: [e.t], rep: e.t, label: e.label, color: e.war ? G.bomb.c : G.tool.c }; };
+    slots.A = mk("a"); slots.B = mk("b"); renderSlot("A", true); renderSlot("B", true); sfx("drop"); rebuild();
+  }
+  function syncPairList() { document.querySelectorAll("#pairs [data-pair]").forEach(b => b.classList.toggle("on", +b.dataset.pair === pairHover)); }
+  function renderPairList() {
+    $("#pairs").innerHTML = PAIRS.map((pr, i) => {
+      const A = pairEnd(pr, "a"), B = pairEnd(pr, "b");
+      return `<button class="pair-row" data-pair="${i}"><b>${i + 1}</b><span>${A.label} <i>↔</i> ${pr.b[1] || (P[pr.b[0]].kind === "env" ? "Ambience" : P[pr.b[0]].kind)}</span><em>${pr.score != null ? pr.score + "%" : ""}</em></button>`;
+    }).join("");
+    document.querySelectorAll("#pairs [data-pair]").forEach(b => {
+      b.onmouseenter = () => { pairListHover = true; pairHover = +b.dataset.pair; draw(); syncPairList(); };
+      b.onmouseleave = () => { pairListHover = false; pairHover = -1; draw(); syncPairList(); };
+      b.onclick = () => loadPair(+b.dataset.pair);
+    });
+  }
+  function setupPairs() {
+    renderPairList();
+    // overlap scores, using the comparison page's own measure
+    const go = () => window.COMPARE.overlap(PAIRS.map(pr => [pr.a[0], pr.b[0]])).then(scores => { scores.forEach((s, i) => { PAIRS[i].score = s; }); renderPairList(); draw(); });
+    if (window.COMPARE) go(); else document.addEventListener("DOMContentLoaded", () => window.COMPARE && go());
+  }
+
   // ---------------- comparison dock ----------------
   function setupDock() {
     document.querySelectorAll(".vs-slot .vs-x").forEach(b => b.onclick = e => { e.stopPropagation(); const s = b.closest(".vs-slot").dataset.slot; slots[s] = null; renderSlot(s); sfx("clear"); rebuild(); });
@@ -439,7 +541,7 @@
       const nonEnv = Object.entries(by).filter(([g]) => g !== "env").sort((a, b) => b[1] - a[1])[0];
       const g = nonEnv && nonEnv[1] >= 12 ? nonEnv[0] : "env";
       const loud = ps.reduce((a, p) => a + Math.max(-70, p.loud), 0) / ps.length;
-      const note = NOTES.find(n => n.t >= m * 60 && n.t < m * 60 + 60);
+      const note = NOTES.find(n => n.t < m * 60 + 60 && (n.t2 || n.t) >= m * 60);
       const kinds = {}; ps.filter(p => p.group === g).forEach(p => { kinds[p.kind] = (kinds[p.kind] || 0) + 1; });
       const kind = g === "env" || g === "both" ? G[g].label : Object.entries(kinds).sort((a, b) => b[1] - a[1])[0][0];
       mins.push({ m, g, loud, note, kind, n: by[g] || 0 });

@@ -42,7 +42,8 @@
       <div id="facets"></div>
       <h3>Film time</h3>
       <div class="dual" id="rangeTime"></div>
-      <h3 class="dock-title">Compare</h3>
+      <h3>Pairs from the film</h3>
+      <div class="pairs" id="pairs"></div>
       <div class="dock vertical" id="dock">
         <div class="vs-slot" id="slotA" data-slot="A" tabindex="0" aria-label="Comparison slot A, empty">
           <div class="vs-fill"></div><div class="vs-text"><b>A</b><small>Drop a dot</small></div>
@@ -131,12 +132,11 @@
       <section id="ab-method">
         <h3>Method</h3>
         <p>The soundtrack was measured every 23 milliseconds and averaged per second. A Google sound-recognition model, YAMNet, trained on about 2 million clips, named each sound. Its labels are grouped into tools and metal, engines and machines, bombs, voice, music, water, silence and wind. The analysis scripts are in the project's analysis folder.</p>
-        <button class="btn" data-tab="impacts">See the impacts</button>
       </section>
       <section id="ab-limits">
         <h3>Limits</h3>
         <ul>
-          <li>The model hears types of sound, not places. "Bomb" means it sounds like a blast, not that it was filmed in Syria. Use Places on the Timeline to record what's on screen.</li>
+          <li>The model hears types of sound, not places. "Bomb" means it sounds like a blast, not that it was filmed in Syria.</li>
           <li>It has no category for a tank or a cement mixer; both count as engines.</li>
           <li>The audio is a compressed web copy, so the highest frequencies are missing.</li>
         </ul>

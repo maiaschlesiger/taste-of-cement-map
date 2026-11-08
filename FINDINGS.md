@@ -21,9 +21,9 @@ Share of film time by dominant sound-world:
 
 Sound the classifier hears as detonation fills under 4 % of the film. Machinery fills nearly a third. The war is present as a sound-world far more often than it is literally heard.
 
-## 2. The loudest stretch is labour, not war
+## 2. The loudest stretch is a tank and a building site cut together
 
-The loudest sustained stretch of the film is **48:49–55:40** (mean −20.6 dB), dominated by machine sound (Vehicle, Truck, Air brake). Inside it, the classifier repeatedly hears **"Boom"** (50:35–55:14). The sound has an extremely regular **2.0-second cycle** (autocorrelation 0.80), which suggests a mechanical rhythm. *Verify:* is this the construction site (pump, pile driver, mixer drum) or the tank sequence? Either way, the classifier hears a machine cycle as detonations.
+The loudest sustained stretch of the film is **48:49–55:40** (mean −20.6 dB). Watching it shows a tank sequence intercut with construction: a tank moving at 51:38, 52:42, 53:30 and 55:11, construction machinery moving at 53:17, the tank firing at 54:14 and 54:29, and a wall being drilled at 54:27. The classifier hears the tank's movement as "Vehicle", the same label it gives the construction machinery, and hears the firing as "Boom". Of the 300 loudest seconds in the film, 209 fall in 51–56 min.
 
 ## 3. Rhymes: building and destroying sound alike
 
@@ -84,3 +84,36 @@ From 81:39 to the end, the sound is a soft noise that swells and fades with a **
 | 68:39–70:54 | water + thunder (underwater/sea?) → hard cut to 4 min of quiet |
 | 76:18–79:56 | heavy vehicles (tank?) → cut to silence |
 | 80:20–84:58 | narrator, then the 6.9 s "breathing" ending |
+
+## 8. Moments checked by watching the film
+
+War sounds identified on screen, paired with a building sound. Overlap uses the comparison page's measure: timbre, loudness shape and level, after lining the two up. A median random pair from the film scores about 40–55%.
+
+| # | War sound (seen) | Building sound | Partner found by | Overlap |
+|---|---|---|---|---|
+| 1 | Bombs 28:53 | 10:01 (engines) | closest building sound by measurement | 100% |
+| 2 | Tank moving 51:38 | Construction moving 53:17 | watching | 97% |
+| 3 | Tank firing 54:14 | Drilling a wall 54:27 | watching | 98% |
+| 4 | Footsteps in tunnels 62:16 | 14:26 (rumble) | closest building sound by measurement | 94% |
+| 5 | Panicked clamour 63:28 | 43:56 (vehicles) | closest building sound by measurement | 100% |
+| 6 | Shovelling rubble 64:35–67:44 | 10:38 (engines) | closest building sound by measurement | 99% |
+| 7 | Helicopter 67:47 | Construction lift 76:24–77:21 | watching | 93% (70% at 76:24) |
+
+**Notes**
+- Pairs 2, 3 and 7 were paired by eye. Their high overlap shows that the film puts sounds that match acoustically side by side.
+- For 1, 4, 5 and 6, every construction second was searched for the closest sound. That excluded anything within 90 s and the war stretches (51–56 and 59–71 min). Many matches hit the top of the scale, so I ranked them on the uncapped score.
+- **Caution:** the score saturates for loud, dense sounds, so 100% means "as close as this measure can tell", not "identical". It does not prove the audience hears them as the same.
+- The pairing at 54:27 and 54:29 (drill vs tank fire, 2 seconds apart) was not scored. Their 6-second windows overlap, so the score would compare the audio with itself.
+
+## 9. Against a published review
+
+A review credits the sound design to Sebastien Tesch and Ansgar Frerich and makes two claims about it.
+
+- **"The rumble of the sea or the sound of tanks rolling over debris become one and the same."**
+  - Sea seconds against the tank-moving moments above score a median of 67% overlap, against a 41–55% median for random pairs.
+  - That is closer than chance but not as close as the tank and the construction machinery (97–100%).
+  - The data supports the tank and building-site rhyme more strongly than the sea and tank one.
+- **"The frantic clamour of voices in the aftermath of the bombing contrasts starkly with the numb silence of the Syrian workers in Beirut."**
+  - The clamour and shovelling stretch, 63:19–67:56, averages −23.2 dB, and 91% of its seconds are heard as speech.
+  - The long quiet stretch that follows, 70:54–75:19, averages −55.1 dB with 2% speech: about 32 dB quieter.
+  - *Verify:* is 70:54–75:19 the workers in Beirut?

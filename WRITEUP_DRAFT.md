@@ -22,7 +22,7 @@ My map therefore does not trace the workers' route from Syria to Lebanon. That j
 
 ## What the map shows
 
-- **The war is mostly heard through the machines.** Detonation sound fills under 4 % of the film; machinery fills nearly 30 %. The loudest sustained stretch (48:49–55:40) is machine-dominated, yet inside its 2-second mechanical cycle the classifier repeatedly hears "Boom".
+- **The war is mostly heard through the machines.** Detonation sound fills under 4 % of the film; machinery fills nearly 30 %. The loudest sustained stretch (48:49–55:40) cuts a tank against a building site: the classifier gives the tank's movement and the construction machinery the same label, "Vehicle", and the tank firing at 54:14 matches a wall being drilled at 54:27 at 98% on the site's overlap measure.
 - **Building and destroying rhyme.** In the first two minutes, a hammer and jackhammer are classified as *gunfire*. A machine rumble around 13:00 is judged most similar to "thunder" heard almost an hour later, around 70:20. The rhymes work like memory: a sound heard in Beirut returns as Syria.
 - **What separates a shell from a hammer is distance, not weight.** Hits heard as detonations ring on nearly twice as long (median 2.1 s vs 1.2 s) and are much darker, which is the acoustics of distance and open space. Their low-frequency weight, the part felt in the body, overlaps heavily with the hammers'.
 - **Silence and cuts are structural.** The only moment of absolute digital silence before the credits comes straight after a cluster of explosions (30:05). Heavy machine sound is repeatedly cut off into silence. The narrator's voice arrives as isolated bursts in quiet, framed the way the film frames shelling.
