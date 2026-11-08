@@ -1,19 +1,18 @@
 # Sound Map of *Taste of Cement*
 
-An interactive, three-dimensional map of the soundtrack of Ziad Kalthoum's documentary *Taste of Cement* (2017). Each of the film's 5,098 seconds becomes one point, placed by how it sounds rather than where it was filmed. The map asks what the film asks without words: **how far apart do building in Beirut and destruction in Syria actually sound?**
+An interactive map of the sound of Ziad Kalthoum's documentary *Taste of Cement* (2017). The film follows Syrian workers building a tower in Beirut while the war goes on at home, and links the two places through sound. The map picks out seven sounds of war, pairs each with a building sound, and lets visitors replay and compare them next to a short explanation of why the link matters.
 
 Made for a creative mapping assignment on film and migration.
 
-## Views
+## The page
 
-| Tab | What it shows |
-|---|---|
-| **Map** | Every second of the soundtrack in 3D. Filter construction, bomb and environmental sounds in the sidebar; nearby dots merge into bubbles sized by how many seconds they hold. Click a dot or a colour swatch to make that group stand out. Hold a dot and drag it into circle A or B, then press **Compare sounds**. |
-| **Compare** (opens from the map) | The two sounds overlapped and shifted so their most similar parts line up, with an overlap score, labels on the matching stretches, a pitch fingerprint, and playback (your film file, or a rough sketch rebuilt from the measurements). |
-| **Timeline** | The film in order: dominant sound-world, loudness, building-vs-bombing resemblance, hits and hard cuts. Includes a tool to mark what is on screen. |
-| **About** | The film, the method and the limits. |
+- **Film strip:** where each sound of war (top lane) and its building sound (bottom lane) fall in the film, joined in pairs. Click a pair to open it.
+- **Pair card:** the two sounds' loudness drawn on top of each other and lined up, an overlap score, the stretches where they are most alike, playback, and a few sentences on why the pair matters.
+- **About:** the film, how the map was made, and its limits.
 
-The speaker button sets the interface sounds, which come from [UI SFX](https://github.com/romainsimon/uisfx) (MIT code, CC0 audio; vendored in `js/vendor/uisfx.js`). Pick one of its 12 sound packs, then a cue for each event (click, hover, pick up, drop, highlight, compare…). "Data voice" is this site's own sound for a clicked dot, shaped by that dot's measurements.
+Three pairs are cut together in the film itself. For the other four, the building sound is the construction moment that measures closest. The pairs and their texts are at the top of `js/app.js`.
+
+The speaker button sets the interface sounds, which come from [UI SFX](https://github.com/romainsimon/uisfx) (MIT code, CC0 audio; vendored in `js/vendor/uisfx.js`).
 
 ## Running it
 
@@ -29,22 +28,21 @@ Then open http://localhost:8000.
 
 **Design tuner:** add `#tune` to the address (e.g. `…/taste-of-cement-map/#tune`) and reload to open a slider panel for every colour, size, radius and spacing value. *Copy values* gives you the CSS to paste into `:root` in `css/style.css`.
 
-**Listening:** click *Load your copy of the film or its audio* and choose your local MP4 or audio file. It plays in the browser and is never uploaded. If you load the MP4, the video plays in sync with the map.
+**Listening:** the site stores no film audio. Playback is a rough sketch rebuilt from the measurements.
 
 ## What's in the repo
 
 ```
-index.html, css/, js/app.js    the map (no build step; Plotly is vendored in js/vendor/)
+index.html, css/, js/app.js    the page, pair data and texts (no build step)
 js/tuner.js                    design tuner (opens with #tune)
 js/sfx.js                      interface sounds (wraps UI SFX)
 js/vendor/uisfx.js             UI SFX 0.4.0 runtime (MIT; audio CC0)
-js/compare.js                  comparison page: alignment, overlap scoring, playback
+js/compare.js                  alignment, overlap score, waveform drawing, playback
 fonts/                         Figtree (SIL Open Font License)
-data/data.json                 5,098 per-second points + 400 rhymes + 57 sound-world regions
+data/data.json                 5,098 per-second measurements (analysis output; not used by the page)
 data/impacts.json              75 impact events
 data/cuts.json                 hard level shifts in the sound edit
-data/places.json               your place annotations (export from the Timeline tab and commit)
-data/fine.json                 50 fps loudness envelope and 12-band spectrum for the comparison page
+data/fine.json                 50 fps loudness envelope and 12-band spectrum, used by the page
 data/summary.json              headline numbers
 analysis/                      the scripts that produced the data
 FINDINGS.md                    what the analysis found, with timestamps to verify against the film
@@ -82,4 +80,4 @@ python analysis/build_data.py feat_frames.npy yam.npy yam_emb.npy analysis/yamne
 ffmpeg -i taste_of_cement.mp4 -vn -ac 1 -ar 22000 m22k.wav && python analysis/fine.py m22k.wav data/fine.json
 ```
 
-`analysis/yam.py` is a self-contained re-implementation of the YAMNet network (MobileNet v1, 521 AudioSet classes, Google, Apache 2.0) that loads only the published weight file. `yamnet_class_map.csv` is from the TensorFlow Models repository (Apache 2.0). Plotly.js is MIT-licensed.
+`analysis/yam.py` is a self-contained re-implementation of the YAMNet network (MobileNet v1, 521 AudioSet classes, Google, Apache 2.0) that loads only the published weight file. `yamnet_class_map.csv` is from the TensorFlow Models repository (Apache 2.0).

@@ -33,17 +33,12 @@
       ["--accent", "Accent", "color"],
     ]],
     ["Sound colours", [
-      ["--c-tool", "Tools and metal", "color"],
-      ["--c-engine", "Engines and machines", "color"],
-      ["--c-bomb", "Bombs", "color"],
-      ["--c-both", "Both at once", "color"],
-      ["--c-env", "Environment", "color"],
+      ["--c-bomb", "War", "color"],
+      ["--c-tool", "Building", "color"],
     ]],
     ["Interaction", [
-      ["--dim-op", "Faded groups opacity", "range", 0, 0.6, 0.01, ""],
-      ["--anim-ms", "Animation length", "range", 0, 1200, 10, ""],
-      ["--vs-size", "Compare circle size", "range", 60, 160, 2, "px"],
-      ["--filter-w", "Filter sidebar width", "range", 220, 380, 2, "px"],
+      ["--strip-h", "Film strip height", "range", 110, 220, 2, "px"],
+      ["--info-w", "Text column width", "range", 280, 520, 2, "px"],
     ]],
     ["Shape", [
       ["--r-card", "Card corners", "range", 0, 32, 1, "px"],
@@ -61,23 +56,14 @@
       ["--page-pad", "Page margin", "range", 8, 64, 1, "px"],
       ["--gap", "Gap between cards", "range", 4, 40, 1, "px"],
       ["--pad-card", "Card padding", "range", 8, 40, 1, "px"],
-      ["--sec-gap", "Sidebar section gap", "range", 8, 48, 1, "px"],
-      ["--side-w", "Sidebar width", "range", 220, 420, 2, "px"],
       ["--maxw", "Max page width", "range", 960, 1920, 10, "px"],
       ["--nav-pad", "Nav bar padding", "range", 0, 14, 1, "px"],
       ["--nav-px", "Nav item side padding", "range", 6, 28, 1, "px"],
       ["--nav-py", "Nav item top padding", "range", 2, 16, 1, "px"],
       ["--row-pad", "Menu row padding", "range", 2, 18, 1, "px"],
     ]],
-    ["Map", [
-      ["--dot-scale", "Circle size", "range", 0.6, 2, 0.05, ""],
-    ]],
-    ["Hover card", [
-      ["--hover-a", "Opacity", "range", 0.3, 1, 0.01, ""],
-      ["--hover-w", "Width", "range", 220, 440, 5, "px"],
-    ]],
   ];
-  const PLOT_TOKENS = new Set(["--c-env", "--bubble-k", "--dim-op", "--anim-ms", "--spin", "--filter-w", "--font", "--c-tool", "--c-engine", "--c-bomb", "--c-both", "--c-other", "--ink", "--mute", "--card", "--line", "--plot-h", "--dot-scale", "--dot-op", "--other-op", "--dot-rim", "--grid", "--note-a", "--side-w", "--maxw", "--page-pad", "--gap"]);
+  const PLOT_TOKENS = new Set(["--strip-h", "--info-w", "--c-env", "--bubble-k", "--dim-op", "--anim-ms", "--spin", "--filter-w", "--font", "--c-tool", "--c-engine", "--c-bomb", "--c-both", "--c-other", "--ink", "--mute", "--card", "--line", "--plot-h", "--dot-scale", "--dot-op", "--other-op", "--dot-rim", "--grid", "--note-a", "--side-w", "--maxw", "--page-pad", "--gap"]);
 
   const base = {};             // stylesheet defaults
   const cs = getComputedStyle(root);

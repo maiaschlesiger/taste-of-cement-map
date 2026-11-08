@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Sound Map of Taste of Cement</title>
-<meta name="description" content="An interactive acoustic map of Ziad Kalthoum's Taste of Cement (2017): where the sounds of building in Beirut and the sounds of bombing in Syria meet.">
+<meta name="description" content="An interactive map of Ziad Kalthoum's Taste of Cement (2017): the sounds of war in Syria and the building sounds the film sets beside them.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300..800&display=swap" rel="stylesheet">
@@ -13,20 +13,15 @@
 <body>
 <!-- PAGE:START -->
 <header class="site">
-  <a class="brand" href="#space" data-tab="space" aria-label="Sound map home">
+  <div class="brand">
     <svg class="mark" viewBox="0 0 32 32" aria-hidden="true">
-      <circle cx="9" cy="9" r="4.2" fill="var(--c-tool)"/><circle cx="20" cy="8" r="3.2" fill="var(--c-engine)"/>
-      <circle cx="24" cy="18" r="4.6" fill="var(--c-bomb)"/><circle cx="13" cy="20" r="5" fill="var(--c-both)"/>
-      <circle cx="6" cy="26" r="2.2" fill="var(--c-env)"/><circle cx="21" cy="28" r="2" fill="var(--c-tool)"/>
+      <circle cx="10" cy="9" r="5" fill="var(--c-bomb)"/><circle cx="22" cy="23" r="4" fill="var(--c-tool)"/>
+      <path d="M10 14C10 19 22 14 22 19" fill="none" stroke="var(--ink)" stroke-width="1.6" stroke-linecap="round"/>
     </svg>
-    <span class="brand-text"><b>Taste of Cement</b><small>Sound map</small></span>
-  </a>
+    <span class="brand-text"><b>Taste of Cement</b><small>War and work, side by side</small></span>
+  </div>
   <div class="hdr-right">
-    <nav class="pillnav tabs" aria-label="Views">
-      <button data-tab="space" class="on">Map</button>
-      <button data-tab="strata">Timeline</button>
-      <button data-tab="about">About</button>
-    </nav>
+    <button class="btn" id="aboutBtn">About</button>
     <div class="dd sfx-dd">
       <button class="iconbtn" id="sfxBtn" aria-haspopup="true" aria-expanded="false" aria-label="Sound settings"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 8h3l4-3.5v11L6 12H3Z" fill="currentColor"/><path id="sfxWaves" d="M13 7.5c1 .8 1.5 1.6 1.5 2.5s-.5 1.7-1.5 2.5M15 5.5c1.6 1.3 2.5 2.8 2.5 4.5s-.9 3.2-2.5 4.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></button>
       <div class="dd-menu sfx-menu" id="sfxMenu" role="dialog" aria-label="Sound settings"></div>
@@ -35,125 +30,67 @@
 </header>
 
 <main>
-  <!-- MAP -->
-  <section class="pane on" id="pane-space">
-    <aside class="card filters" aria-label="Filters">
-      <div class="f-head"><h3>Sounds</h3><button class="f-clear" id="fReset">Reset</button></div>
-      <div id="facets"></div>
-      <h3>Film time</h3>
-      <div class="dual" id="rangeTime"></div>
-      <h3>Pairs from the film</h3>
-      <div class="pairs" id="pairs"></div>
-      <div class="dock vertical" id="dock">
-        <div class="vs-slot" id="slotA" data-slot="A" tabindex="0" aria-label="Comparison slot A, empty">
-          <div class="vs-fill"></div><div class="vs-text"><b>A</b><small>Drop a dot</small></div>
-          <button class="vs-x" aria-label="Clear A">×</button>
-        </div>
-        <span class="vs-word">vs</span>
-        <div class="vs-slot" id="slotB" data-slot="B" tabindex="0" aria-label="Comparison slot B, empty">
-          <div class="vs-fill"></div><div class="vs-text"><b>B</b><small>Drop a dot</small></div>
-          <button class="vs-x" aria-label="Clear B">×</button>
-        </div>
-        <button id="compareBtn" class="btn primary big" disabled>Compare sounds</button>
-      </div>
-    </aside>
-
-    <div class="card stage">
-      <div class="stage-head">
-        <div class="qpills" id="presets" role="tablist" aria-label="Views"></div>
-        <p class="finding" id="finding"></p>
-      </div>
-      <div class="inner plotbox" id="plotbox">
-        <canvas id="field" aria-label="Dot map of the film's sounds"></canvas>
-        <div id="hovercard" class="hovercard" role="status" aria-live="polite"></div>
-        <div id="ghost" class="ghost" aria-hidden="true"></div>
-      </div>
-      <div class="field-foot">
-        <span id="axLo"></span>
-        <p class="plot-hint" id="plotHint">Hover a dot · Click to highlight its group · Drag it into A or B</p>
-        <span id="axHi"></span>
-      </div>
+  <section class="card strip-card" aria-label="Where the pairs fall in the film">
+    <p class="lede">Syrian workers build a tower in Beirut while the war goes on at home. The film ties the two together through sound. Pick a pair to hear how close they are.</p>
+    <div class="strip-box">
+      <svg id="strip" role="group" aria-label="Film strip: sounds of war above, building sounds below, joined in pairs"></svg>
+      <div class="tip" id="tip" hidden></div>
     </div>
   </section>
 
-  <!-- COMPARE -->
-  <section class="pane" id="pane-compare" aria-label="Sound comparison">
-    <div class="card cmp">
-      <div class="cmp-top">
-        <button class="btn" id="cmpBack"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3 5 8l5 5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Back to map</button>
-        <div class="cmp-chips" id="cmpChips"></div>
+  <section class="card pair-card" id="pairCard" aria-live="polite">
+    <div class="pair-info">
+      <div class="pair-nav">
+        <button class="btn icon" id="prev" aria-label="Previous pair"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3 5 8l5 5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <span class="pdots" id="pNum" role="group" aria-label="Pairs"></span>
+        <button class="btn icon" id="next" aria-label="Next pair"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m6 3 5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
       </div>
-      <div class="cmp-hero">
-        <div class="score" id="cmpScore"><svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="52" class="ring-bg"/><circle cx="60" cy="60" r="52" class="ring" id="cmpRing"/></svg><div><b id="cmpPct">0%</b><small>overlap</small></div></div>
-        <div class="cmp-say">
-          <h2 id="cmpTitle"></h2>
-          <p id="cmpSay"></p>
-          <label class="chk"><input type="checkbox" id="cmpAlign" checked> Line up the similar parts <span class="mute" id="cmpShift"></span></label>
+      <h2 id="pTitle"></h2>
+      <div class="chips">
+        <span class="chip war" id="pWar"></span>
+        <span class="chip build" id="pBuild"></span>
+        <span class="tag" id="pHow"></span>
+      </div>
+      <p class="why" id="pWhy"></p>
+      <p class="hear mute" id="pHear"></p>
+    </div>
+
+    <div class="pair-sound">
+      <div class="sound-head">
+        <div class="score"><svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="52" class="ring-bg"/><circle cx="60" cy="60" r="52" class="ring" id="ring"/></svg><div><b id="pct">0%</b></div></div>
+        <div class="key">
+          <span><i class="k-war"></i>War</span><span><i class="k-build"></i>Building</span><span><i class="k-both"></i>Most alike</span>
         </div>
       </div>
-      <div class="cmp-wave">
-        <canvas id="cmpWave" height="300" aria-label="Overlapped sound waves"></canvas>
+      <div class="wave-box"><canvas id="wave" height="230" aria-label="The two sounds overlapped"></canvas></div>
+      <div class="playrow">
+        <button class="btn primary" id="playBoth"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3.5v9l7-4.5Z" fill="currentColor"/></svg>Play both</button>
+        <button class="btn" id="playWar">War</button>
+        <button class="btn" id="playBuild">Building</button>
+        <label class="chk"><input type="checkbox" id="pAlign" checked> Line them up <span class="mute" id="pShift"></span></label>
       </div>
-      <div class="cmp-play">
-        <button class="btn primary" id="cmpPlayBoth">Play together</button>
-        <button class="btn" id="cmpPlayA">Play A</button>
-        <button class="btn" id="cmpPlayB">Play B</button>
-      </div>
-      <p class="cmp-desc" id="cmpDesc"></p>
     </div>
-  </section>
-
-  <!-- TIMELINE -->
-  <section class="pane" id="pane-strata">
-    <div class="card tl-card">
-      <h2>The film, minute by minute</h2>
-      <p class="mute">Each dot is one minute. Bigger is louder. Hover to read it, click to open it on the map.</p>
-      <div class="tl-wrap">
-        <div class="tline" id="tline"></div>
-        <div class="tticks" id="tticks"></div>
-      </div>
-      <div class="legend" id="legend"></div>
-    </div>
-  </section>
-
-  <!-- ABOUT -->
-  <section class="pane" id="pane-about">
-    <article class="card letter">
-      <header class="letter-head">
-        <h2>How alike do building and bombing sound?</h2>
-        <p>Taste of Cement follows Syrian men building a high-rise in Beirut while their own homes in Syria are bombed. This map turns its soundtrack into a space you can explore.</p>
-        <button class="link" data-tab="space">Open the sound space</button>
-      </header>
-      <section id="ab-what">
-        <h3>What this is</h3>
-        <p>A curfew keeps the workers in the building's foundations after dark. The programme notes say they were not allowed to talk about their conditions, and the film barely lets them speak. Its sound carries the story: the cement mixer, hammering, a tank, shelling, the sea, silence.</p>
-        <p>Each of the film's 5,098 seconds is placed by how it sounds, not where it was filmed.</p>
-      </section>
-      <section id="ab-method">
-        <h3>Method</h3>
-        <p>The soundtrack was measured every 23 milliseconds and averaged per second. A Google sound-recognition model, YAMNet, trained on about 2 million clips, named each sound. Its labels are grouped into tools and metal, engines and machines, bombs, voice, music, water, silence and wind. The analysis scripts are in the project's analysis folder.</p>
-      </section>
-      <section id="ab-limits">
-        <h3>Limits</h3>
-        <ul>
-          <li>The model hears types of sound, not places. "Bomb" means it sounds like a blast, not that it was filmed in Syria.</li>
-          <li>It has no category for a tank or a cement mixer; both count as engines.</li>
-          <li>The audio is a compressed web copy, so the highest frequencies are missing.</li>
-        </ul>
-      </section>
-      <footer class="letter-foot">
-        <p>Taste of Cement is directed by Ziad Kalthoum; all rights belong to its makers. This site holds no audio or images from the film, only numbers measured from it.</p>
-      </footer>
-    </article>
   </section>
 </main>
 
-
+<dialog class="card about" id="about" aria-labelledby="aboutTitle">
+  <button class="btn icon close" id="aboutClose" aria-label="Close">×</button>
+  <h2 id="aboutTitle">About this map</h2>
+  <p>Taste of Cement (Ziad Kalthoum, 2017) follows Syrian men building a high-rise in Beirut while their own cities are bombed. A curfew keeps them in the building's foundations after dark, and the film barely lets them speak. Its sound tells the story instead: drills and engines on the site keep turning into tanks, shells and helicopters.</p>
+  <h3>How it was made</h3>
+  <p>Each sound of war was picked out by watching the film. Three are paired with the building sound the film cuts to. The other four are paired with the construction moment that measures closest in tone, loudness and rhythm. The percentage compares those measurements after lining the two sounds up.</p>
+  <h3>Limits</h3>
+  <ul>
+    <li>The page holds no audio from the film, only measurements of it. Playback is a rough sketch rebuilt from those numbers.</li>
+    <li>A high percentage means the measurements are close, not that the sounds are identical.</li>
+  </ul>
+  <p class="mute small">Taste of Cement is directed by Ziad Kalthoum; all rights belong to its makers.</p>
+</dialog>
 <!-- PAGE:END -->
 
 <script src="js/sfx.js"></script>
-<script src="js/app.js"></script>
 <script src="js/compare.js"></script>
+<script src="js/app.js"></script>
 <script>if (location.hash === "#tune") { var s = document.createElement("script"); s.src = "js/tuner.js"; document.body.appendChild(s); }</script>
 </body>
 </html>
